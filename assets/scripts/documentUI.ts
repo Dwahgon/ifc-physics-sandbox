@@ -1,10 +1,9 @@
 interface Selectable {
-    isDeletable: boolean;
     isFollowable: boolean;
-    getName(): string;
+    name: string;
     appendPropertyListItems(ul: HTMLUListElement, enabled: boolean): void;
     getObjectProperties(): PhysicsProperty<any>[];
-    destroy(): void;
+    destroy?(): void;
 }
 
 class DocumentUI {
@@ -64,10 +63,11 @@ class DocumentUI {
     }
 
     set propertiesEnabled(value: boolean) {
+        const selectedObj = <Selectable>this._selectedObject;
         this._propertiesEnabled = value;
 
-        if (this._selectedObject) {
-            this._selectedObject.getObjectProperties().forEach(objectProperty => {
+        if (this._selectedObject && selectedObj.getObjectProperties) {
+            selectedObj.getObjectProperties().forEach(objectProperty => {
                 if (objectProperty.propertyLI)
                     objectProperty.propertyLI.enabled = value;
             });
@@ -102,7 +102,7 @@ class DocumentUI {
     }
 
     private destroySelectedObject(): void {
-        if (!this._selectedObject || !this._selectedObject.isDeletable)
+        if (!this._selectedObject || !this._selectedObject.destroy)
             return;
 
         if (System.simulator.time != 0)
@@ -113,7 +113,8 @@ class DocumentUI {
     }
 
     private followSelectedObject(): void{
-        if(!this._selectedObject || !this._selectedObject.isFollowable)
+        const selectedObj = <Selectable>this._selectedObject;
+        if(!selectedObj || selectedObj.isFollowable)
             return;
 
         const camera = System.canvasRenderer.camera;
@@ -129,14 +130,14 @@ class DocumentUI {
     }
 
     selectObject(object: Selectable): void {
-        console.log(`Selected ${object.getName()}`);
+        console.log(`Selected ${object.name}`);
         this._selectedObject = object;
 
         while (this.domPropertyUL.firstChild)
             this.domPropertyUL.removeChild(this.domPropertyUL.firstChild);
 
 
-        this.domPropertyH1.innerHTML = `Propriedades do ${object.getName()}`;
+        this.domPropertyH1.innerHTML = `Propriedades do ${object.name}`;
         object.appendPropertyListItems(this.domPropertyUL, this.propertiesEnabled);
         this.propertiesEnabled = this.propertiesEnabled;
 
@@ -145,6 +146,7 @@ class DocumentUI {
 
         followButton.enabled = object.isFollowable;
         followButton.element.innerHTML = (System.canvasRenderer.camera.objectBeingFollowed != this._selectedObject) ? "Seguir" : "Parar de seguir";
-        destroyButton.enabled = object.isDeletable && System.simulator.time == 0;
+        
+        destroyButton.enabled = object.destroy != undefined && System.simulator.time == 0;
     }
 }

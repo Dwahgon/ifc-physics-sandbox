@@ -20,7 +20,7 @@ class Ambient implements Selectable {
 
     /* Selectable */
 
-    getName(): string {
+    get name(): string {
         return "Ambiente";
     }
 
@@ -36,13 +36,5 @@ class Ambient implements Selectable {
 
     get isFollowable(){
         return false;
-    }
-
-    get isDeletable(){
-        return false;
-    }
-    
-    destroy(): void {
-        throw new Error("Method not implemented.");
     }
 }

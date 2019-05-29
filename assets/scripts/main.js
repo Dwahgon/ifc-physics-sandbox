@@ -14,7 +14,7 @@ class Ambient {
         this.objects.push(obj);
     }
     /* Selectable */
-    getName() {
+    get name() {
         return "Ambiente";
     }
     appendPropertyListItems(ul, enabled) {
@@ -27,12 +27,6 @@ class Ambient {
     }
     get isFollowable() {
         return false;
-    }
-    get isDeletable() {
-        return false;
-    }
-    destroy() {
-        throw new Error("Method not implemented.");
     }
 }
 class Camera {
@@ -197,9 +191,10 @@ class DocumentUI {
         return this._propertiesEnabled;
     }
     set propertiesEnabled(value) {
+        const selectedObj = this._selectedObject;
         this._propertiesEnabled = value;
-        if (this._selectedObject) {
-            this._selectedObject.getObjectProperties().forEach(objectProperty => {
+        if (this._selectedObject && selectedObj.getObjectProperties) {
+            selectedObj.getObjectProperties().forEach(objectProperty => {
                 if (objectProperty.propertyLI)
                     objectProperty.propertyLI.enabled = value;
             });
@@ -226,7 +221,7 @@ class DocumentUI {
         });
     }
     destroySelectedObject() {
-        if (!this._selectedObject || !this._selectedObject.isDeletable)
+        if (!this._selectedObject || !this._selectedObject.destroy)
             return;
         if (System.simulator.time != 0)
             throw "Attempted to delete object in simulation!";
@@ -234,7 +229,8 @@ class DocumentUI {
         this.selectObject(System.ambient);
     }
     followSelectedObject() {
-        if (!this._selectedObject || !this._selectedObject.isFollowable)
+        const selectedObj = this._selectedObject;
+        if (!selectedObj || selectedObj.isFollowable)
             return;
         const camera = System.canvasRenderer.camera;
         if (camera.objectBeingFollowed != this._selectedObject)
@@ -246,18 +242,18 @@ class DocumentUI {
         return this.buttons.filter(el => { return el.element.getAttribute("id") == buttonId; })[0];
     }
     selectObject(object) {
-        console.log(`Selected ${object.getName()}`);
+        console.log(`Selected ${object.name}`);
         this._selectedObject = object;
         while (this.domPropertyUL.firstChild)
             this.domPropertyUL.removeChild(this.domPropertyUL.firstChild);
-        this.domPropertyH1.innerHTML = `Propriedades do ${object.getName()}`;
+        this.domPropertyH1.innerHTML = `Propriedades do ${object.name}`;
         object.appendPropertyListItems(this.domPropertyUL, this.propertiesEnabled);
         this.propertiesEnabled = this.propertiesEnabled;
         const followButton = this.getButton("follow-button");
         const destroyButton = this.getButton("destroy-button");
         followButton.enabled = object.isFollowable;
         followButton.element.innerHTML = (System.canvasRenderer.camera.objectBeingFollowed != this._selectedObject) ? "Seguir" : "Parar de seguir";
-        destroyButton.enabled = object.isDeletable && System.simulator.time == 0;
+        destroyButton.enabled = object.destroy != undefined && System.simulator.time == 0;
     }
 }
 class Vector2Calculator {
@@ -405,11 +401,6 @@ class PhysicsObject {
     reset() {
         this.objectProperties.forEach(property => property.reset());
     }
-    destroy() {
-        this.sprite.stopDrawing();
-        const index = this.ambient.objects.indexOf(this);
-        this.ambient.objects.splice(index, 1);
-    }
     getProperty(propertyName) {
         for (const property of this.objectProperties) {
             if (property.name == propertyName)
@@ -435,6 +426,11 @@ class PhysicsObject {
     }
     get isDeletable() {
         return true;
+    }
+    destroy() {
+        this.sprite.stopDrawing();
+        const index = this.ambient.objects.indexOf(this);
+        this.ambient.objects.splice(index, 1);
     }
 }
 class Solid extends PhysicsObject {

@@ -18,35 +18,29 @@ abstract class PhysicsObject implements Selectable{
         this.objectProperties.forEach(property => property.reset())
     }
 
-    destroy(): void{
-        this.sprite.stopDrawing();
-
-        const index = this.ambient.objects.indexOf(this);
-        this.ambient.objects.splice(index, 1);
-    }
-
+    
     getProperty (propertyName: string): PhysicsProperty<any> | undefined {
         for (const property of this.objectProperties) {
             if (property.name == propertyName)
-                return property;
+            return property;
         }
-
+        
         return undefined;
     }
-
+    
     /* Selectable */
-
+    
     getName(): string {
         return this.name;
     }
-
+    
     appendPropertyListItems(): void{
         this.objectProperties.forEach(property=>{
             if(property.propertyLI)
-                property.propertyLI.appendToPropertyUL();
+            property.propertyLI.appendToPropertyUL();
         });
     }
-
+    
     getObjectProperties(): PhysicsProperty<any>[] {
         return this.objectProperties;
     }
@@ -54,9 +48,16 @@ abstract class PhysicsObject implements Selectable{
     get isFollowable(){
         return true;
     }
-
+    
     get isDeletable(){
         return true;
+    }
+    
+    destroy(): void{
+        this.sprite.stopDrawing();
+    
+        const index = this.ambient.objects.indexOf(this);
+        this.ambient.objects.splice(index, 1);
     }
 }
 
