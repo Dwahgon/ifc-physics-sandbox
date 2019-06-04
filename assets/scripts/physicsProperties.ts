@@ -1,10 +1,15 @@
-abstract class PhysicsProperty<T>{
+import {PhysicsPropertyType} from 'types';
+import PropertyLI from 'propertyLI';
+import PhysicsObject, * as PhysicsObjects from 'physicsObjects';
+import { PropertyLINumber, PropertyLIVector2 } from './propertyLI';
+
+export default abstract class PhysicsProperty<T>{
     public active: boolean;
     public propertyLI: PropertyLI<T> | null = null;
     private onValueChangedCallbacks: Function[];
     
     constructor(
-        public readonly name: string,
+        public readonly kind: PhysicsPropertyType,
         public readonly changeable: boolean,
         public readonly object: PhysicsObject,
         private iValue: T,
@@ -43,12 +48,12 @@ abstract class PhysicsProperty<T>{
     }
 }
 
-class ObjectPosition extends PhysicsProperty<Vector2>{
+export class ObjectPosition extends PhysicsProperty<Vector2>{
     constructor(
         initialPosition: Vector2,
         object: PhysicsObject
     ){
-        super("ObjectPosition", true, object, initialPosition, Vector2.zero, Vector2Calculator.instance);
+        super(PhysicsPropertyType.ObjectPosition, true, object, initialPosition, Vector2.zero, Vector2Calculator.instance);
         this.propertyLI = new PropertyLIVector2(this, "pos<sub>(x, y)</sub>", "m, m", initialPosition);
     }
 
@@ -75,12 +80,12 @@ class ObjectPosition extends PhysicsProperty<Vector2>{
     }
 }
 
-class ObjectSize extends PhysicsProperty<Vector2>{
+export class ObjectSize extends PhysicsProperty<Vector2>{
     constructor(
         initialSize: Vector2,
         object: PhysicsObject
     ){
-        super("ObjectSize", true, object, initialSize, Vector2.zero, Vector2Calculator.instance);
+        super(PhysicsPropertyType.ObjectSize, true, object, initialSize, Vector2.zero, Vector2Calculator.instance);
         this.propertyLI = new PropertyLIVector2(this, "tam<sub>(x, y)</sub>", "m, m", initialSize);
     }
 
@@ -93,9 +98,9 @@ class ObjectSize extends PhysicsProperty<Vector2>{
         this.updateSpriteSize();
 
         // Change area
-        const objArea = this.object.getProperty("ObjectArea");
+        const objArea = this.object.getProperty(PhysicsPropertyType.ObjectArea);
         if(objArea)
-            objArea.initialValue = this.value.x * this.value.y;
+            (<PhysicsProperty<any>>objArea).initialValue = this.value.x * this.value.y;
     }
     
     get initialValue(){
@@ -112,28 +117,28 @@ class ObjectSize extends PhysicsProperty<Vector2>{
     }
 }
 
-class ObjectArea extends PhysicsProperty<number>{
+export class ObjectArea extends PhysicsProperty<number>{
     constructor(object: PhysicsObject){
-        super("ObjectArea", false, object, 0, 0, NumberCalculator.instance);
+        super(PhysicsPropertyType.ObjectArea, false, object, 0, 0, NumberCalculator.instance);
         this.propertyLI = new PropertyLINumber(this, "área", "m<sup>2</sup>", 0);
         
-        const objectSize = object.getProperty("ObjectSize");
+        const objectSize = <PhysicsProperty<any>> object.getProperty(PhysicsPropertyType.ObjectSize);
         const sizeVector2 = (objectSize) ? objectSize.initialValue : Vector2.zero;
         this.initialValue = sizeVector2.x * sizeVector2.y;
     }
 }
 
-class ObjectVelocity extends PhysicsProperty<Vector2>{
+export class ObjectVelocity extends PhysicsProperty<Vector2>{
     constructor(object: PhysicsObject){
-        super("ObjectVelocity", true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
+        super(PhysicsPropertyType.ObjectVelocity, true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
         this.propertyLI = new PropertyLIVector2(this, "velocidade", "<sup>m</sup>&frasl;<sub>s</sub>, <sup>m</sup>&frasl;<sub>s</sub>", Vector2.zero);
     }
 
     simulateStep(step: 0): void{
         const displacement = Vector2.mult(this.value, step);
         
-        const objectPosition = this.object.getProperty("ObjectPosition");
-        const objectDisplacement = this.object.getProperty("ObjectDisplacement");
+        const objectPosition = this.object.getProperty(PhysicsPropertyType.ObjectPosition);
+        const objectDisplacement = this.object.getProperty(PhysicsPropertyType.ObjectDisplacement);
 
         //add displacement to objectdisplacement
         if(objectDisplacement)
@@ -145,21 +150,21 @@ class ObjectVelocity extends PhysicsProperty<Vector2>{
     }
 }
 
-class ObjectDisplacement extends PhysicsProperty<number>{
+export class ObjectDisplacement extends PhysicsProperty<number>{
     constructor(object: PhysicsObject){
-        super("ObjectDisplacement", false, object, 0, 0, NumberCalculator.instance);
+        super(PhysicsPropertyType.ObjectDisplacement, false, object, 0, 0, NumberCalculator.instance);
         this.propertyLI = new PropertyLINumber(this, "deslocamento", "m", 0);
     }
 }
 
-class ObjectAcceleration extends PhysicsProperty<Vector2>{
+export class ObjectAcceleration extends PhysicsProperty<Vector2>{
     constructor(object: PhysicsObject){
-        super("ObjectAcceleration", true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
+        super(PhysicsPropertyType.ObjectAcceleration, true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
         this.propertyLI = new PropertyLIVector2(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue);
     }
 
     simulateStep(step: 0): void{
-        const objectVel = this.object.getProperty("ObjectVelocity");
+        const objectVel = this.object.getProperty(PhysicsPropertyType.ObjectVelocity);
         const velDisplacement = Vector2.mult(this.value, step);
 
         if(objectVel)

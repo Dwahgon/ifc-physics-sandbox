@@ -1,3 +1,5 @@
+import {Camera, CanvasRenderer} from 'rendering';
+
 class Input{
     private isMouseDown: boolean;
     private clickedPos: Vector2;

@@ -1,4 +1,8 @@
-abstract class PhysicsObject implements Selectable{
+import {PhysicsPropertyType} from 'types';
+import PhysicsProperty, * as PhysicsProperties from 'physicsProperties';
+import {CanvasRenderer, Sprite} from 'rendering';
+
+export default abstract class PhysicsObject implements Selectable{
     private objectProperties: PhysicsProperty<any>[];
 
     constructor(public name: string, public readonly sprite: Sprite, protected ambient: Ambient){
@@ -19,13 +23,13 @@ abstract class PhysicsObject implements Selectable{
     }
 
     
-    getProperty (propertyName: string): PhysicsProperty<any> | undefined {
-        for (const property of this.objectProperties) {
-            if (property.name == propertyName)
-            return property;
+    getProperty (type: PhysicsPropertyType): PhysicsProperty<any>[] |PhysicsProperty<any> | undefined {
+        switch(type){
+            case PhysicsPropertyType.All:
+                return this.objectProperties;
+            default:
+                return this.objectProperties.find(physicsProperty => {return physicsProperty.kind == type});
         }
-        
-        return undefined;
     }
     
     /* Selectable */
@@ -39,10 +43,6 @@ abstract class PhysicsObject implements Selectable{
             if(property.propertyLI)
             property.propertyLI.appendToPropertyUL();
         });
-    }
-    
-    getObjectProperties(): PhysicsProperty<any>[] {
-        return this.objectProperties;
     }
     
     get isFollowable(){
@@ -91,11 +91,11 @@ class Solid extends PhysicsObject{
             ambient         
         ); 
 
-        this.addProperties(new ObjectPosition(position, this));
-        this.addProperties(new ObjectSize(size, this));
-        this.addProperties(new ObjectArea(this));
-        this.addProperties(new ObjectAcceleration(this));
-        this.addProperties(new ObjectVelocity(this));
-        this.addProperties(new ObjectDisplacement(this));
+        this.addProperties(new PhysicsProperties.ObjectPosition(position, this));
+        this.addProperties(new PhysicsProperties.ObjectSize(size, this));
+        this.addProperties(new PhysicsProperties.ObjectArea(this));
+        this.addProperties(new PhysicsProperties.ObjectAcceleration(this));
+        this.addProperties(new PhysicsProperties.ObjectVelocity(this));
+        this.addProperties(new PhysicsProperties.ObjectDisplacement(this));
     }
 }

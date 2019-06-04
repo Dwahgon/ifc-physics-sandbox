@@ -82,14 +82,14 @@ header > .button{
     padding: 5px;
 }
 
-body > div{
+#main-interface{
     width: 100vw;
     height: calc(100vh - var(--header-height));
     display: flex;
 }
 
 /*Panels*/
-body > div > div{
+#main-interface > div{
     height: 100%;
     display: flex;
     flex-flow: column;
@@ -180,10 +180,10 @@ body > div > div{
 .side-panel > div{
     height: 100%;
     padding: 10px;
-    border: 1px solid rgb(47, 47, 47);
+    border: 1px solid #2f2f2f;
     box-sizing: border-box;
     border-radius: 4px;
-    background-color: rgb(100, 100, 100);
+    background-color: #646464;
     display: flex;
     flex-direction: column;
 }
@@ -313,4 +313,29 @@ body > div > div{
     display: inline;
     text-align: right;
     overflow: hidden;
+}
+
+/* Property Description */
+
+#property-description-interface{
+    position: fixed;
+    background-color: #000000aa;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+#property-description-interface > div{
+    width: 20vw;
+    height: 30vw;
+    border-radius: 4px;
+    background-color: #646464;
+    border: 1px solid #2f2f2f;
+    box-sizing: border-box;
 }

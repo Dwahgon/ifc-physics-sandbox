@@ -1,3 +1,6 @@
+import PhysicsObject from 'physicsObjects';
+import PropertyLI from 'propertyLI';
+
 class Ambient implements Selectable {
     public readonly objects: PhysicsObject[];
 
@@ -29,9 +32,8 @@ class Ambient implements Selectable {
         return empty;
     }
 
-    getObjectProperties(): PhysicsProperty<any>[] {
-        let empty: PhysicsProperty<any>[] = [];
-        return empty;
+    getProperty(): undefined {
+        return undefined;
     }
 
     get isFollowable(){

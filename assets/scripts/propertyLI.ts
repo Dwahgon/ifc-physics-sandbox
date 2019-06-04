@@ -1,4 +1,6 @@
-abstract class PropertyLI<T>{
+import PhysicsProperty from 'physicsProperties';
+
+export default abstract class PropertyLI<T>{
     public readonly li: HTMLLIElement;
     protected readonly input: HTMLInputElement;
     private readonly ul: HTMLUListElement;
@@ -85,7 +87,7 @@ abstract class PropertyLI<T>{
     }
 }
 
-class PropertyLIVector2 extends PropertyLI<Vector2>{
+export class PropertyLIVector2 extends PropertyLI<Vector2>{
     constructor(property: PhysicsProperty<Vector2>, title: string, propertyUnit: string, initialValue: Vector2){
         super(property, title, propertyUnit, /\-?\d*\.?\d*/g, initialValue);
     }
@@ -104,7 +106,7 @@ class PropertyLIVector2 extends PropertyLI<Vector2>{
     }
 }
 
-class PropertyLINumber extends PropertyLI<number>{
+export class PropertyLINumber extends PropertyLI<number>{
     constructor(property: PhysicsProperty<number>, title: string, propertyUnit: string, initialValue: number){
         super(property, title, propertyUnit, /\-?\d*\.?\d*/i, initialValue);
     }
