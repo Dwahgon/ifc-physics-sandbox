@@ -6,9 +6,10 @@
         <title>Projeto Integrador - IFC Campus Camboriú</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" type="text/css" media="screen" href="assets/style/main.css">
+        <script data-main="assets/scripts/main.js" src="assets/scripts/require.js"></script>
     </head>
     <body>
-        <header>
+        <header hidden>
             <button class="button white-button" id="centralize-camera" title="Posicionar câmera no centro do cenário">
                 <img src="assets/images/cameracenter.png">
             </button>
@@ -57,7 +58,7 @@
             </div>
         </div>
 
-        <div id="property-description-interface">
+        <div id="property-description-interface" hidden>
             <div>
                 <article>
 
@@ -65,9 +66,6 @@
             </div>
         </div>
 
-        <script src="assets/scripts/main.js"></script>
-        <script>
-            System.start();
-        </script>
+        
     </body>
 </html>

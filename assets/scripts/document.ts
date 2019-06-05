@@ -1,4 +1,14 @@
-class DocumentElement<T extends HTMLElement>{
+import {canvasRenderer, simulator, ambient} from "main";
+import {PhysicsPropertyType, PhysicsObjectType, CurrentButtons} from 'types';
+import {CanvasRenderer} from 'rendering';
+import Ambient from 'ambient';
+import {Solid} from 'physicsObjects';
+import PhysicsProperty from "physicsProperties";
+import PhysicsObject from "physicsObjects";
+import Selectable from 'selectable';
+import ObjectLI from 'objectLI';
+
+export class DocumentElement<T extends HTMLElement>{
     public readonly element: T;
     protected _enabled: boolean;
 
@@ -12,7 +22,7 @@ class DocumentElement<T extends HTMLElement>{
     }
 }
 
-class DocumentButton extends DocumentElement<HTMLButtonElement>{
+export class DocumentButton extends DocumentElement<HTMLButtonElement>{
     constructor(selector: string, enabled: boolean, public onClick: Function | null, private buttonColor: string){
         super(selector, enabled);
 
@@ -31,18 +41,41 @@ class DocumentButton extends DocumentElement<HTMLButtonElement>{
     }
 }
 
-export const buttons = [
-    new DocumentButton("#reset-button", false, null, "dark-button"),
-    new DocumentButton("#follow-button", false, this.followSelectedObject.bind(this), "dark-button"),
-    new DocumentButton("#destroy-button", false, this.destroySelectedObject.bind(this), "dark-button"),
-    new DocumentButton("#play-button", true, null, "dark-button"),
-    new DocumentButton("#centralize-camera", true, System.canvasRenderer.camera.centralize.bind(System.canvasRenderer.camera), "white-button")
-];
+export const buttons : Map<CurrentButtons, DocumentButton> = new Map<CurrentButtons, DocumentButton>();
+buttons.set(CurrentButtons.ResetButton, new DocumentButton("#reset-button", false, null, "dark-button"));
+buttons.set(CurrentButtons.FollowButton, new DocumentButton("#follow-button", false, null, "dark-button"));
+buttons.set(CurrentButtons.DestroyButton, new DocumentButton("#destroy-button", false, null, "dark-button"));
+buttons.set(CurrentButtons.PlayButton, new DocumentButton("#play-button", true, null, "dark-button"));
+buttons.set(CurrentButtons.CentralizeCamera, new DocumentButton("#centralize-camera", true, null, "white-button"));
 
+export const objectLIs : Map<PhysicsObjectType, ObjectLI> = new Map<PhysicsObjectType, ObjectLI>();
+objectLIs.set(PhysicsObjectType.Solid, new ObjectLI("Sólido", "./assets/images/dwagao.png", 
+    function(canvasRenderer: CanvasRenderer, ambient: Ambient){
+        new Solid(
+            canvasRenderer, 
+            ambient,
+            canvasRenderer.camera.getWorldPosFromCanvas(
+                new Vector2(canvasRenderer.context.canvas.width / 2, canvasRenderer.context.canvas.height / 2)
+            ),
+            new Vector2(1, 1)
+        )
+    }
+));
+
+abstract class PropertyDescriptionInterface{
+    private static element: HTMLDivElement = <HTMLDivElement>document.querySelector("#property-description-interface");
+    private static 
+
+    show(): void{
+        
+    }
+
+    hide(): void{
+
+    }
+}
 
 export default class DocumentUI {
-    public readonly buttons: DocumentButton[];
-
     private domObjectUL: HTMLUListElement;
     private domPropertyUL: HTMLUListElement;
     private domPropertyH1: HTMLHeadingElement;
@@ -59,10 +92,13 @@ export default class DocumentUI {
         if (!this.domObjectUL || !this.domPropertyUL || !this.domPropertyH1)
             throw "Some elements are missing!";
 
-        this.buttons = [];
         this._propertiesEnabled = true;
         this._objectCreatable = true;
         this._selectedObject = null;
+
+
+        buttons.get(CurrentButtons.DestroyButton)!.onClick = this.destroySelectedObject.bind(this);
+        buttons.get(CurrentButtons.FollowButton)!.onClick = this.followSelectedObject.bind(this);
 
         this.domObjectUL.addEventListener("click", e => this.createObject(e));
         document.addEventListener("click", e => {
@@ -72,16 +108,12 @@ export default class DocumentUI {
                 return;
             }
 
-            const propertyName: string | null = (<HTMLDivElement>e.target)!.getAttribute("property-name");
-            if (propertyName) {
-                this.
-            }
-            
+            const propertyKind: string | null = (<HTMLDivElement>e.target)!.getAttribute("property-kind");
+            if (propertyKind)
+                this.onPropertyClick(parseInt(propertyKind));
         });
 
-        ObjectLI.objectLIs.forEach(objectLI => {
-            this.domObjectUL.appendChild(objectLI.li);
-        });
+        objectLIs.forEach(objectLI => this.domObjectUL.appendChild(objectLI.li));
     }
 
     get selectedObject() {
@@ -95,11 +127,16 @@ export default class DocumentUI {
     }
 
     set propertiesEnabled(value: boolean) {
-        const selectedObj = <Selectable>this._selectedObject;
+        if(!this._selectedObject)
+            return
+            
         this._propertiesEnabled = value;
-
-        if (this._selectedObject && selectedObj.getObjectProperties) {
-            selectedObj.getObjectProperties().forEach(objectProperty => {
+        
+        
+        const physicsProperties = <PhysicsProperty<any>[]>this._selectedObject.getProperty(PhysicsPropertyType.All);
+        
+        if(physicsProperties){
+            physicsProperties.forEach(objectProperty => {
                 if (objectProperty.propertyLI)
                     objectProperty.propertyLI.enabled = value;
             });
@@ -110,7 +147,7 @@ export default class DocumentUI {
 
     set objectCreatable(value: boolean) {
         this._objectCreatable = value;
-        ObjectLI.objectLIs.forEach(objectLI => objectLI.enabled = value)
+        objectLIs.forEach(objectLI => objectLI.enabled = value)
     }
 
     get objectCreatable() {
@@ -118,10 +155,6 @@ export default class DocumentUI {
     }
 
     //Methods
-
-    getButton(buttonId: string): DocumentButton {
-        return this.buttons.filter(el => { return el.element.getAttribute("id") == buttonId })[0];
-    }
 
     selectObject(object: Selectable): void {
         console.log(`Selected ${object.name}`);
@@ -135,13 +168,13 @@ export default class DocumentUI {
         object.appendPropertyListItems(this.domPropertyUL, this.propertiesEnabled);
         this.propertiesEnabled = this.propertiesEnabled;
 
-        const followButton = this.getButton("follow-button");
-        const destroyButton = this.getButton("destroy-button");
+        const followButton = buttons.get(CurrentButtons.FollowButton);
+        const destroyButton = buttons.get(CurrentButtons.DestroyButton);
 
-        followButton.enabled = object.isFollowable;
-        followButton.element.innerHTML = (System.canvasRenderer.camera.objectBeingFollowed != this._selectedObject) ? "Seguir" : "Parar de seguir";
+        followButton!.enabled = object.isFollowable;
+        followButton!.element.innerHTML = (canvasRenderer.camera.objectBeingFollowed != this._selectedObject) ? "Seguir" : "Parar de seguir";
 
-        destroyButton.enabled = object.destroy != undefined && System.simulator.time == 0;
+        destroyButton!.enabled = object.destroy != undefined && simulator.time == 0;
     }
     
     private createObject(e: Event): void {
@@ -152,9 +185,9 @@ export default class DocumentUI {
         if (!objectType)
             return;
 
-        ObjectLI.objectLIs.forEach(objectLI => {
+        objectLIs.forEach(objectLI => {
             if (objectLI.name == objectType)
-                objectLI.createObject(System.canvasRenderer, System.ambient);
+                objectLI.createObject(canvasRenderer, ambient);
         })
     }
 
@@ -163,19 +196,18 @@ export default class DocumentUI {
         if (!this._selectedObject || !this._selectedObject.destroy)
             return;
 
-        if (System.simulator.time != 0)
+        if (simulator.time != 0)
             throw "Attempted to delete object in simulation!"
 
         this._selectedObject.destroy();
-        this.selectObject(System.ambient);
+        this.selectObject(ambient);
     }
 
     private followSelectedObject(): void {
-        const selectedObj = <Selectable>this._selectedObject;
-        if (!selectedObj || selectedObj.isFollowable)
+        if (!this._selectedObject || !this._selectedObject.isFollowable)
             return;
 
-        const camera = System.canvasRenderer.camera;
+        const camera = canvasRenderer.camera;
 
         if (camera.objectBeingFollowed != this._selectedObject)
             camera.followObject(<PhysicsObject>this._selectedObject);
@@ -184,18 +216,19 @@ export default class DocumentUI {
     }
 
     private onDocumentButtonClick(buttonName: string){
-        const button = this.buttons.filter(el => { return el.element.getAttribute("button-name") == buttonName })[0];
+        const buttonsArray = Array.from(buttons);
+        const button: DocumentButton = buttonsArray.find(el => { return el[1].element.getAttribute("button-name") == buttonName })![1];
         if (button.onClick)
             button.onClick();
     }
 
-    private onPropertyClick(propertyName: string){
+    private onPropertyClick(propertyKind: PhysicsPropertyType){
         if(!this._selectedObject)
             throw "There's no selected object";
 
-        const physicsProperty = this._selectedObject.getObjectProperties().find(el => {return el.name == propertyName});
-        if(!physicsProperty){
-
+        const physicsProperty = <PhysicsProperty<any>>this._selectedObject.getProperty(propertyKind);
+        if(physicsProperty){
+            
         }
     }
 }

@@ -1,4 +1,9 @@
-class Simulator {
+import DocumentUI, {DocumentButton, buttons as documentButtons} from 'document';
+import {documentUI, ambient} from 'main';
+import {CurrentButtons} from 'types';
+
+
+export default class Simulator {
     private static playSrc: string = "./assets/images/play.png";
     private static pauseSrc: string = "./assets/images/pause.png";
 
@@ -20,8 +25,8 @@ class Simulator {
         
         this.domInput = <HTMLInputElement>queryInput;
         this.domInput.value = this._time.toFixed(2);
-        this.playButton = documentUI.getButton("play-button");
-        this.resetButton = documentUI.getButton("reset-button");
+        this.playButton = documentButtons.get(CurrentButtons.PlayButton)!;
+        this.resetButton = documentButtons.get(CurrentButtons.ResetButton)!;
 
         this.domInput.addEventListener("change", () => {
             if(this.isPlaying)
@@ -48,11 +53,11 @@ class Simulator {
         this._time = value;
         this.domInput.value = value.toFixed(2);
 
-        System.documentUI.propertiesEnabled = value == 0;
-        System.documentUI.objectCreatable = value == 0;
+        documentUI.propertiesEnabled = value == 0;
+        documentUI.objectCreatable = value == 0;
 
         this.resetButton.enabled = value > 0 && !this._isPlaying;
-        System.documentUI.getButton("destroy-button").enabled = value == 0 && System.documentUI.selectedObject != null && System.documentUI.selectedObject.isFollowable;
+        documentButtons.get(CurrentButtons.DestroyButton)!.enabled = value == 0 && documentUI.selectedObject != null && documentUI.selectedObject.isFollowable;
     }
 
     get isPlaying(){
@@ -91,7 +96,7 @@ class Simulator {
             return;
 
         this.time = 0;
-        System.ambient.objects.forEach(object => object.reset())
+        ambient.objects.forEach(object => object.reset())
     }
     
     fastForwardTo(time: number){
@@ -100,7 +105,7 @@ class Simulator {
     }
 
     private passTime(step: number){
-        System.ambient.objects.forEach(object => object.simulate(step))
+        ambient.objects.forEach(object => object.simulate(step))
         this.time += step;
     }
 

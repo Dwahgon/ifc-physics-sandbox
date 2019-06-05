@@ -1,7 +1,8 @@
 import PhysicsObject from 'physicsObjects';
 import PropertyLI from 'propertyLI';
+import Selectable from 'selectable';
 
-class Ambient implements Selectable {
+export default class Ambient implements Selectable {
     public readonly objects: PhysicsObject[];
 
     constructor() {

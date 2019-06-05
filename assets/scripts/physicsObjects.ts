@@ -1,6 +1,8 @@
 import {PhysicsPropertyType} from 'types';
 import PhysicsProperty, * as PhysicsProperties from 'physicsProperties';
 import {CanvasRenderer, Sprite} from 'rendering';
+import Ambient from 'ambient';
+import Selectable from 'selectable';
 
 export default abstract class PhysicsObject implements Selectable{
     private objectProperties: PhysicsProperty<any>[];
@@ -61,22 +63,7 @@ export default abstract class PhysicsObject implements Selectable{
     }
 }
 
-class Solid extends PhysicsObject{
-    public static readonly button: ObjectLI = new ObjectLI(
-        "Sólido", 
-        "./assets/images/dwagao.png", 
-        function(canvasRenderer: CanvasRenderer, ambient: Ambient){
-            new Solid(
-                canvasRenderer, 
-                ambient,
-                canvasRenderer.camera.getWorldPosFromCanvas(
-                    new Vector2(canvasRenderer.context.canvas.width / 2, canvasRenderer.context.canvas.height / 2)
-                ),
-                new Vector2(1, 1)
-            )
-        }
-    );
-
+export class Solid extends PhysicsObject{
     constructor(canvasRenderer: CanvasRenderer, ambient: Ambient, position: Vector2, size: Vector2){
         super(
             "Sólido",

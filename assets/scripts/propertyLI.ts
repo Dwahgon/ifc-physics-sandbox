@@ -23,6 +23,7 @@ export default abstract class PropertyLI<T>{
         this.li.appendChild(this.domUnitLabel);
 
         this.input.setAttribute("type", "text");
+        this.domNameLabel.setAttribute("property-kind", this.property.kind.toString());
 
         this.lastValue = "";
         this.setValue(initialValue);

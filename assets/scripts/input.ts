@@ -1,18 +1,21 @@
 import {Camera, CanvasRenderer} from 'rendering';
+import {documentUI, ambient} from 'main';
 
-class Input{
+export default class Input{
     private isMouseDown: boolean;
     private clickedPos: Vector2;
     private cameraPosOnMouseDown: Vector2;
     private mouseMoved: boolean;
+    private camera: Camera;
 
-    constructor(private readonly camera: Camera, private readonly canvasRenderer: CanvasRenderer){
+    constructor(private readonly canvasRenderer: CanvasRenderer){
         let canvas = canvasRenderer.context.canvas;
 
         this.isMouseDown = false;
         this.clickedPos = Vector2.zero;
         this.cameraPosOnMouseDown = Vector2.zero;
         this.mouseMoved = false;
+        this.camera = canvasRenderer.camera;
 
         canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
         canvas.addEventListener("mousemove", this.onMove.bind(this));
@@ -43,17 +46,14 @@ class Input{
     private onMouseUp(ev: MouseEvent){
         if(!this.isMouseDown)
             return;
-
-        this.isMouseDown = false;
-
-        if(this.mouseMoved)
-            return;
         
-        let clickedPos = new Vector2(ev.offsetX, ev.offsetY);
-        let documentUI = System.documentUI;
+        this.isMouseDown = false;
+        
+        if(!this.mouseMoved){
+            let clickedPos = new Vector2(ev.offsetX, ev.offsetY);
+            let obj = ambient.getObjectOnPosition(clickedPos);
 
-        let obj = System.ambient.getObjectOnPosition(clickedPos);
-
-        documentUI.selectObject((obj) ? obj : System.ambient);
+            documentUI.selectObject((obj) ? obj : ambient);
+        }
     }
 }

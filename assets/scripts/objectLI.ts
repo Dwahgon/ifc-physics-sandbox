@@ -1,5 +1,4 @@
-class ObjectLI{
-    public static readonly objectLIs: ObjectLI[] = [];
+export default class ObjectLI{
     public readonly li: HTMLLIElement;
     private title: HTMLSpanElement;
     private thumbImg: HTMLImageElement;
@@ -20,8 +19,6 @@ class ObjectLI{
         
         this.thumbImg.src = thumbSrc;
         this.title.innerHTML = name;
-        
-        ObjectLI.objectLIs.push(this);
     }
 
     set enabled(value: boolean){

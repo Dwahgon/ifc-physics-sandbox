@@ -1,3 +1,9 @@
+import {ObjectPosition} from 'physicsProperties';
+import PhysicsObject from 'physicsObjects';
+import {PhysicsPropertyType, CurrentButtons} from 'types';
+import {documentUI, canvasRenderer as canvasRenderer} from 'main';
+import {buttons} from 'document';
+
 export class CanvasRenderer{
     private isRunning: boolean;
     private functions: Function[];
@@ -50,6 +56,8 @@ export class Camera {
     constructor(private canvasRenderer: CanvasRenderer, private _pos: Vector2, public zoom: number) {
         this.targetObjectPosition = null;
         
+        buttons.get(CurrentButtons.CentralizeCamera)!.onClick = this.centralize.bind(this);
+
         let canvas = this.canvasRenderer.context.canvas;
         canvas.addEventListener("wheel", this.onWheelEvent.bind(this))
     }
@@ -98,7 +106,7 @@ export class Camera {
         if(!object.isFollowable)
             throw "Attemting to follow an unfollowable object";
         
-        this.targetObjectPosition = <ObjectPosition>object.getProperty("ObjectPosition");
+        this.targetObjectPosition = <ObjectPosition>object.getProperty(PhysicsPropertyType.ObjectPosition);
 
         this.changeButtonText(false);
     }
@@ -114,8 +122,7 @@ export class Camera {
     }
 
     private changeButtonText(isFollowing: boolean): void{
-        const documentUI = System.documentUI;
-        const followButton = documentUI.getButton("follow-button");
+        const followButton = buttons.get(CurrentButtons.FollowButton)!;
         
         if(documentUI.selectedObject == this.objectBeingFollowed)
             followButton.element.innerHTML = (isFollowing) ? "Seguir" : "Parar de seguir";
@@ -183,16 +190,16 @@ export class Sprite {
 }
 
 export class Grid{
-    constructor(public gridSize: number){
-        System.canvasRenderer.add(this.draw.bind(this));
+    constructor(public gridSize: number, public canvasRenderer: CanvasRenderer){
+        this.canvasRenderer.add(this.draw.bind(this));
     }
 
     draw(){
-        let ctx = System.canvasRenderer.context;
+        let ctx = this.canvasRenderer.context;
         let canvas = ctx.canvas;
-        let camera = System.canvasRenderer.camera;
-        let startPos = System.canvasRenderer.camera.getWorldPosFromCanvas(new Vector2(0, 0));
-        let finishPos = System.canvasRenderer.camera.getWorldPosFromCanvas(new Vector2(canvas.width, canvas.height));
+        let camera = this.canvasRenderer.camera;
+        let startPos = this.canvasRenderer.camera.getWorldPosFromCanvas(new Vector2(0, 0));
+        let finishPos = this.canvasRenderer.camera.getWorldPosFromCanvas(new Vector2(canvas.width, canvas.height));
 
         let startX = Math.ceil(startPos.x / this.gridSize) * this.gridSize;
         let startY = Math.floor(startPos.y / this.gridSize) * this.gridSize;
