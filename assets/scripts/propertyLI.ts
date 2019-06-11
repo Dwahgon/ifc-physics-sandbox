@@ -1,4 +1,5 @@
 import PhysicsProperty from 'physicsProperties';
+import Vector2 from 'vector2';
 
 export default abstract class PropertyLI<T>{
     public readonly li: HTMLLIElement;

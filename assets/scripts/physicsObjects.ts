@@ -3,6 +3,7 @@ import PhysicsProperty, * as PhysicsProperties from 'physicsProperties';
 import {CanvasRenderer, Sprite} from 'rendering';
 import Ambient from 'ambient';
 import Selectable from 'selectable';
+import Vector2 from 'vector2';
 
 export default abstract class PhysicsObject implements Selectable{
     private objectProperties: PhysicsProperty<any>[];

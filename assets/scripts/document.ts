@@ -7,6 +7,8 @@ import PhysicsProperty from "physicsProperties";
 import PhysicsObject from "physicsObjects";
 import Selectable from 'selectable';
 import ObjectLI from 'objectLI';
+import Vector2 from 'vector2';
+import {propertyDescriptions} from 'propertyDescriptions';
 
 export class DocumentElement<T extends HTMLElement>{
     public readonly element: T;
@@ -62,16 +64,27 @@ objectLIs.set(PhysicsObjectType.Solid, new ObjectLI("Sólido", "./assets/images/
     }
 ));
 
-abstract class PropertyDescriptionInterface{
-    private static element: HTMLDivElement = <HTMLDivElement>document.querySelector("#property-description-interface");
-    private static 
+export abstract class PropertyDescriptionInterface{
+    private static readonly element: HTMLDivElement = <HTMLDivElement>document.querySelector("#property-description-interface");
 
-    show(): void{
+    private static setElementVisible(isVisible: boolean): void{
+        PropertyDescriptionInterface.element.style.display = (isVisible) ? "flex" : "none"; 
+    }
+
+    static show(propertyKind: PhysicsPropertyType): void{
+        this.setElementVisible(true);
+
+        const description = propertyDescriptions.get(propertyKind);
+
+        if(description)
+            this.element.querySelector("article")!.innerHTML = description;
+        else
+            this.hide();
         
     }
 
-    hide(): void{
-
+    static hide(): void{
+        this.setElementVisible(false);
     }
 }
 
@@ -223,12 +236,6 @@ export default class DocumentUI {
     }
 
     private onPropertyClick(propertyKind: PhysicsPropertyType){
-        if(!this._selectedObject)
-            throw "There's no selected object";
-
-        const physicsProperty = <PhysicsProperty<any>>this._selectedObject.getProperty(propertyKind);
-        if(physicsProperty){
-            
-        }
+        PropertyDescriptionInterface.show(propertyKind);
     }
 }

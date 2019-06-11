@@ -1,11 +1,13 @@
-interface GenericCalculator<T>{
+import Vector2 from "vector2";
+
+export default interface GenericCalculator<T>{
     sum(a: T, b: T): T;
     sub(a: T, b: T): T;
     mult(a: T, b: T): T;
     div(a: T, b: T): T;
 }
 
-class Vector2Calculator implements GenericCalculator<Vector2>{
+export class Vector2Calculator implements GenericCalculator<Vector2>{
     public static readonly instance: GenericCalculator<any> = new Vector2Calculator();
 
     private constructor(){}
@@ -24,7 +26,7 @@ class Vector2Calculator implements GenericCalculator<Vector2>{
     }
 }
 
-class NumberCalculator implements GenericCalculator<number>{
+export class NumberCalculator implements GenericCalculator<number>{
     public static readonly instance: GenericCalculator<any> = new NumberCalculator();
 
     private constructor(){}

@@ -3,6 +3,7 @@ import PhysicsObject from 'physicsObjects';
 import {PhysicsPropertyType, CurrentButtons} from 'types';
 import {documentUI, canvasRenderer as canvasRenderer} from 'main';
 import {buttons} from 'document';
+import Vector2 from 'vector2';
 
 export class CanvasRenderer{
     private isRunning: boolean;

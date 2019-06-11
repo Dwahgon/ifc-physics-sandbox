@@ -1,6 +1,7 @@
 import PhysicsObject from 'physicsObjects';
 import PropertyLI from 'propertyLI';
 import Selectable from 'selectable';
+import Vector2 from 'vector2';
 
 export default class Ambient implements Selectable {
     public readonly objects: PhysicsObject[];

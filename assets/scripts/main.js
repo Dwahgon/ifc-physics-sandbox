@@ -1,4 +1,3 @@
-"use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -35,9 +34,63 @@ define("types", ["require", "exports"], function (require, exports) {
         CurrentButtons["CentralizeCamera"] = "#centralize-camera";
     })(CurrentButtons = exports.CurrentButtons || (exports.CurrentButtons = {}));
 });
-define("propertyLI", ["require", "exports"], function (require, exports) {
+define("vector2", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    class Vector2 {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+        toArray() {
+            return [this.x, this.y];
+        }
+        clone() {
+            return new Vector2(this.x, this.y);
+        }
+        toString() {
+            return "(" + this.x + ", " + this.y + ")";
+        }
+        static get zero() {
+            return new Vector2(0, 0);
+        }
+        static distance(a, b) {
+            return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+        }
+        static sum(a, b) {
+            return new Vector2(a.x + b.x, a.y + b.y);
+        }
+        static sub(a, b) {
+            return new Vector2(a.x - b.x, a.y - b.y);
+        }
+        static mult(a, b) {
+            if (typeof (a) == "number" && typeof (b) == "object")
+                return new Vector2(a * b.x, a * b.y);
+            if (typeof (a) == "object" && typeof (b) == "number")
+                return new Vector2(a.x * b, a.y * b);
+            if (typeof (a) == "object" && typeof (b) == "object")
+                return new Vector2(a.x * b.x, a.y * b.y);
+            throw "arguments 'a' and 'b' are either both numbers";
+        }
+        static div(a, b) {
+            if (typeof (a) == "number" && typeof (b) == "object")
+                return new Vector2(a / b.x, a / b.y);
+            if (typeof (a) == "object" && typeof (b) == "number")
+                return new Vector2(a.x / b, a.y / b);
+            if (typeof (a) == "object" && typeof (b) == "object")
+                return new Vector2(a.x / b.x, a.y / b.y);
+            throw "arguments 'a' and 'b' are either both numbers";
+        }
+        static equals(a, b) {
+            return a.x == b.x && a.y == b.y;
+        }
+    }
+    exports.default = Vector2;
+});
+define("propertyLI", ["require", "exports", "vector2"], function (require, exports, vector2_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    vector2_1 = __importDefault(vector2_1);
     class PropertyLI {
         constructor(property, title, propertyUnit, regExp, initialValue) {
             this.property = property;
@@ -113,7 +166,7 @@ define("propertyLI", ["require", "exports"], function (require, exports) {
                 this.resetToLastString();
                 return undefined;
             }
-            return new Vector2(Number(match[0]), Number(match[1]));
+            return new vector2_1.default(Number(match[0]), Number(match[1]));
         }
     }
     exports.PropertyLIVector2 = PropertyLIVector2;
@@ -134,9 +187,49 @@ define("propertyLI", ["require", "exports"], function (require, exports) {
     }
     exports.PropertyLINumber = PropertyLINumber;
 });
-define("physicsProperties", ["require", "exports", "types", "propertyLI"], function (require, exports, types_1, propertyLI_1) {
+define("genericCalulator", ["require", "exports", "vector2"], function (require, exports, vector2_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    vector2_2 = __importDefault(vector2_2);
+    class Vector2Calculator {
+        constructor() { }
+        sum(a, b) {
+            return vector2_2.default.sum(a, b);
+        }
+        sub(a, b) {
+            return vector2_2.default.sub(a, b);
+        }
+        mult(a, b) {
+            return vector2_2.default.mult(a, b);
+        }
+        div(a, b) {
+            return vector2_2.default.div(a, b);
+        }
+    }
+    Vector2Calculator.instance = new Vector2Calculator();
+    exports.Vector2Calculator = Vector2Calculator;
+    class NumberCalculator {
+        constructor() { }
+        sum(a, b) {
+            return a + b;
+        }
+        sub(a, b) {
+            return a - b;
+        }
+        mult(a, b) {
+            return a * b;
+        }
+        div(a, b) {
+            return a / b;
+        }
+    }
+    NumberCalculator.instance = new NumberCalculator();
+    exports.NumberCalculator = NumberCalculator;
+});
+define("physicsProperties", ["require", "exports", "types", "propertyLI", "vector2", "genericCalulator"], function (require, exports, types_1, propertyLI_1, vector2_3, genericCalulator_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    vector2_3 = __importDefault(vector2_3);
     class PhysicsProperty {
         constructor(kind, changeable, object, iValue, oValue, genericCalculator) {
             this.kind = kind;
@@ -174,7 +267,7 @@ define("physicsProperties", ["require", "exports", "types", "propertyLI"], funct
     exports.default = PhysicsProperty;
     class ObjectPosition extends PhysicsProperty {
         constructor(initialPosition, object) {
-            super(types_1.PhysicsPropertyType.ObjectPosition, true, object, initialPosition, Vector2.zero, Vector2Calculator.instance);
+            super(types_1.PhysicsPropertyType.ObjectPosition, true, object, initialPosition, vector2_3.default.zero, genericCalulator_1.Vector2Calculator.instance);
             this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "pos<sub>(x, y)</sub>", "m, m", initialPosition);
         }
         updateSpritePosition() {
@@ -198,7 +291,7 @@ define("physicsProperties", ["require", "exports", "types", "propertyLI"], funct
     exports.ObjectPosition = ObjectPosition;
     class ObjectSize extends PhysicsProperty {
         constructor(initialSize, object) {
-            super(types_1.PhysicsPropertyType.ObjectSize, true, object, initialSize, Vector2.zero, Vector2Calculator.instance);
+            super(types_1.PhysicsPropertyType.ObjectSize, true, object, initialSize, vector2_3.default.zero, genericCalulator_1.Vector2Calculator.instance);
             this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "tam<sub>(x, y)</sub>", "m, m", initialSize);
         }
         updateSpriteSize() {
@@ -226,49 +319,49 @@ define("physicsProperties", ["require", "exports", "types", "propertyLI"], funct
     exports.ObjectSize = ObjectSize;
     class ObjectArea extends PhysicsProperty {
         constructor(object) {
-            super(types_1.PhysicsPropertyType.ObjectArea, false, object, 0, 0, NumberCalculator.instance);
+            super(types_1.PhysicsPropertyType.ObjectArea, false, object, 0, 0, genericCalulator_1.NumberCalculator.instance);
             this.propertyLI = new propertyLI_1.PropertyLINumber(this, "área", "m<sup>2</sup>", 0);
             const objectSize = object.getProperty(types_1.PhysicsPropertyType.ObjectSize);
-            const sizeVector2 = (objectSize) ? objectSize.initialValue : Vector2.zero;
+            const sizeVector2 = (objectSize) ? objectSize.initialValue : vector2_3.default.zero;
             this.initialValue = sizeVector2.x * sizeVector2.y;
         }
     }
     exports.ObjectArea = ObjectArea;
     class ObjectVelocity extends PhysicsProperty {
         constructor(object) {
-            super(types_1.PhysicsPropertyType.ObjectVelocity, true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "velocidade", "<sup>m</sup>&frasl;<sub>s</sub>, <sup>m</sup>&frasl;<sub>s</sub>", Vector2.zero);
+            super(types_1.PhysicsPropertyType.ObjectVelocity, true, object, vector2_3.default.zero, vector2_3.default.zero, genericCalulator_1.Vector2Calculator.instance);
+            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "velocidade", "<sup>m</sup>&frasl;<sub>s</sub>, <sup>m</sup>&frasl;<sub>s</sub>", vector2_3.default.zero);
         }
         simulateStep(step) {
-            const displacement = Vector2.mult(this.value, step);
+            const displacement = vector2_3.default.mult(this.value, step);
             const objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
             const objectDisplacement = this.object.getProperty(types_1.PhysicsPropertyType.ObjectDisplacement);
             //add displacement to objectdisplacement
             if (objectDisplacement)
-                objectDisplacement.value += Vector2.distance(Vector2.zero, displacement);
+                objectDisplacement.value += vector2_3.default.distance(vector2_3.default.zero, displacement);
             //displace object
             if (objectPosition)
-                objectPosition.value = Vector2.sum(displacement, objectPosition.value);
+                objectPosition.value = vector2_3.default.sum(displacement, objectPosition.value);
         }
     }
     exports.ObjectVelocity = ObjectVelocity;
     class ObjectDisplacement extends PhysicsProperty {
         constructor(object) {
-            super(types_1.PhysicsPropertyType.ObjectDisplacement, false, object, 0, 0, NumberCalculator.instance);
+            super(types_1.PhysicsPropertyType.ObjectDisplacement, false, object, 0, 0, genericCalulator_1.NumberCalculator.instance);
             this.propertyLI = new propertyLI_1.PropertyLINumber(this, "deslocamento", "m", 0);
         }
     }
     exports.ObjectDisplacement = ObjectDisplacement;
     class ObjectAcceleration extends PhysicsProperty {
         constructor(object) {
-            super(types_1.PhysicsPropertyType.ObjectAcceleration, true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
+            super(types_1.PhysicsPropertyType.ObjectAcceleration, true, object, vector2_3.default.zero, vector2_3.default.zero, genericCalulator_1.Vector2Calculator.instance);
             this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue);
         }
         simulateStep(step) {
             const objectVel = this.object.getProperty(types_1.PhysicsPropertyType.ObjectVelocity);
-            const velDisplacement = Vector2.mult(this.value, step);
+            const velDisplacement = vector2_3.default.mult(this.value, step);
             if (objectVel)
-                objectVel.value = Vector2.sum(velDisplacement, objectVel.value);
+                objectVel.value = vector2_3.default.sum(velDisplacement, objectVel.value);
         }
     }
     exports.ObjectAcceleration = ObjectAcceleration;
@@ -303,10 +396,24 @@ define("objectLI", ["require", "exports"], function (require, exports) {
     }
     exports.default = ObjectLI;
 });
-define("document", ["require", "exports", "main", "types", "physicsObjects", "objectLI"], function (require, exports, main_1, types_2, physicsObjects_1, objectLI_1) {
+define("propertyDescriptions", ["require", "exports", "types"], function (require, exports, types_2) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.propertyDescriptions = new Map();
+    exports.propertyDescriptions.set(types_2.PhysicsPropertyType.ObjectPosition, `
+    <h1>
+        Posição
+    </h1>
+    <p>
+        Em física, a posição de um corpo é a especificação de seu lugar no espaço. A identificação da posição é feita a partir de um vetor, denominado vetor posição, que pode ser escrito em função de um sistema de coordenadas de um certo referencial. A unidade de medida da posição no Sistema Internacional de Unidades é o metro.
+    </p>
+    `);
+});
+define("document", ["require", "exports", "main", "types", "physicsObjects", "objectLI", "vector2", "propertyDescriptions"], function (require, exports, main_1, types_3, physicsObjects_1, objectLI_1, vector2_4, propertyDescriptions_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     objectLI_1 = __importDefault(objectLI_1);
+    vector2_4 = __importDefault(vector2_4);
     class DocumentElement {
         constructor(selector, enabled) {
             const query = document.querySelector(selector);
@@ -336,22 +443,33 @@ define("document", ["require", "exports", "main", "types", "physicsObjects", "ob
     }
     exports.DocumentButton = DocumentButton;
     exports.buttons = new Map();
-    exports.buttons.set(types_2.CurrentButtons.ResetButton, new DocumentButton("#reset-button", false, null, "dark-button"));
-    exports.buttons.set(types_2.CurrentButtons.FollowButton, new DocumentButton("#follow-button", false, null, "dark-button"));
-    exports.buttons.set(types_2.CurrentButtons.DestroyButton, new DocumentButton("#destroy-button", false, null, "dark-button"));
-    exports.buttons.set(types_2.CurrentButtons.PlayButton, new DocumentButton("#play-button", true, null, "dark-button"));
-    exports.buttons.set(types_2.CurrentButtons.CentralizeCamera, new DocumentButton("#centralize-camera", true, null, "white-button"));
+    exports.buttons.set(types_3.CurrentButtons.ResetButton, new DocumentButton("#reset-button", false, null, "dark-button"));
+    exports.buttons.set(types_3.CurrentButtons.FollowButton, new DocumentButton("#follow-button", false, null, "dark-button"));
+    exports.buttons.set(types_3.CurrentButtons.DestroyButton, new DocumentButton("#destroy-button", false, null, "dark-button"));
+    exports.buttons.set(types_3.CurrentButtons.PlayButton, new DocumentButton("#play-button", true, null, "dark-button"));
+    exports.buttons.set(types_3.CurrentButtons.CentralizeCamera, new DocumentButton("#centralize-camera", true, null, "white-button"));
     exports.objectLIs = new Map();
-    exports.objectLIs.set(types_2.PhysicsObjectType.Solid, new objectLI_1.default("Sólido", "./assets/images/dwagao.png", function (canvasRenderer, ambient) {
-        new physicsObjects_1.Solid(canvasRenderer, ambient, canvasRenderer.camera.getWorldPosFromCanvas(new Vector2(canvasRenderer.context.canvas.width / 2, canvasRenderer.context.canvas.height / 2)), new Vector2(1, 1));
+    exports.objectLIs.set(types_3.PhysicsObjectType.Solid, new objectLI_1.default("Sólido", "./assets/images/dwagao.png", function (canvasRenderer, ambient) {
+        new physicsObjects_1.Solid(canvasRenderer, ambient, canvasRenderer.camera.getWorldPosFromCanvas(new vector2_4.default(canvasRenderer.context.canvas.width / 2, canvasRenderer.context.canvas.height / 2)), new vector2_4.default(1, 1));
     }));
     class PropertyDescriptionInterface {
-        static show() {
+        static setElementVisible(isVisible) {
+            PropertyDescriptionInterface.element.style.display = (isVisible) ? "flex" : "none";
         }
-        hide() {
+        static show(propertyKind) {
+            this.setElementVisible(true);
+            const description = propertyDescriptions_1.propertyDescriptions.get(propertyKind);
+            if (description)
+                this.element.querySelector("article").innerHTML = description;
+            else
+                this.hide();
+        }
+        static hide() {
+            this.setElementVisible(false);
         }
     }
     PropertyDescriptionInterface.element = document.querySelector("#property-description-interface");
+    exports.PropertyDescriptionInterface = PropertyDescriptionInterface;
     class DocumentUI {
         constructor() {
             this.domObjectUL = document.querySelector("#object-list");
@@ -362,8 +480,8 @@ define("document", ["require", "exports", "main", "types", "physicsObjects", "ob
             this._propertiesEnabled = true;
             this._objectCreatable = true;
             this._selectedObject = null;
-            exports.buttons.get(types_2.CurrentButtons.DestroyButton).onClick = this.destroySelectedObject.bind(this);
-            exports.buttons.get(types_2.CurrentButtons.FollowButton).onClick = this.followSelectedObject.bind(this);
+            exports.buttons.get(types_3.CurrentButtons.DestroyButton).onClick = this.destroySelectedObject.bind(this);
+            exports.buttons.get(types_3.CurrentButtons.FollowButton).onClick = this.followSelectedObject.bind(this);
             this.domObjectUL.addEventListener("click", e => this.createObject(e));
             document.addEventListener("click", e => {
                 const buttonName = e.target.getAttribute("button-name");
@@ -388,7 +506,7 @@ define("document", ["require", "exports", "main", "types", "physicsObjects", "ob
             if (!this._selectedObject)
                 return;
             this._propertiesEnabled = value;
-            const physicsProperties = this._selectedObject.getProperty(types_2.PhysicsPropertyType.All);
+            const physicsProperties = this._selectedObject.getProperty(types_3.PhysicsPropertyType.All);
             if (physicsProperties) {
                 physicsProperties.forEach(objectProperty => {
                     if (objectProperty.propertyLI)
@@ -413,8 +531,8 @@ define("document", ["require", "exports", "main", "types", "physicsObjects", "ob
             this.domPropertyH1.innerHTML = `Propriedades do ${object.name}`;
             object.appendPropertyListItems(this.domPropertyUL, this.propertiesEnabled);
             this.propertiesEnabled = this.propertiesEnabled;
-            const followButton = exports.buttons.get(types_2.CurrentButtons.FollowButton);
-            const destroyButton = exports.buttons.get(types_2.CurrentButtons.DestroyButton);
+            const followButton = exports.buttons.get(types_3.CurrentButtons.FollowButton);
+            const destroyButton = exports.buttons.get(types_3.CurrentButtons.DestroyButton);
             followButton.enabled = object.isFollowable;
             followButton.element.innerHTML = (main_1.canvasRenderer.camera.objectBeingFollowed != this._selectedObject) ? "Seguir" : "Parar de seguir";
             destroyButton.enabled = object.destroy != undefined && main_1.simulator.time == 0;
@@ -454,16 +572,12 @@ define("document", ["require", "exports", "main", "types", "physicsObjects", "ob
                 button.onClick();
         }
         onPropertyClick(propertyKind) {
-            if (!this._selectedObject)
-                throw "There's no selected object";
-            const physicsProperty = this._selectedObject.getProperty(propertyKind);
-            if (physicsProperty) {
-            }
+            PropertyDescriptionInterface.show(propertyKind);
         }
     }
     exports.default = DocumentUI;
 });
-define("simulator", ["require", "exports", "document", "main", "types"], function (require, exports, document_1, main_2, types_3) {
+define("simulator", ["require", "exports", "document", "main", "types"], function (require, exports, document_1, main_2, types_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Simulator {
@@ -476,8 +590,8 @@ define("simulator", ["require", "exports", "document", "main", "types"], functio
                 throw "time input, play button or reset button not found";
             this.domInput = queryInput;
             this.domInput.value = this._time.toFixed(2);
-            this.playButton = document_1.buttons.get(types_3.CurrentButtons.PlayButton);
-            this.resetButton = document_1.buttons.get(types_3.CurrentButtons.ResetButton);
+            this.playButton = document_1.buttons.get(types_4.CurrentButtons.PlayButton);
+            this.resetButton = document_1.buttons.get(types_4.CurrentButtons.ResetButton);
             this.domInput.addEventListener("change", () => {
                 if (this.isPlaying)
                     return;
@@ -500,7 +614,7 @@ define("simulator", ["require", "exports", "document", "main", "types"], functio
             main_2.documentUI.propertiesEnabled = value == 0;
             main_2.documentUI.objectCreatable = value == 0;
             this.resetButton.enabled = value > 0 && !this._isPlaying;
-            document_1.buttons.get(types_3.CurrentButtons.DestroyButton).enabled = value == 0 && main_2.documentUI.selectedObject != null && main_2.documentUI.selectedObject.isFollowable;
+            document_1.buttons.get(types_4.CurrentButtons.DestroyButton).enabled = value == 0 && main_2.documentUI.selectedObject != null && main_2.documentUI.selectedObject.isFollowable;
         }
         get isPlaying() {
             return this._isPlaying;
@@ -550,16 +664,17 @@ define("simulator", ["require", "exports", "document", "main", "types"], functio
     Simulator.pauseSrc = "./assets/images/pause.png";
     exports.default = Simulator;
 });
-define("input", ["require", "exports", "main"], function (require, exports, main_3) {
+define("input", ["require", "exports", "main", "vector2"], function (require, exports, main_3, vector2_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    vector2_5 = __importDefault(vector2_5);
     class Input {
         constructor(canvasRenderer) {
             this.canvasRenderer = canvasRenderer;
             let canvas = canvasRenderer.context.canvas;
             this.isMouseDown = false;
-            this.clickedPos = Vector2.zero;
-            this.cameraPosOnMouseDown = Vector2.zero;
+            this.clickedPos = vector2_5.default.zero;
+            this.cameraPosOnMouseDown = vector2_5.default.zero;
             this.mouseMoved = false;
             this.camera = canvasRenderer.camera;
             canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
@@ -569,16 +684,16 @@ define("input", ["require", "exports", "main"], function (require, exports, main
         onMouseDown(ev) {
             this.isMouseDown = true;
             this.mouseMoved = false;
-            this.clickedPos = new Vector2(ev.offsetX, -ev.offsetY);
+            this.clickedPos = new vector2_5.default(ev.offsetX, -ev.offsetY);
             this.cameraPosOnMouseDown = this.camera.pos;
             console.log("click");
         }
         onMove(ev) {
             if (!this.isMouseDown)
                 return;
-            let currentMousePos = new Vector2(ev.offsetX, -ev.offsetY);
-            this.camera.pos = Vector2.sum(this.cameraPosOnMouseDown, Vector2.sub(this.clickedPos, currentMousePos));
-            if (!Vector2.equals(this.cameraPosOnMouseDown, this.camera.pos)) {
+            let currentMousePos = new vector2_5.default(ev.offsetX, -ev.offsetY);
+            this.camera.pos = vector2_5.default.sum(this.cameraPosOnMouseDown, vector2_5.default.sub(this.clickedPos, currentMousePos));
+            if (!vector2_5.default.equals(this.cameraPosOnMouseDown, this.camera.pos)) {
                 this.mouseMoved = true;
                 this.camera.unfollowObject();
             }
@@ -588,7 +703,7 @@ define("input", ["require", "exports", "main"], function (require, exports, main
                 return;
             this.isMouseDown = false;
             if (!this.mouseMoved) {
-                let clickedPos = new Vector2(ev.offsetX, ev.offsetY);
+                let clickedPos = new vector2_5.default(ev.offsetX, ev.offsetY);
                 let obj = main_3.ambient.getObjectOnPosition(clickedPos);
                 main_3.documentUI.selectObject((obj) ? obj : main_3.ambient);
             }
@@ -596,19 +711,20 @@ define("input", ["require", "exports", "main"], function (require, exports, main
     }
     exports.default = Input;
 });
-define("main", ["require", "exports", "document", "rendering", "ambient", "simulator", "input"], function (require, exports, document_2, rendering_1, ambient_1, simulator_1, input_1) {
+define("main", ["require", "exports", "document", "rendering", "ambient", "simulator", "input", "vector2"], function (require, exports, document_2, rendering_1, ambient_1, simulator_1, input_1, vector2_6) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     document_2 = __importDefault(document_2);
     ambient_1 = __importDefault(ambient_1);
     simulator_1 = __importDefault(simulator_1);
     input_1 = __importDefault(input_1);
+    vector2_6 = __importDefault(vector2_6);
     let can = document.createElement('canvas');
     let ctx = can.getContext('2d');
     can.width = 500;
     can.height = 500;
     document.body.querySelector("#mid-menu>div").appendChild(can);
-    exports.canvasRenderer = new rendering_1.CanvasRenderer(ctx, Vector2.zero, 100);
+    exports.canvasRenderer = new rendering_1.CanvasRenderer(ctx, vector2_6.default.zero, 100);
     exports.ambient = new ambient_1.default();
     exports.documentUI = new document_2.default();
     exports.documentUI.selectObject(exports.ambient);
@@ -618,9 +734,10 @@ define("main", ["require", "exports", "document", "rendering", "ambient", "simul
     new rendering_1.Grid(1, exports.canvasRenderer);
     exports.canvasRenderer.start();
 });
-define("rendering", ["require", "exports", "types", "main", "document"], function (require, exports, types_4, main_4, document_3) {
+define("rendering", ["require", "exports", "types", "main", "document", "vector2"], function (require, exports, types_5, main_4, document_3, vector2_7) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    vector2_7 = __importDefault(vector2_7);
     class CanvasRenderer {
         constructor(context, cameraPos, cameraZoom) {
             this.context = context;
@@ -662,7 +779,7 @@ define("rendering", ["require", "exports", "types", "main", "document"], functio
             this._pos = _pos;
             this.zoom = zoom;
             this.targetObjectPosition = null;
-            document_3.buttons.get(types_4.CurrentButtons.CentralizeCamera).onClick = this.centralize.bind(this);
+            document_3.buttons.get(types_5.CurrentButtons.CentralizeCamera).onClick = this.centralize.bind(this);
             let canvas = this.canvasRenderer.context.canvas;
             canvas.addEventListener("wheel", this.onWheelEvent.bind(this));
         }
@@ -670,17 +787,17 @@ define("rendering", ["require", "exports", "types", "main", "document"], functio
             const canvas = this.canvasRenderer.context.canvas;
             const posX = ((canvas.width / 2) - this.pos.x - canvasPos.x) / -this.zoom;
             const posY = ((canvas.height / 2) + this.pos.y - canvasPos.y) / this.zoom;
-            return new Vector2(posX, posY);
+            return new vector2_7.default(posX, posY);
         }
         getCanvasPosFromWorld(worldPos) {
             const canvas = this.canvasRenderer.context.canvas;
             const posX = (canvas.width / 2) + worldPos.x * this.zoom - this.pos.x;
             const posY = (canvas.height / 2) - worldPos.y * this.zoom + this.pos.y;
-            return new Vector2(posX, posY);
+            return new vector2_7.default(posX, posY);
         }
         get pos() {
             if (this.targetObjectPosition) {
-                return Vector2.mult(this.targetObjectPosition.value, this.zoom);
+                return vector2_7.default.mult(this.targetObjectPosition.value, this.zoom);
             }
             return this._pos;
         }
@@ -697,7 +814,7 @@ define("rendering", ["require", "exports", "types", "main", "document"], functio
         followObject(object) {
             if (!object.isFollowable)
                 throw "Attemting to follow an unfollowable object";
-            this.targetObjectPosition = object.getProperty(types_4.PhysicsPropertyType.ObjectPosition);
+            this.targetObjectPosition = object.getProperty(types_5.PhysicsPropertyType.ObjectPosition);
             this.changeButtonText(false);
         }
         unfollowObject() {
@@ -705,10 +822,10 @@ define("rendering", ["require", "exports", "types", "main", "document"], functio
             this.targetObjectPosition = null;
         }
         centralize() {
-            this.pos = Vector2.zero;
+            this.pos = vector2_7.default.zero;
         }
         changeButtonText(isFollowing) {
-            const followButton = document_3.buttons.get(types_4.CurrentButtons.FollowButton);
+            const followButton = document_3.buttons.get(types_5.CurrentButtons.FollowButton);
             if (main_4.documentUI.selectedObject == this.objectBeingFollowed)
                 followButton.element.innerHTML = (isFollowing) ? "Seguir" : "Parar de seguir";
         }
@@ -735,7 +852,7 @@ define("rendering", ["require", "exports", "types", "main", "document"], functio
             renderer.add(this.drawFunction);
         }
         getZoomedSize(zoom) {
-            return Vector2.mult(this.drawSize, zoom);
+            return vector2_7.default.mult(this.drawSize, zoom);
         }
         draw() {
             // @ts-ignore
@@ -746,7 +863,7 @@ define("rendering", ["require", "exports", "types", "main", "document"], functio
         }
         getPositionInCanvas() {
             const camera = this.renderer.camera;
-            return Vector2.sub(camera.getCanvasPosFromWorld(this.drawPosition), Vector2.div(this.getZoomedSize(camera.zoom), 2));
+            return vector2_7.default.sub(camera.getCanvasPosFromWorld(this.drawPosition), vector2_7.default.div(this.getZoomedSize(camera.zoom), 2));
         }
         positionIsInsideSprite(pos) {
             const posInCan = this.getPositionInCanvas();
@@ -767,8 +884,8 @@ define("rendering", ["require", "exports", "types", "main", "document"], functio
             let ctx = this.canvasRenderer.context;
             let canvas = ctx.canvas;
             let camera = this.canvasRenderer.camera;
-            let startPos = this.canvasRenderer.camera.getWorldPosFromCanvas(new Vector2(0, 0));
-            let finishPos = this.canvasRenderer.camera.getWorldPosFromCanvas(new Vector2(canvas.width, canvas.height));
+            let startPos = this.canvasRenderer.camera.getWorldPosFromCanvas(new vector2_7.default(0, 0));
+            let finishPos = this.canvasRenderer.camera.getWorldPosFromCanvas(new vector2_7.default(canvas.width, canvas.height));
             let startX = Math.ceil(startPos.x / this.gridSize) * this.gridSize;
             let startY = Math.floor(startPos.y / this.gridSize) * this.gridSize;
             for (let i = startX; i < finishPos.x; i += this.gridSize) {
@@ -791,10 +908,11 @@ define("rendering", ["require", "exports", "types", "main", "document"], functio
     }
     exports.Grid = Grid;
 });
-define("physicsObjects", ["require", "exports", "types", "physicsProperties", "rendering"], function (require, exports, types_5, PhysicsProperties, rendering_2) {
+define("physicsObjects", ["require", "exports", "types", "physicsProperties", "rendering", "vector2"], function (require, exports, types_6, PhysicsProperties, rendering_2, vector2_8) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     PhysicsProperties = __importStar(PhysicsProperties);
+    vector2_8 = __importDefault(vector2_8);
     class PhysicsObject {
         constructor(name, sprite, ambient) {
             this.name = name;
@@ -814,7 +932,7 @@ define("physicsObjects", ["require", "exports", "types", "physicsProperties", "r
         }
         getProperty(type) {
             switch (type) {
-                case types_5.PhysicsPropertyType.All:
+                case types_6.PhysicsPropertyType.All:
                     return this.objectProperties;
                 default:
                     return this.objectProperties.find(physicsProperty => { return physicsProperty.kind == type; });
@@ -845,7 +963,7 @@ define("physicsObjects", ["require", "exports", "types", "physicsProperties", "r
     exports.default = PhysicsObject;
     class Solid extends PhysicsObject {
         constructor(canvasRenderer, ambient, position, size) {
-            super("Sólido", new rendering_2.Sprite(canvasRenderer, "./assets/images/dwagao.png", new Vector2(0, 0), new Vector2(512, 512), position, size), ambient);
+            super("Sólido", new rendering_2.Sprite(canvasRenderer, "./assets/images/dwagao.png", new vector2_8.default(0, 0), new vector2_8.default(512, 512), position, size), ambient);
             this.addProperties(new PhysicsProperties.ObjectPosition(position, this));
             this.addProperties(new PhysicsProperties.ObjectSize(size, this));
             this.addProperties(new PhysicsProperties.ObjectArea(this));
@@ -890,83 +1008,3 @@ define("ambient", ["require", "exports"], function (require, exports) {
     }
     exports.default = Ambient;
 });
-class Vector2Calculator {
-    constructor() { }
-    sum(a, b) {
-        return Vector2.sum(a, b);
-    }
-    sub(a, b) {
-        return Vector2.sub(a, b);
-    }
-    mult(a, b) {
-        return Vector2.mult(a, b);
-    }
-    div(a, b) {
-        return Vector2.div(a, b);
-    }
-}
-Vector2Calculator.instance = new Vector2Calculator();
-class NumberCalculator {
-    constructor() { }
-    sum(a, b) {
-        return a + b;
-    }
-    sub(a, b) {
-        return a - b;
-    }
-    mult(a, b) {
-        return a * b;
-    }
-    div(a, b) {
-        return a / b;
-    }
-}
-NumberCalculator.instance = new NumberCalculator();
-class Vector2 {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-    toArray() {
-        return [this.x, this.y];
-    }
-    clone() {
-        return new Vector2(this.x, this.y);
-    }
-    toString() {
-        return "(" + this.x + ", " + this.y + ")";
-    }
-    static get zero() {
-        return new Vector2(0, 0);
-    }
-    static distance(a, b) {
-        return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
-    }
-    static sum(a, b) {
-        return new Vector2(a.x + b.x, a.y + b.y);
-    }
-    static sub(a, b) {
-        return new Vector2(a.x - b.x, a.y - b.y);
-    }
-    static mult(a, b) {
-        if (typeof (a) == "number" && typeof (b) == "object")
-            return new Vector2(a * b.x, a * b.y);
-        if (typeof (a) == "object" && typeof (b) == "number")
-            return new Vector2(a.x * b, a.y * b);
-        if (typeof (a) == "object" && typeof (b) == "object")
-            return new Vector2(a.x * b.x, a.y * b.y);
-        throw "arguments 'a' and 'b' are either both numbers";
-    }
-    static div(a, b) {
-        if (typeof (a) == "number" && typeof (b) == "object")
-            return new Vector2(a / b.x, a / b.y);
-        if (typeof (a) == "object" && typeof (b) == "number")
-            return new Vector2(a.x / b, a.y / b);
-        if (typeof (a) == "object" && typeof (b) == "object")
-            return new Vector2(a.x / b.x, a.y / b.y);
-        throw "arguments 'a' and 'b' are either both numbers";
-    }
-    static equals(a, b) {
-        return a.x == b.x && a.y == b.y;
-    }
-}

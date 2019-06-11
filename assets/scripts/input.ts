@@ -1,5 +1,6 @@
 import {Camera, CanvasRenderer} from 'rendering';
 import {documentUI, ambient} from 'main';
+import Vector2 from 'vector2';
 
 export default class Input{
     private isMouseDown: boolean;

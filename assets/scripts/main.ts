@@ -3,6 +3,7 @@ import {CanvasRenderer, Grid} from 'rendering';
 import Ambient from 'ambient';
 import Simulator from 'simulator';
 import Input from 'input';
+import Vector2 from 'vector2';
 
 let can = document.createElement('canvas');
 let ctx = can.getContext('2d');

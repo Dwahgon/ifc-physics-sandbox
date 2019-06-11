@@ -1,7 +1,9 @@
 import {PhysicsPropertyType} from 'types';
 import PropertyLI from 'propertyLI';
-import PhysicsObject, * as PhysicsObjects from 'physicsObjects';
+import PhysicsObject from 'physicsObjects';
 import { PropertyLINumber, PropertyLIVector2 } from './propertyLI';
+import Vector2 from 'vector2';
+import GenericCalculator, {Vector2Calculator, NumberCalculator} from 'genericCalulator';
 
 export default abstract class PhysicsProperty<T>{
     public active: boolean;
