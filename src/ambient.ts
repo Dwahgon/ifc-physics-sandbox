@@ -1,5 +1,4 @@
 import PhysicsObject from 'physicsObjects';
-import PropertyLI from 'propertyLI';
 import Selectable from 'selectable';
 import Vector2 from 'vector2';
 
@@ -27,11 +26,6 @@ export default class Ambient implements Selectable {
 
     get name(): string {
         return "Ambiente";
-    }
-
-    appendPropertyListItems(ul: HTMLUListElement, enabled: boolean): PropertyLI<any>[] {
-        let empty: PropertyLI<any>[] = [];
-        return empty;
     }
 
     getProperty(): undefined {

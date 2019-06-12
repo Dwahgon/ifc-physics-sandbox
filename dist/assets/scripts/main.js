@@ -8,32 +8,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-define("types", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    var PhysicsPropertyType;
-    (function (PhysicsPropertyType) {
-        PhysicsPropertyType[PhysicsPropertyType["All"] = 0] = "All";
-        PhysicsPropertyType[PhysicsPropertyType["ObjectPosition"] = 1] = "ObjectPosition";
-        PhysicsPropertyType[PhysicsPropertyType["ObjectAcceleration"] = 2] = "ObjectAcceleration";
-        PhysicsPropertyType[PhysicsPropertyType["ObjectSize"] = 3] = "ObjectSize";
-        PhysicsPropertyType[PhysicsPropertyType["ObjectArea"] = 4] = "ObjectArea";
-        PhysicsPropertyType[PhysicsPropertyType["ObjectVelocity"] = 5] = "ObjectVelocity";
-        PhysicsPropertyType[PhysicsPropertyType["ObjectDisplacement"] = 6] = "ObjectDisplacement";
-    })(PhysicsPropertyType = exports.PhysicsPropertyType || (exports.PhysicsPropertyType = {}));
-    var PhysicsObjectType;
-    (function (PhysicsObjectType) {
-        PhysicsObjectType[PhysicsObjectType["Solid"] = 0] = "Solid";
-    })(PhysicsObjectType = exports.PhysicsObjectType || (exports.PhysicsObjectType = {}));
-    var CurrentButtons;
-    (function (CurrentButtons) {
-        CurrentButtons["ResetButton"] = "#reset-button";
-        CurrentButtons["FollowButton"] = "#follow-button";
-        CurrentButtons["DestroyButton"] = "#destroy-button";
-        CurrentButtons["PlayButton"] = "#play-button";
-        CurrentButtons["CentralizeCamera"] = "#centralize-camera";
-    })(CurrentButtons = exports.CurrentButtons || (exports.CurrentButtons = {}));
-});
 define("vector2", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -87,10 +61,49 @@ define("vector2", ["require", "exports"], function (require, exports) {
     }
     exports.default = Vector2;
 });
-define("propertyLI", ["require", "exports", "vector2"], function (require, exports, vector2_1) {
+define("genericCalulator", ["require", "exports", "vector2"], function (require, exports, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_1 = __importDefault(vector2_1);
+    class Vector2Calculator {
+        constructor() { }
+        sum(a, b) {
+            return vector2_1.default.sum(a, b);
+        }
+        sub(a, b) {
+            return vector2_1.default.sub(a, b);
+        }
+        mult(a, b) {
+            return vector2_1.default.mult(a, b);
+        }
+        div(a, b) {
+            return vector2_1.default.div(a, b);
+        }
+    }
+    Vector2Calculator.instance = new Vector2Calculator();
+    exports.Vector2Calculator = Vector2Calculator;
+    class NumberCalculator {
+        constructor() { }
+        sum(a, b) {
+            return a + b;
+        }
+        sub(a, b) {
+            return a - b;
+        }
+        mult(a, b) {
+            return a * b;
+        }
+        div(a, b) {
+            return a / b;
+        }
+    }
+    NumberCalculator.instance = new NumberCalculator();
+    exports.NumberCalculator = NumberCalculator;
+});
+define("propertyLI", ["require", "exports", "vector2"], function (require, exports, vector2_2) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    vector2_2 = __importDefault(vector2_2);
     class PropertyLI {
         constructor(property, title, propertyUnit, regExp, initialValue) {
             this.property = property;
@@ -166,7 +179,7 @@ define("propertyLI", ["require", "exports", "vector2"], function (require, expor
                 this.resetToLastString();
                 return undefined;
             }
-            return new vector2_1.default(Number(match[0]), Number(match[1]));
+            return new vector2_2.default(Number(match[0]), Number(match[1]));
         }
     }
     exports.PropertyLIVector2 = PropertyLIVector2;
@@ -187,46 +200,36 @@ define("propertyLI", ["require", "exports", "vector2"], function (require, expor
     }
     exports.PropertyLINumber = PropertyLINumber;
 });
-define("genericCalulator", ["require", "exports", "vector2"], function (require, exports, vector2_2) {
+define("types", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    vector2_2 = __importDefault(vector2_2);
-    class Vector2Calculator {
-        constructor() { }
-        sum(a, b) {
-            return vector2_2.default.sum(a, b);
-        }
-        sub(a, b) {
-            return vector2_2.default.sub(a, b);
-        }
-        mult(a, b) {
-            return vector2_2.default.mult(a, b);
-        }
-        div(a, b) {
-            return vector2_2.default.div(a, b);
-        }
-    }
-    Vector2Calculator.instance = new Vector2Calculator();
-    exports.Vector2Calculator = Vector2Calculator;
-    class NumberCalculator {
-        constructor() { }
-        sum(a, b) {
-            return a + b;
-        }
-        sub(a, b) {
-            return a - b;
-        }
-        mult(a, b) {
-            return a * b;
-        }
-        div(a, b) {
-            return a / b;
-        }
-    }
-    NumberCalculator.instance = new NumberCalculator();
-    exports.NumberCalculator = NumberCalculator;
+    var ButtonColor;
+    (function (ButtonColor) {
+        ButtonColor["Dark"] = "dark-button";
+        ButtonColor["White"] = "white-button";
+    })(ButtonColor = exports.ButtonColor || (exports.ButtonColor = {}));
+    var DocumentButtonKind;
+    (function (DocumentButtonKind) {
+        DocumentButtonKind["MiscButton"] = "misc-button";
+        DocumentButtonKind["CreateObjectButton"] = "create-object-button";
+        DocumentButtonKind["PropertyButton"] = "property-button";
+    })(DocumentButtonKind = exports.DocumentButtonKind || (exports.DocumentButtonKind = {}));
+    var PhysicsPropertyType;
+    (function (PhysicsPropertyType) {
+        PhysicsPropertyType[PhysicsPropertyType["All"] = 0] = "All";
+        PhysicsPropertyType[PhysicsPropertyType["ObjectPosition"] = 1] = "ObjectPosition";
+        PhysicsPropertyType[PhysicsPropertyType["ObjectAcceleration"] = 2] = "ObjectAcceleration";
+        PhysicsPropertyType[PhysicsPropertyType["ObjectSize"] = 3] = "ObjectSize";
+        PhysicsPropertyType[PhysicsPropertyType["ObjectArea"] = 4] = "ObjectArea";
+        PhysicsPropertyType[PhysicsPropertyType["ObjectVelocity"] = 5] = "ObjectVelocity";
+        PhysicsPropertyType[PhysicsPropertyType["ObjectDisplacement"] = 6] = "ObjectDisplacement";
+    })(PhysicsPropertyType = exports.PhysicsPropertyType || (exports.PhysicsPropertyType = {}));
+    var PhysicsObjectType;
+    (function (PhysicsObjectType) {
+        PhysicsObjectType[PhysicsObjectType["Solid"] = 0] = "Solid";
+    })(PhysicsObjectType = exports.PhysicsObjectType || (exports.PhysicsObjectType = {}));
 });
-define("physicsProperties", ["require", "exports", "types", "propertyLI", "vector2", "genericCalulator"], function (require, exports, types_1, propertyLI_1, vector2_3, genericCalulator_1) {
+define("physicsProperties", ["require", "exports", "genericCalulator", "types", "vector2", "propertyLI"], function (require, exports, genericCalulator_1, types_1, vector2_3, propertyLI_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_3 = __importDefault(vector2_3);
@@ -366,218 +369,54 @@ define("physicsProperties", ["require", "exports", "types", "propertyLI", "vecto
     }
     exports.ObjectAcceleration = ObjectAcceleration;
 });
-define("selectable", ["require", "exports"], function (require, exports) {
+define("input", ["require", "exports", "main", "vector2"], function (require, exports, main_1, vector2_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-});
-define("objectLI", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    class ObjectLI {
-        constructor(name, thumbSrc, createObject) {
-            this.name = name;
-            this.createObject = createObject;
-            this.li = document.createElement("li");
-            let content = document.createElement("div");
-            this.title = document.createElement("span");
-            this.thumbImg = document.createElement("img");
-            content.appendChild(this.title);
-            this.li.appendChild(this.thumbImg);
-            this.li.appendChild(content);
-            this.li.setAttribute("object-name", name);
-            this.li.setAttribute("class", "dark-button button");
-            this.li.querySelectorAll("*").forEach(el => el.setAttribute("object-name", name));
-            this.thumbImg.src = thumbSrc;
-            this.title.innerHTML = name;
-        }
-        set enabled(value) {
-            this.li.setAttribute("class", (!value) ? "dark-button inactive-button" : "dark-button button");
-        }
-    }
-    exports.default = ObjectLI;
-});
-define("propertyDescriptions", ["require", "exports", "types"], function (require, exports, types_2) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.propertyDescriptions = new Map();
-    exports.propertyDescriptions.set(types_2.PhysicsPropertyType.ObjectPosition, `
-    <h1>
-        Posição
-    </h1>
-    <p>
-        Em física, a posição de um corpo é a especificação de seu lugar no espaço. A identificação da posição é feita a partir de um vetor, denominado vetor posição, que pode ser escrito em função de um sistema de coordenadas de um certo referencial. A unidade de medida da posição no Sistema Internacional de Unidades é o metro.
-    </p>
-    `);
-});
-define("document", ["require", "exports", "main", "types", "physicsObjects", "objectLI", "vector2", "propertyDescriptions"], function (require, exports, main_1, types_3, physicsObjects_1, objectLI_1, vector2_4, propertyDescriptions_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    objectLI_1 = __importDefault(objectLI_1);
     vector2_4 = __importDefault(vector2_4);
-    class DocumentElement {
-        constructor(selector, enabled) {
-            const query = document.querySelector(selector);
-            if (!query)
-                throw `Couldn't query select ${selector}`;
-            this.element = query;
-            this._enabled = enabled;
+    class Input {
+        constructor(canvasRenderer) {
+            this.canvasRenderer = canvasRenderer;
+            let canvas = canvasRenderer.context.canvas;
+            this.isMouseDown = false;
+            this.clickedPos = vector2_4.default.zero;
+            this.cameraPosOnMouseDown = vector2_4.default.zero;
+            this.mouseMoved = false;
+            this.camera = canvasRenderer.camera;
+            canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
+            canvas.addEventListener("mousemove", this.onMove.bind(this));
+            document.addEventListener("mouseup", this.onMouseUp.bind(this));
         }
-    }
-    exports.DocumentElement = DocumentElement;
-    class DocumentButton extends DocumentElement {
-        constructor(selector, enabled, onClick, buttonColor) {
-            super(selector, enabled);
-            this.onClick = onClick;
-            this.buttonColor = buttonColor;
-            const attributeValue = this.element.getAttribute("id");
-            this.element.setAttribute("button-name", attributeValue);
-            this.element.querySelectorAll("*").forEach(el => el.setAttribute("button-name", attributeValue));
+        onMouseDown(ev) {
+            this.isMouseDown = true;
+            this.mouseMoved = false;
+            this.clickedPos = new vector2_4.default(ev.offsetX, -ev.offsetY);
+            this.cameraPosOnMouseDown = this.camera.pos;
+            console.log("click");
         }
-        get enabled() {
-            return this._enabled;
-        }
-        set enabled(value) {
-            this._enabled = value;
-            this.element.setAttribute("class", (value) ? `${this.buttonColor} button` : `${this.buttonColor} inactive-button`);
-        }
-    }
-    exports.DocumentButton = DocumentButton;
-    exports.buttons = new Map();
-    exports.buttons.set(types_3.CurrentButtons.ResetButton, new DocumentButton("#reset-button", false, null, "dark-button"));
-    exports.buttons.set(types_3.CurrentButtons.FollowButton, new DocumentButton("#follow-button", false, null, "dark-button"));
-    exports.buttons.set(types_3.CurrentButtons.DestroyButton, new DocumentButton("#destroy-button", false, null, "dark-button"));
-    exports.buttons.set(types_3.CurrentButtons.PlayButton, new DocumentButton("#play-button", true, null, "dark-button"));
-    exports.buttons.set(types_3.CurrentButtons.CentralizeCamera, new DocumentButton("#centralize-camera", true, null, "white-button"));
-    exports.objectLIs = new Map();
-    exports.objectLIs.set(types_3.PhysicsObjectType.Solid, new objectLI_1.default("Sólido", "./assets/images/dwagao.png", function (canvasRenderer, ambient) {
-        new physicsObjects_1.Solid(canvasRenderer, ambient, canvasRenderer.camera.getWorldPosFromCanvas(new vector2_4.default(canvasRenderer.context.canvas.width / 2, canvasRenderer.context.canvas.height / 2)), new vector2_4.default(1, 1));
-    }));
-    class PropertyDescriptionInterface {
-        static setElementVisible(isVisible) {
-            PropertyDescriptionInterface.element.style.display = (isVisible) ? "flex" : "none";
-        }
-        static show(propertyKind) {
-            this.setElementVisible(true);
-            const description = propertyDescriptions_1.propertyDescriptions.get(propertyKind);
-            if (description)
-                this.element.querySelector("article").innerHTML = description;
-            else
-                this.hide();
-        }
-        static hide() {
-            this.setElementVisible(false);
-        }
-    }
-    PropertyDescriptionInterface.element = document.querySelector("#property-description-interface");
-    exports.PropertyDescriptionInterface = PropertyDescriptionInterface;
-    class DocumentUI {
-        constructor() {
-            this.domObjectUL = document.querySelector("#object-list");
-            this.domPropertyUL = document.querySelector("#property-list");
-            this.domPropertyH1 = this.domPropertyUL.parentElement.querySelector("h1");
-            if (!this.domObjectUL || !this.domPropertyUL || !this.domPropertyH1)
-                throw "Some elements are missing!";
-            this._propertiesEnabled = true;
-            this._objectCreatable = true;
-            this._selectedObject = null;
-            exports.buttons.get(types_3.CurrentButtons.DestroyButton).onClick = this.destroySelectedObject.bind(this);
-            exports.buttons.get(types_3.CurrentButtons.FollowButton).onClick = this.followSelectedObject.bind(this);
-            this.domObjectUL.addEventListener("click", e => this.createObject(e));
-            document.addEventListener("click", e => {
-                const buttonName = e.target.getAttribute("button-name");
-                if (buttonName) {
-                    this.onDocumentButtonClick(buttonName);
-                    return;
-                }
-                const propertyKind = e.target.getAttribute("property-kind");
-                if (propertyKind)
-                    this.onPropertyClick(parseInt(propertyKind));
-            });
-            exports.objectLIs.forEach(objectLI => this.domObjectUL.appendChild(objectLI.li));
-        }
-        get selectedObject() {
-            return this._selectedObject;
-        }
-        //propertiesEnabled: boolean
-        get propertiesEnabled() {
-            return this._propertiesEnabled;
-        }
-        set propertiesEnabled(value) {
-            if (!this._selectedObject)
+        onMove(ev) {
+            if (!this.isMouseDown)
                 return;
-            this._propertiesEnabled = value;
-            const physicsProperties = this._selectedObject.getProperty(types_3.PhysicsPropertyType.All);
-            if (physicsProperties) {
-                physicsProperties.forEach(objectProperty => {
-                    if (objectProperty.propertyLI)
-                        objectProperty.propertyLI.enabled = value;
-                });
+            let currentMousePos = new vector2_4.default(ev.offsetX, -ev.offsetY);
+            this.camera.pos = vector2_4.default.sum(this.cameraPosOnMouseDown, vector2_4.default.sub(this.clickedPos, currentMousePos));
+            if (!vector2_4.default.equals(this.cameraPosOnMouseDown, this.camera.pos)) {
+                this.mouseMoved = true;
+                this.camera.unfollowObject();
             }
         }
-        //objectCreatable: boolean
-        set objectCreatable(value) {
-            this._objectCreatable = value;
-            exports.objectLIs.forEach(objectLI => objectLI.enabled = value);
-        }
-        get objectCreatable() {
-            return this._objectCreatable;
-        }
-        //Methods
-        selectObject(object) {
-            console.log(`Selected ${object.name}`);
-            this._selectedObject = object;
-            while (this.domPropertyUL.firstChild)
-                this.domPropertyUL.removeChild(this.domPropertyUL.firstChild);
-            this.domPropertyH1.innerHTML = `Propriedades do ${object.name}`;
-            object.appendPropertyListItems(this.domPropertyUL, this.propertiesEnabled);
-            this.propertiesEnabled = this.propertiesEnabled;
-            const followButton = exports.buttons.get(types_3.CurrentButtons.FollowButton);
-            const destroyButton = exports.buttons.get(types_3.CurrentButtons.DestroyButton);
-            followButton.enabled = object.isFollowable;
-            followButton.element.innerHTML = (main_1.canvasRenderer.camera.objectBeingFollowed != this._selectedObject) ? "Seguir" : "Parar de seguir";
-            destroyButton.enabled = object.destroy != undefined && main_1.simulator.time == 0;
-        }
-        createObject(e) {
-            if (!this.objectCreatable)
+        onMouseUp(ev) {
+            if (!this.isMouseDown)
                 return;
-            const objectType = e.target.getAttribute("object-name");
-            if (!objectType)
-                return;
-            exports.objectLIs.forEach(objectLI => {
-                if (objectLI.name == objectType)
-                    objectLI.createObject(main_1.canvasRenderer, main_1.ambient);
-            });
-        }
-        destroySelectedObject() {
-            if (!this._selectedObject || !this._selectedObject.destroy)
-                return;
-            if (main_1.simulator.time != 0)
-                throw "Attempted to delete object in simulation!";
-            this._selectedObject.destroy();
-            this.selectObject(main_1.ambient);
-        }
-        followSelectedObject() {
-            if (!this._selectedObject || !this._selectedObject.isFollowable)
-                return;
-            const camera = main_1.canvasRenderer.camera;
-            if (camera.objectBeingFollowed != this._selectedObject)
-                camera.followObject(this._selectedObject);
-            else
-                camera.unfollowObject();
-        }
-        onDocumentButtonClick(buttonName) {
-            const buttonsArray = Array.from(exports.buttons);
-            const button = buttonsArray.find(el => { return el[1].element.getAttribute("button-name") == buttonName; })[1];
-            if (button.onClick)
-                button.onClick();
-        }
-        onPropertyClick(propertyKind) {
-            PropertyDescriptionInterface.show(propertyKind);
+            this.isMouseDown = false;
+            if (!this.mouseMoved) {
+                let clickedPos = new vector2_4.default(ev.offsetX, ev.offsetY);
+                let obj = main_1.ambient.getObjectOnPosition(clickedPos);
+                main_1.documentUI.selectObject((obj) ? obj : main_1.ambient);
+            }
         }
     }
-    exports.default = DocumentUI;
+    exports.default = Input;
 });
-define("simulator", ["require", "exports", "document", "main", "types"], function (require, exports, document_1, main_2, types_4) {
+define("simulator", ["require", "exports", "document", "main", "types"], function (require, exports, document_1, main_2, types_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Simulator {
@@ -590,8 +429,8 @@ define("simulator", ["require", "exports", "document", "main", "types"], functio
                 throw "time input, play button or reset button not found";
             this.domInput = queryInput;
             this.domInput.value = this._time.toFixed(2);
-            this.playButton = document_1.buttons.get(types_4.CurrentButtons.PlayButton);
-            this.resetButton = document_1.buttons.get(types_4.CurrentButtons.ResetButton);
+            this.playButton = document_1.buttons.get(types_2.CurrentButtons.PlayButton);
+            this.resetButton = document_1.buttons.get(types_2.CurrentButtons.ResetButton);
             this.domInput.addEventListener("change", () => {
                 if (this.isPlaying)
                     return;
@@ -614,7 +453,7 @@ define("simulator", ["require", "exports", "document", "main", "types"], functio
             main_2.documentUI.propertiesEnabled = value == 0;
             main_2.documentUI.objectCreatable = value == 0;
             this.resetButton.enabled = value > 0 && !this._isPlaying;
-            document_1.buttons.get(types_4.CurrentButtons.DestroyButton).enabled = value == 0 && main_2.documentUI.selectedObject != null && main_2.documentUI.selectedObject.isFollowable;
+            document_1.buttons.get(types_2.CurrentButtons.DestroyButton).enabled = value == 0 && main_2.documentUI.selectedObject != null && main_2.documentUI.selectedObject.isFollowable;
         }
         get isPlaying() {
             return this._isPlaying;
@@ -664,67 +503,20 @@ define("simulator", ["require", "exports", "document", "main", "types"], functio
     Simulator.pauseSrc = "./assets/images/pause.png";
     exports.default = Simulator;
 });
-define("input", ["require", "exports", "main", "vector2"], function (require, exports, main_3, vector2_5) {
+define("main", ["require", "exports", "ambient", "document", "input", "rendering", "simulator", "vector2"], function (require, exports, ambient_1, document_2, input_1, rendering_1, simulator_1, vector2_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    vector2_5 = __importDefault(vector2_5);
-    class Input {
-        constructor(canvasRenderer) {
-            this.canvasRenderer = canvasRenderer;
-            let canvas = canvasRenderer.context.canvas;
-            this.isMouseDown = false;
-            this.clickedPos = vector2_5.default.zero;
-            this.cameraPosOnMouseDown = vector2_5.default.zero;
-            this.mouseMoved = false;
-            this.camera = canvasRenderer.camera;
-            canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
-            canvas.addEventListener("mousemove", this.onMove.bind(this));
-            document.addEventListener("mouseup", this.onMouseUp.bind(this));
-        }
-        onMouseDown(ev) {
-            this.isMouseDown = true;
-            this.mouseMoved = false;
-            this.clickedPos = new vector2_5.default(ev.offsetX, -ev.offsetY);
-            this.cameraPosOnMouseDown = this.camera.pos;
-            console.log("click");
-        }
-        onMove(ev) {
-            if (!this.isMouseDown)
-                return;
-            let currentMousePos = new vector2_5.default(ev.offsetX, -ev.offsetY);
-            this.camera.pos = vector2_5.default.sum(this.cameraPosOnMouseDown, vector2_5.default.sub(this.clickedPos, currentMousePos));
-            if (!vector2_5.default.equals(this.cameraPosOnMouseDown, this.camera.pos)) {
-                this.mouseMoved = true;
-                this.camera.unfollowObject();
-            }
-        }
-        onMouseUp(ev) {
-            if (!this.isMouseDown)
-                return;
-            this.isMouseDown = false;
-            if (!this.mouseMoved) {
-                let clickedPos = new vector2_5.default(ev.offsetX, ev.offsetY);
-                let obj = main_3.ambient.getObjectOnPosition(clickedPos);
-                main_3.documentUI.selectObject((obj) ? obj : main_3.ambient);
-            }
-        }
-    }
-    exports.default = Input;
-});
-define("main", ["require", "exports", "document", "rendering", "ambient", "simulator", "input", "vector2"], function (require, exports, document_2, rendering_1, ambient_1, simulator_1, input_1, vector2_6) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    document_2 = __importDefault(document_2);
     ambient_1 = __importDefault(ambient_1);
-    simulator_1 = __importDefault(simulator_1);
+    document_2 = __importDefault(document_2);
     input_1 = __importDefault(input_1);
-    vector2_6 = __importDefault(vector2_6);
+    simulator_1 = __importDefault(simulator_1);
+    vector2_5 = __importDefault(vector2_5);
     let can = document.createElement('canvas');
     let ctx = can.getContext('2d');
     can.width = 500;
     can.height = 500;
     document.body.querySelector("#mid-menu>div").appendChild(can);
-    exports.canvasRenderer = new rendering_1.CanvasRenderer(ctx, vector2_6.default.zero, 100);
+    exports.canvasRenderer = new rendering_1.CanvasRenderer(ctx, vector2_5.default.zero, 100);
     exports.ambient = new ambient_1.default();
     exports.documentUI = new document_2.default();
     exports.documentUI.selectObject(exports.ambient);
@@ -734,7 +526,261 @@ define("main", ["require", "exports", "document", "rendering", "ambient", "simul
     new rendering_1.Grid(1, exports.canvasRenderer);
     exports.canvasRenderer.start();
 });
-define("rendering", ["require", "exports", "types", "main", "document", "vector2"], function (require, exports, types_5, main_4, document_3, vector2_7) {
+define("propertyDescriptions", ["require", "exports", "types"], function (require, exports, types_3) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.propertyDescriptions = new Map();
+    exports.propertyDescriptions.set(types_3.PhysicsPropertyType.ObjectPosition, `
+    <h1>
+        Posição
+    </h1>
+    <p>
+        Em física, a posição de um corpo é a especificação de seu lugar no espaço. A identificação da posição é feita a partir de um vetor, denominado vetor posição, que pode ser escrito em função de um sistema de coordenadas de um certo referencial. A unidade de medida da posição no Sistema Internacional de Unidades é o metro.
+    </p>
+    `);
+});
+define("selectable", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
+define("document", ["require", "exports", "main", "physicsObjects", "propertyDescriptions", "types", "vector2"], function (require, exports, main_3, physicsObjects_1, propertyDescriptions_1, types_4, vector2_6) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    vector2_6 = __importDefault(vector2_6);
+    class DocumentButton {
+        constructor(parent, id, kind, _enabled, onClick, buttonColor) {
+            this.id = id;
+            this.kind = kind;
+            this._enabled = _enabled;
+            this.onClick = onClick;
+            this.buttonColor = buttonColor;
+            this.element = document.createElement("button");
+            parent.appendChild(this.element);
+            this.element.setAttribute("id", id);
+            this.element.setAttribute("class", (this._enabled) ? `${this.buttonColor} button` : `${this.buttonColor} inactive-button`);
+            this.setButtonKindToDescendants();
+        }
+        setButtonKindToDescendants() {
+            this.element.setAttribute("button-kind", this.kind);
+            this.element.querySelectorAll("*").forEach(el => el.setAttribute("button-kind", this.kind));
+        }
+        setButtonIdToDescendants() {
+            this.element.setAttribute("button-id", this.id);
+            this.element.querySelectorAll("*").forEach(el => el.setAttribute("button-id", this.id));
+        }
+        get enabled() {
+            return this._enabled;
+        }
+        set enabled(value) {
+            this._enabled = value;
+            this.element.setAttribute("class", (value) ? `${this.buttonColor} button` : `${this.buttonColor} inactive-button`);
+        }
+    }
+    exports.DocumentButton = DocumentButton;
+    class MiscImageButton extends DocumentButton {
+        constructor(parent, id, thumbSrc, buttonColor, onClick, title) {
+            super(parent, id, types_4.DocumentButtonKind.MiscButton, true, (onClick) ? onClick : null, buttonColor);
+            if (title)
+                this.element.setAttribute("title", title);
+            const thumbImg = document.createElement("img");
+            thumbImg.src = thumbSrc;
+            this.element.appendChild(thumbImg);
+            this.setButtonIdToDescendants();
+            this.setButtonKindToDescendants();
+        }
+    }
+    exports.MiscImageButton = MiscImageButton;
+    class MiscTextButton extends DocumentButton {
+        constructor(parent, id, text, buttonColor, onClick, title) {
+            super(parent, id, types_4.DocumentButtonKind.MiscButton, true, (onClick) ? onClick : null, buttonColor);
+            this.element.innerHTML = text;
+            if (title)
+                this.element.setAttribute("title", title);
+        }
+    }
+    exports.MiscTextButton = MiscTextButton;
+    class CreateObjectButton extends DocumentButton {
+        constructor(name, thumbSrc, createObject) {
+            super(exports.documentElements.get("object-list"), `create-${name}-button`, types_4.DocumentButtonKind.CreateObjectButton, true, createObject, types_4.ButtonColor.Dark);
+            this.name = name;
+            const parent = this.element.parentElement;
+            const li = document.createElement("li");
+            li.appendChild(this.element);
+            parent.appendChild(li);
+            const thumbImg = document.createElement("img");
+            thumbImg.src = thumbSrc;
+            li.setAttribute("object-name", name);
+            li.querySelectorAll("*").forEach(el => el.setAttribute("object-name", name));
+            this.element.appendChild(thumbImg);
+            this.setButtonIdToDescendants();
+            this.setButtonKindToDescendants();
+        }
+        get enabled() {
+            return this._enabled;
+        }
+        set enabled(value) {
+            this.element.setAttribute("class", (!value) ? "dark-button inactive-button" : "dark-button button");
+        }
+    }
+    exports.CreateObjectButton = CreateObjectButton;
+    class PropertyDescriptionUI {
+        static setElementVisible(isVisible) {
+            this.element.style.display = (isVisible) ? "flex" : "none";
+        }
+        static show(propertyKind) {
+            this.setElementVisible(true);
+            const description = propertyDescriptions_1.propertyDescriptions.get(propertyKind);
+            if (description)
+                this.element.querySelector("article").innerHTML = description;
+            else
+                this.hide();
+        }
+        static hide() {
+            this.setElementVisible(false);
+        }
+    }
+    PropertyDescriptionUI.element = document.querySelector("#property-description-interface");
+    exports.PropertyDescriptionUI = PropertyDescriptionUI;
+    class ObjectCreationController {
+        static set objectCreatable(value) {
+            this._objectCreatable = value;
+            exports.objectCreationButtons.forEach(button => button.enabled = value);
+        }
+        static get objectCreatable() {
+            return this._objectCreatable;
+        }
+    }
+    ObjectCreationController._objectCreatable = true;
+    exports.ObjectCreationController = ObjectCreationController;
+    /**
+     * A map that contains various Elements in the application HTML document.
+     */
+    exports.documentElements = new Map();
+    exports.documentElements.set("header", document.querySelector("#buttons-header"));
+    exports.documentElements.set("object-interactor", document.querySelector("#object-interactor"));
+    exports.documentElements.set("property-list", document.querySelector("#property-list"));
+    exports.documentElements.set("simulation-controller-buttons", document.querySelector("#simulation-controller-buttons"));
+    exports.documentElements.set("object-list", document.querySelector("#object-list"));
+    exports.documentElements.set("property-description-interface", document.querySelector("#property-description-interface"));
+    /**
+     * A map that contains all of the buttons that creates objects
+     */
+    exports.objectCreationButtons = new Map();
+    exports.objectCreationButtons.set(types_4.PhysicsObjectType.Solid, new CreateObjectButton("Sólido", "./assets/images/dwagao.png", function (canvasRenderer, ambient) {
+        new physicsObjects_1.Solid(canvasRenderer, ambient, canvasRenderer.camera.getWorldPosFromCanvas(new vector2_6.default(canvasRenderer.context.canvas.width / 2, canvasRenderer.context.canvas.height / 2)), new vector2_6.default(1, 1));
+    }));
+    /**
+     * A map that contains all of the buttons that do various functions on the application
+     */
+    exports.miscButtons = new Map();
+    exports.miscButtons.set("play-button", new MiscImageButton(exports.documentElements.get("simulation-controller-buttons"), "play-button", "./assets/images/play.png", types_4.ButtonColor.Dark, undefined, "Iniciar simulação"));
+    exports.miscButtons.set("reset-button", new MiscTextButton(exports.documentElements.get("simulation-controller-buttons"), "reset-button", "t=0", types_4.ButtonColor.Dark, undefined, "Definir tempo igual a 0"));
+    exports.miscButtons.set("follow-button", new MiscTextButton(exports.documentElements.get("object-interactor"), "follow-button", "Seguir", types_4.ButtonColor.Dark));
+    exports.miscButtons.set("destroy-button", new MiscTextButton(exports.documentElements.get("object-interactor"), "destroy-button", "Destruir", types_4.ButtonColor.Dark));
+    exports.miscButtons.set("centralize-camera", new MiscImageButton(exports.documentElements.get("header"), "centralize-camera", "./assets/images/cameracenter.png", types_4.ButtonColor.White, undefined, "Posicionar câmera no centro do cenário"));
+    //Event listeners
+    document.addEventListener("click", e => {
+        const target = e.target;
+        const id = target.getAttribute("button-id");
+        let button = null;
+        switch (target.getAttribute("button-kind")) {
+            case types_4.DocumentButtonKind.MiscButton:
+                const miscArray = Array.from(exports.miscButtons);
+                button = miscArray.find(el => { return el[1].element.getAttribute("button-id") == id; })[1];
+                break;
+            case types_4.DocumentButtonKind.CreateObjectButton:
+                if (!ObjectCreationController.objectCreatable)
+                    return;
+                const objectCreationArray = Array.from(exports.objectCreationButtons);
+                button = objectCreationArray.find(el => { return el[1].element.getAttribute("button-id") == id; })[1];
+                break;
+            case types_4.DocumentButtonKind.PropertyButton:
+                const propertyKind = e.target.getAttribute("property-kind");
+                if (propertyKind)
+                    this.onPropertyClick(parseInt(propertyKind));
+                return;
+        }
+        if (button && button.onClick)
+            button.onClick();
+    });
+    //Configuration
+    exports.miscButtons.get("destory-button").onClick = function () {
+        if (!this._selectedObject || !this._selectedObject.destroy)
+            return;
+        if (main_3.simulator.time != 0)
+            throw "Attempted to delete object in simulation!";
+        this._selectedObject.destroy();
+        this.selectObject(main_3.ambient);
+    };
+    buttons.get(CurrentButtons.FollowButton).onClick = this.followSelectedObject.bind(this);
+    class old {
+        constructor() {
+            this.domObjectUL = document.querySelector("#object-list");
+            this.domPropertyUL = document.querySelector("#property-list");
+            this.domPropertyH1 = this.domPropertyUL.parentElement.querySelector("h1");
+            this._propertiesEnabled = true;
+            this._selectedObject = null;
+            objectLIs.forEach(objectLI => this.domObjectUL.appendChild(objectLI.li));
+        }
+        get selectedObject() {
+            return this._selectedObject;
+        }
+        //propertiesEnabled: boolean
+        get propertiesEnabled() {
+            return this._propertiesEnabled;
+        }
+        set propertiesEnabled(value) {
+            if (!this._selectedObject)
+                return;
+            this._propertiesEnabled = value;
+            const physicsProperties = this._selectedObject.getProperty(types_4.PhysicsPropertyType.All);
+            if (physicsProperties) {
+                physicsProperties.forEach(objectProperty => {
+                    if (objectProperty.propertyLI)
+                        objectProperty.propertyLI.enabled = value;
+                });
+            }
+        }
+        //Methods
+        selectObject(object) {
+            console.log(`Selected ${object.name}`);
+            this._selectedObject = object;
+            while (this.domPropertyUL.firstChild)
+                this.domPropertyUL.removeChild(this.domPropertyUL.firstChild);
+            this.domPropertyH1.innerHTML = `Propriedades do ${object.name}`;
+            this.propertiesEnabled = this.propertiesEnabled;
+            if (object.appendPropertyListItems)
+                object.appendPropertyListItems(this.domPropertyUL, this.propertiesEnabled);
+            const followButton = buttons.get(CurrentButtons.FollowButton);
+            const destroyButton = buttons.get(CurrentButtons.DestroyButton);
+            followButton.enabled = object.isFollowable;
+            followButton.element.innerHTML = (main_3.canvasRenderer.camera.objectBeingFollowed != this._selectedObject) ? "Seguir" : "Parar de seguir";
+            destroyButton.enabled = object.destroy != undefined && main_3.simulator.time == 0;
+        }
+        destroySelectedObject() {
+        }
+        followSelectedObject() {
+            if (!this._selectedObject || !this._selectedObject.isFollowable)
+                return;
+            const camera = main_3.canvasRenderer.camera;
+            if (camera.objectBeingFollowed != this._selectedObject)
+                camera.followObject(this._selectedObject);
+            else
+                camera.unfollowObject();
+        }
+        onDocumentButtonClick(buttonName) {
+            const buttonsArray = Array.from(buttons);
+            const button = buttonsArray.find(el => { return el[1].element.getAttribute("button-name") == buttonName; })[1];
+            if (button.onClick)
+                button.onClick();
+        }
+        onPropertyClick(propertyKind) {
+            PropertyDescriptionInterface.show(propertyKind);
+        }
+    }
+    exports.old = old;
+});
+define("rendering", ["require", "exports", "document", "main", "types", "vector2"], function (require, exports, document_3, main_4, types_5, vector2_7) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_7 = __importDefault(vector2_7);
@@ -908,7 +954,7 @@ define("rendering", ["require", "exports", "types", "main", "document", "vector2
     }
     exports.Grid = Grid;
 });
-define("physicsObjects", ["require", "exports", "types", "physicsProperties", "rendering", "vector2"], function (require, exports, types_6, PhysicsProperties, rendering_2, vector2_8) {
+define("physicsObjects", ["require", "exports", "physicsProperties", "rendering", "types", "vector2"], function (require, exports, PhysicsProperties, rendering_2, types_6, vector2_8) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     PhysicsProperties = __importStar(PhysicsProperties);
@@ -994,10 +1040,6 @@ define("ambient", ["require", "exports"], function (require, exports) {
         /* Selectable */
         get name() {
             return "Ambiente";
-        }
-        appendPropertyListItems(ul, enabled) {
-            let empty = [];
-            return empty;
         }
         getProperty() {
             return undefined;

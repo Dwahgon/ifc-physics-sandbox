@@ -1,8 +1,8 @@
-import {PhysicsPropertyType} from 'types';
-import PhysicsProperty, * as PhysicsProperties from 'physicsProperties';
-import {CanvasRenderer, Sprite} from 'rendering';
 import Ambient from 'ambient';
+import PhysicsProperty, * as PhysicsProperties from 'physicsProperties';
+import { CanvasRenderer, Sprite } from 'rendering';
 import Selectable from 'selectable';
+import { PhysicsPropertyType } from 'types';
 import Vector2 from 'vector2';
 
 export default abstract class PhysicsObject implements Selectable{

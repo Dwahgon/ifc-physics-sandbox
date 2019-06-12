@@ -1,8 +1,8 @@
-import {ObjectPosition} from 'physicsProperties';
+import { buttons } from 'document';
+import { documentUI } from 'main';
 import PhysicsObject from 'physicsObjects';
-import {PhysicsPropertyType, CurrentButtons} from 'types';
-import {documentUI, canvasRenderer as canvasRenderer} from 'main';
-import {buttons} from 'document';
+import { ObjectPosition } from 'physicsProperties';
+import { CurrentButtons, PhysicsPropertyType } from 'types';
 import Vector2 from 'vector2';
 
 export class CanvasRenderer{

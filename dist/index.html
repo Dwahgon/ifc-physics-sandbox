@@ -1,71 +1,80 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Projeto Integrador - IFC Campus Camboriú</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" type="text/css" media="screen" href="assets/style/main.css">
-        <script data-main="assets/scripts/main.js" src="assets/scripts/require.js"></script>
-    </head>
-    <body>
-        <header hidden>
-            <button class="button white-button" id="centralize-camera" title="Posicionar câmera no centro do cenário">
-                <img src="assets/images/cameracenter.png">
-            </button>
-        </header>
 
-        <div id="main-interface">
-            <div class="side-panel"> 
-                <div>
-                    <h1>
-                        Propriedades do ambiente
-                    </h1>
-                    
-                    <div id="properties-buttons">
-                        <button id="destroy-button" class="dark-button inactive-button" title="Destruir o objeto selecionado. Só é possível destruí-lo se t = 0!">Destruir</button>
-                        <button id="follow-button" class="dark-button inactive-button" title="Seguir o objeto selecionado.">Seguir</button>
-                    </div>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Projeto Integrador - IFC Campus Camboriú</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="assets/style/main.css">
+    <script data-main="assets/scripts/main.js" src="assets/scripts/require.js"></script>
+</head>
 
-                    <ul id="property-list">
-                    </ul>
+<body>
+    <header id="buttons-header">
+        <button class="button white-button" id="centralize-camera" title="Posicionar câmera no centro do cenário">
+            <img src="assets/images/cameracenter.png">
+        </button>
+    </header>
+
+    <div id="main-interface">
+        <div class="side-panel">
+            <div>
+                <h1>
+                    Propriedades do ambiente
+                </h1>
+
+                <div id="object-interactor">
+                    <button id="destroy-button" class="dark-button inactive-button"
+                        title="Destruir o objeto selecionado. Só é possível destruí-lo se t = 0!">Destruir</button>
+                    <button id="follow-button" class="dark-button inactive-button"
+                        title="Seguir o objeto selecionado.">Seguir</button>
                 </div>
-            </div>
 
-            <div id="mid-menu">
-                <div></div>
-                <div>
-                    <div>
+                <ul id="property-list">
+                </ul>
+            </div>
+        </div>
+
+        <div id="mid-menu">
+            <div></div>
+            <div>
+                <div id="simulation-controller">
+                    <div id="simulation-controller-buttons">
                         <button id="play-button" class="dark-button button" type="button" title="Iniciar a simulação">
                             <img src="assets/images/play.png"></img>
                         </button>
-                        <button id="reset-button" class="dark-button inactive-button" type="button" title="Restabeler simulação">t=0</button>
-                        <div>
-                            <span>t=</span>
-                            <input type="text">
-                        </div>
+                        <button id="reset-button" class="dark-button inactive-button" type="button"
+                            title="Restabeler simulação">t=0</button>
+                    </div>
+
+                    <div>
+                        <span>t=</span>
+                        <input type="text">
                     </div>
                 </div>
             </div>
-
-            <div class="side-panel">
-                <div>
-                    <h1>
-                        Objetos
-                    </h1>
-                    <ul id="object-list"></ul>
-                </div>
-            </div>
         </div>
 
-        <div id="property-description-interface" hidden>
+        <div class="side-panel">
             <div>
-                <article>
-
-                </article>
+                <h1>
+                    Objetos
+                </h1>
+                <ul id="object-list"></ul>
             </div>
         </div>
+    </div>
 
-        
-    </body>
+    <div id="property-description-interface" hidden>
+        <div>
+            <article>
+
+            </article>
+        </div>
+    </div>
+
+
+</body>
+
 </html>

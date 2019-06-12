@@ -1,6 +1,6 @@
-import DocumentUI, {DocumentButton, buttons as documentButtons} from 'document';
-import {documentUI, ambient} from 'main';
-import {CurrentButtons} from 'types';
+import DocumentUI, { buttons as documentButtons, DocumentButton } from 'document';
+import { ambient, documentUI } from 'main';
+import { CurrentButtons } from 'types';
 
 
 export default class Simulator {

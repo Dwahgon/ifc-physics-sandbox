@@ -1,5 +1,5 @@
-import {Camera, CanvasRenderer} from 'rendering';
-import {documentUI, ambient} from 'main';
+import { ambient, documentUI } from 'main';
+import { Camera, CanvasRenderer } from 'rendering';
 import Vector2 from 'vector2';
 
 export default class Input{

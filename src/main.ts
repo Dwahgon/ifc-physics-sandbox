@@ -1,8 +1,8 @@
-import DocumentUI from 'document';
-import {CanvasRenderer, Grid} from 'rendering';
 import Ambient from 'ambient';
-import Simulator from 'simulator';
+import DocumentUI from 'document';
 import Input from 'input';
+import { CanvasRenderer, Grid } from 'rendering';
+import Simulator from 'simulator';
 import Vector2 from 'vector2';
 
 let can = document.createElement('canvas');
