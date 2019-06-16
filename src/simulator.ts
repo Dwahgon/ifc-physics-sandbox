@@ -1,6 +1,5 @@
-import DocumentUI, { buttons as documentButtons, DocumentButton } from 'document';
-import { ambient, documentUI } from 'main';
-import { CurrentButtons } from 'types';
+import { ambient } from 'main';
+import { DocumentButton, miscButtons, ObjectSelectionController, ObjectCreationController } from './document';
 
 
 export default class Simulator {
@@ -13,7 +12,7 @@ export default class Simulator {
     private playButton: DocumentButton;
     private resetButton: DocumentButton;
 
-    constructor(documentUI: DocumentUI){
+    constructor(){
         this._time = 0;
         this._isPlaying = false;
         
@@ -25,8 +24,8 @@ export default class Simulator {
         
         this.domInput = <HTMLInputElement>queryInput;
         this.domInput.value = this._time.toFixed(2);
-        this.playButton = documentButtons.get(CurrentButtons.PlayButton)!;
-        this.resetButton = documentButtons.get(CurrentButtons.ResetButton)!;
+        this.playButton = miscButtons.get("play-button")!;
+        this.resetButton = miscButtons.get("reset-button")!;
 
         this.domInput.addEventListener("change", () => {
             if(this.isPlaying)
@@ -53,11 +52,11 @@ export default class Simulator {
         this._time = value;
         this.domInput.value = value.toFixed(2);
 
-        documentUI.propertiesEnabled = value == 0;
-        documentUI.objectCreatable = value == 0;
+        ObjectSelectionController.propertiesEnabled = value == 0;
+        ObjectCreationController.objectCreatable = value == 0;
 
         this.resetButton.enabled = value > 0 && !this._isPlaying;
-        documentButtons.get(CurrentButtons.DestroyButton)!.enabled = value == 0 && documentUI.selectedObject != null && documentUI.selectedObject.isFollowable;
+        miscButtons.get("destroy-button")!.enabled = value == 0 && ObjectSelectionController.selectedObject != null && ObjectSelectionController.selectedObject.isFollowable;
     }
 
     get isPlaying(){

@@ -27,7 +27,7 @@ export class DocumentButton {
         this.element.querySelectorAll("*").forEach(el => el.setAttribute("button-kind", this.kind));
     }
 
-    protected setButtonIdToDescendants(){
+    protected setButtonIdToDescendants() {
         this.element.setAttribute("button-id", this.id);
         this.element.querySelectorAll("*").forEach(el => el.setAttribute("button-id", this.id));
     }
@@ -66,6 +66,9 @@ export class MiscTextButton extends DocumentButton {
         this.element.innerHTML = text;
         if (title)
             this.element.setAttribute("title", title);
+
+        this.setButtonIdToDescendants();
+        this.setButtonKindToDescendants();
     }
 }
 
@@ -75,18 +78,16 @@ export class CreateObjectButton extends DocumentButton {
 
         const parent = this.element.parentElement!;
         const li = document.createElement("li");
-
-        li.appendChild(this.element);
-        parent.appendChild(li);
-
         const thumbImg = document.createElement("img");
+
+        li.setAttribute("title", `Criar um ${name.toLowerCase()}`);
+        
         thumbImg.src = thumbSrc;
-
-        li.setAttribute("object-name", name);
-        li.querySelectorAll("*").forEach(el => el.setAttribute("object-name", name));
-
+        
         this.element.appendChild(thumbImg);
-
+        parent.appendChild(li);
+        li.appendChild(this.element);
+        
         this.setButtonIdToDescendants();
         this.setButtonKindToDescendants();
     }
@@ -137,15 +138,84 @@ export abstract class ObjectCreationController {
 }
 
 /**
+ * Controlls the selection of Selectable objects
+ */
+export abstract class ObjectSelectionController {
+    private static _selectedObject: Selectable | null = null;
+    private static _propertiesEnabled: boolean = true;
+
+    /** 
+     * @returns the currently selected object
+     */
+    static get selectedObject() {
+        return this._selectedObject;
+    }
+
+    /**
+     * Selects an object, displaying it's properties in the properties list
+     * @param object the object to be selected
+     */
+    static selectObject(object: Selectable): void {
+        console.log(`Selected ${object.name}`);
+        const domPropertyUL = <HTMLUListElement>documentElements.get("property-list")!;
+        const domPropertyH1 = documentElements.get("property-list-title")!;
+
+        this._selectedObject = object;
+
+        while (domPropertyUL.firstChild)
+            domPropertyUL.removeChild(domPropertyUL.firstChild);
+
+        domPropertyH1.innerHTML = `Propriedades do ${object.name}`;
+
+        this.propertiesEnabled = this.propertiesEnabled;
+
+        if (object.appendPropertyListItems)
+            object.appendPropertyListItems(domPropertyUL, this.propertiesEnabled);
+
+        const followButton = miscButtons.get("follow-button");
+        const destroyButton = miscButtons.get("destroy-button");
+
+        followButton!.enabled = object.isFollowable;
+        followButton!.element.innerHTML = (canvasRenderer.camera.objectBeingFollowed != this._selectedObject) ? "Seguir" : "Parar de seguir";
+
+        destroyButton!.enabled = object.destroy != undefined && simulator.time == 0;
+    }
+
+    static get propertiesEnabled() {
+        return this._propertiesEnabled;
+    }
+
+    static set propertiesEnabled(value: boolean) {
+        if (!this._selectedObject)
+            return
+
+        this._propertiesEnabled = value;
+
+
+        const physicsProperties = <PhysicsProperty<any>[]>this._selectedObject.getProperty(PhysicsPropertyType.All);
+
+        if (physicsProperties) {
+            physicsProperties.forEach(objectProperty => {
+                if (objectProperty.propertyLI)
+                    objectProperty.propertyLI.enabled = value;
+            });
+        }
+    }
+}
+
+/**
  * A map that contains various Elements in the application HTML document.
  */
 export const documentElements = new Map<string, Element>();
 documentElements.set("header", document.querySelector("#buttons-header")!);
+documentElements.set("property-panel", document.querySelector(".side-panel:first-child > div")!);
 documentElements.set("object-interactor", document.querySelector("#object-interactor")!);
+documentElements.set("property-list-title", documentElements.get("property-panel")!.querySelector("h1")!);
 documentElements.set("property-list", document.querySelector("#property-list")!);
 documentElements.set("simulation-controller-buttons", document.querySelector("#simulation-controller-buttons")!);
 documentElements.set("object-list", document.querySelector("#object-list")!);
 documentElements.set("property-description-interface", document.querySelector("#property-description-interface")!);
+documentElements.set("property-description-header", documentElements.get("property-description-interface")!.querySelector("header")!);
 
 /**
  * A map that contains all of the buttons that creates objects
@@ -173,141 +243,60 @@ miscButtons.set("reset-button", new MiscTextButton(documentElements.get("simulat
 miscButtons.set("follow-button", new MiscTextButton(documentElements.get("object-interactor")!, "follow-button", "Seguir", ButtonColor.Dark));
 miscButtons.set("destroy-button", new MiscTextButton(documentElements.get("object-interactor")!, "destroy-button", "Destruir", ButtonColor.Dark));
 miscButtons.set("centralize-camera", new MiscImageButton(documentElements.get("header")!, "centralize-camera", "./assets/images/cameracenter.png", ButtonColor.White, undefined, "Posicionar câmera no centro do cenário"));
+miscButtons.set("close-property-description", new MiscImageButton(documentElements.get("property-description-header")!, "close-property-description", "./assets/images/closeicon.png", ButtonColor.White));
 
 //Event listeners
-
 document.addEventListener("click", e => {
     const target = (<HTMLElement>e.target);
-
-    const id = target.getAttribute("button-id");
-    let button: DocumentButton | null = null;
-
+    const buttonId = target.getAttribute("button-id");
+    
     switch (target.getAttribute("button-kind")) {
         case DocumentButtonKind.MiscButton:
-            const miscArray = Array.from(miscButtons);
-            button = miscArray.find(el => { return el[1].element.getAttribute("button-id") == id })![1];
+            const button = miscButtons.get(buttonId!);
+            if (button && button.onClick)
+                button.onClick();
+        
             break;
         case DocumentButtonKind.CreateObjectButton:
             if (!ObjectCreationController.objectCreatable)
                 return;
 
             const objectCreationArray = Array.from(objectCreationButtons);
-            button = objectCreationArray.find(el => { return el[1].element.getAttribute("button-id") == id })![1];
+            const objectButton = objectCreationArray.find(el => { return el[1].element.getAttribute("button-id") == buttonId })![1];
+
+            objectButton.onClick!(canvasRenderer, ambient);
             break;
         case DocumentButtonKind.PropertyButton:
             const propertyKind: string | null = (<HTMLDivElement>e.target)!.getAttribute("property-kind");
             if (propertyKind)
-                this.onPropertyClick(parseInt(propertyKind));
+                PropertyDescriptionUI.show(parseInt(propertyKind));
             return;
     }
 
-    if(button && button.onClick)
-        button.onClick();
+    
 });
 
 //Configuration
-miscButtons.get("destory-button")!.onClick = function(){
-    if (!this._selectedObject || !this._selectedObject.destroy)
-            return;
+miscButtons.get("destroy-button")!.onClick = function () {
+    const selectedObject = ObjectSelectionController.selectedObject;
+    if (!selectedObject || !selectedObject.destroy || simulator.time != 0)
+        return;
 
-        if (simulator.time != 0)
-            throw "Attempted to delete object in simulation!"
-
-        this._selectedObject.destroy();
-        this.selectObject(ambient);
+    selectedObject.destroy();
+    ObjectSelectionController.selectObject(ambient);
 };
-buttons.get(CurrentButtons.FollowButton)!.onClick = this.followSelectedObject.bind(this);
 
+miscButtons.get("follow-button")!.onClick = function () {
+    const selectedObject = ObjectSelectionController.selectedObject;
+    if (!selectedObject || !selectedObject.isFollowable)
+        return;
 
-export abstract class old {
-    private domObjectUL: HTMLUListElement = <HTMLUListElement>document.querySelector("#object-list");
-    private domPropertyUL: HTMLUListElement = <HTMLUListElement>document.querySelector("#property-list");
-    private domPropertyH1: HTMLHeadingElement = <HTMLHeadingElement>this.domPropertyUL.parentElement!.querySelector("h1");
-    private _propertiesEnabled: boolean = true;
+    const camera = canvasRenderer.camera;
 
-    private _selectedObject: Selectable | null = null;
-
-    constructor() {
-        
-
-        objectLIs.forEach(objectLI => this.domObjectUL.appendChild(objectLI.li));
-    }
-
-    get selectedObject() {
-        return this._selectedObject;
-    }
-
-    //propertiesEnabled: boolean
-
-    get propertiesEnabled() {
-        return this._propertiesEnabled;
-    }
-
-    set propertiesEnabled(value: boolean) {
-        if (!this._selectedObject)
-            return
-
-        this._propertiesEnabled = value;
-
-
-        const physicsProperties = <PhysicsProperty<any>[]>this._selectedObject.getProperty(PhysicsPropertyType.All);
-
-        if (physicsProperties) {
-            physicsProperties.forEach(objectProperty => {
-                if (objectProperty.propertyLI)
-                    objectProperty.propertyLI.enabled = value;
-            });
-        }
-    }
-    //Methods
-
-    selectObject(object: Selectable): void {
-        console.log(`Selected ${object.name}`);
-        this._selectedObject = object;
-
-        while (this.domPropertyUL.firstChild)
-            this.domPropertyUL.removeChild(this.domPropertyUL.firstChild);
-        this.domPropertyH1.innerHTML = `Propriedades do ${object.name}`;
-
-        this.propertiesEnabled = this.propertiesEnabled;
-
-        if (object.appendPropertyListItems)
-            object.appendPropertyListItems(this.domPropertyUL, this.propertiesEnabled);
-
-        const followButton = buttons.get(CurrentButtons.FollowButton);
-        const destroyButton = buttons.get(CurrentButtons.DestroyButton);
-
-        followButton!.enabled = object.isFollowable;
-        followButton!.element.innerHTML = (canvasRenderer.camera.objectBeingFollowed != this._selectedObject) ? "Seguir" : "Parar de seguir";
-
-        destroyButton!.enabled = object.destroy != undefined && simulator.time == 0;
-    }
-
-    private destroySelectedObject(): void {
-        
-    }
-
-    private followSelectedObject(): void {
-        if (!this._selectedObject || !this._selectedObject.isFollowable)
-            return;
-
-        const camera = canvasRenderer.camera;
-
-        if (camera.objectBeingFollowed != this._selectedObject)
-            camera.followObject(<PhysicsObject>this._selectedObject);
-        else
-            camera.unfollowObject();
-    }
-
-    private onDocumentButtonClick(buttonName: string) {
-        const buttonsArray = Array.from(buttons);
-        const button: DocumentButton = buttonsArray.find(el => { return el[1].element.getAttribute("button-name") == buttonName })![1];
-        if (button.onClick)
-            button.onClick();
-    }
-
-    private onPropertyClick(propertyKind: PhysicsPropertyType) {
-        PropertyDescriptionInterface.show(propertyKind);
-    }
+    if (camera.objectBeingFollowed != selectedObject)
+        camera.followObject(<PhysicsObject>selectedObject);
+    else
+        camera.unfollowObject();
 }
 
+miscButtons.get("close-property-description")!.onClick = PropertyDescriptionUI.hide.bind(PropertyDescriptionUI);

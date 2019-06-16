@@ -1,6 +1,7 @@
-import { ambient, documentUI } from 'main';
+import { ambient } from 'main';
 import { Camera, CanvasRenderer } from 'rendering';
 import Vector2 from 'vector2';
+import { ObjectSelectionController } from './document';
 
 export default class Input{
     private isMouseDown: boolean;
@@ -9,7 +10,7 @@ export default class Input{
     private mouseMoved: boolean;
     private camera: Camera;
 
-    constructor(private readonly canvasRenderer: CanvasRenderer){
+    constructor(canvasRenderer: CanvasRenderer){
         let canvas = canvasRenderer.context.canvas;
 
         this.isMouseDown = false;
@@ -54,7 +55,7 @@ export default class Input{
             let clickedPos = new Vector2(ev.offsetX, ev.offsetY);
             let obj = ambient.getObjectOnPosition(clickedPos);
 
-            documentUI.selectObject((obj) ? obj : ambient);
+            ObjectSelectionController.selectObject((obj) ? obj : ambient);
         }
     }
 }

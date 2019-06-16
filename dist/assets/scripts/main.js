@@ -100,106 +100,6 @@ define("genericCalulator", ["require", "exports", "vector2"], function (require,
     NumberCalculator.instance = new NumberCalculator();
     exports.NumberCalculator = NumberCalculator;
 });
-define("propertyLI", ["require", "exports", "vector2"], function (require, exports, vector2_2) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    vector2_2 = __importDefault(vector2_2);
-    class PropertyLI {
-        constructor(property, title, propertyUnit, regExp, initialValue) {
-            this.property = property;
-            this.regExp = regExp;
-            this.ul = document.querySelector("#property-list");
-            this.li = document.createElement("li");
-            this.input = document.createElement("input");
-            this.domNameLabel = document.createElement("label");
-            this.domUnitLabel = document.createElement("label");
-            this.domNameLabel.innerHTML = title;
-            this.domUnitLabel.innerHTML = propertyUnit;
-            this.li.appendChild(this.domNameLabel);
-            this.li.appendChild(this.input);
-            this.li.appendChild(this.domUnitLabel);
-            this.input.setAttribute("type", "text");
-            this.domNameLabel.setAttribute("property-kind", this.property.kind.toString());
-            this.lastValue = "";
-            this.setValue(initialValue);
-            this.input.addEventListener("change", this.onInputChanged.bind(this));
-            this.enabled = this.property.changeable;
-        }
-        setValue(value) {
-            const formattedValue = this.formatValue(value);
-            this.input.value = formattedValue;
-            this.lastValue = formattedValue;
-        }
-        onInputChanged() {
-            let match = this.input.value.match(this.regExp);
-            if (!match) {
-                this.resetToLastString();
-                return;
-            }
-            match = match.filter(el => { return el != ""; });
-            let matchResult = this.processMatch(match);
-            if (!matchResult) {
-                this.resetToLastString();
-                return;
-            }
-            this.property.initialValue = matchResult;
-        }
-        formatValue(value) {
-            throw "formatValue(value: T) has not been implemented";
-        }
-        processMatch(match) {
-            throw "processMatch(match: RegExpMatchArray): T has not been implemented";
-        }
-        resetToLastString() {
-            this.input.value = this.lastValue;
-        }
-        appendToPropertyUL() {
-            this.ul.appendChild(this.li);
-        }
-        set enabled(value) {
-            const isDisabled = !value || !this.property.changeable;
-            this.input.disabled = isDisabled;
-            this.li.style.backgroundColor = (isDisabled) ? "#474747" : "#282828";
-            const textColor = (isDisabled) ? "#a0a0a0" : "#ffffff";
-            this.input.style.color = textColor;
-            this.domNameLabel.style.color = textColor;
-            this.domUnitLabel.style.color = textColor;
-        }
-    }
-    exports.default = PropertyLI;
-    class PropertyLIVector2 extends PropertyLI {
-        constructor(property, title, propertyUnit, initialValue) {
-            super(property, title, propertyUnit, /\-?\d*\.?\d*/g, initialValue);
-        }
-        formatValue(value) {
-            return `(${value.x.toFixed(2)}, ${value.y.toFixed(2)})`;
-        }
-        processMatch(match) {
-            if (!match[0] || !match[1]) {
-                this.resetToLastString();
-                return undefined;
-            }
-            return new vector2_2.default(Number(match[0]), Number(match[1]));
-        }
-    }
-    exports.PropertyLIVector2 = PropertyLIVector2;
-    class PropertyLINumber extends PropertyLI {
-        constructor(property, title, propertyUnit, initialValue) {
-            super(property, title, propertyUnit, /\-?\d*\.?\d*/i, initialValue);
-        }
-        formatValue(value) {
-            return value.toFixed(2);
-        }
-        processMatch(match) {
-            if (!match[0]) {
-                this.resetToLastString();
-                return;
-            }
-            return Number(match[0]);
-        }
-    }
-    exports.PropertyLINumber = PropertyLINumber;
-});
 define("types", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -229,157 +129,190 @@ define("types", ["require", "exports"], function (require, exports) {
         PhysicsObjectType[PhysicsObjectType["Solid"] = 0] = "Solid";
     })(PhysicsObjectType = exports.PhysicsObjectType || (exports.PhysicsObjectType = {}));
 });
-define("physicsProperties", ["require", "exports", "genericCalulator", "types", "vector2", "propertyLI"], function (require, exports, genericCalulator_1, types_1, vector2_3, propertyLI_1) {
+define("rendering", ["require", "exports", "types", "vector2", "document"], function (require, exports, types_1, vector2_2, document_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    vector2_2 = __importDefault(vector2_2);
+    class CanvasRenderer {
+        constructor(context, cameraPos, cameraZoom) {
+            this.context = context;
+            this.isRunning = false;
+            this.functions = [];
+            this.camera = new Camera(this, cameraPos, cameraZoom);
+        }
+        start() {
+            this.isRunning = true;
+            this.render();
+        }
+        stop() {
+            this.isRunning = false;
+        }
+        add(fn) {
+            this.functions.push(fn);
+        }
+        remove(fn) {
+            const index = this.functions.indexOf(fn);
+            if (index > -1)
+                this.functions.splice(index, 1);
+        }
+        render() {
+            const cam = this.camera;
+            const con = this.context;
+            const canvas = this.context.canvas;
+            const canvasParent = canvas.parentElement;
+            canvas.height = canvasParent.offsetHeight;
+            canvas.width = canvasParent.offsetWidth;
+            this.functions.forEach(fn => fn(cam, con));
+            if (this.isRunning)
+                window.requestAnimationFrame(this.render.bind(this));
+        }
+    }
+    exports.CanvasRenderer = CanvasRenderer;
+    class Camera {
+        constructor(canvasRenderer, _pos, zoom) {
+            this.canvasRenderer = canvasRenderer;
+            this._pos = _pos;
+            this.zoom = zoom;
+            this.targetObjectPosition = null;
+            document_1.miscButtons.get("centralize-camera").onClick = this.centralize.bind(this);
+            let canvas = this.canvasRenderer.context.canvas;
+            canvas.addEventListener("wheel", this.onWheelEvent.bind(this));
+        }
+        getWorldPosFromCanvas(canvasPos) {
+            const canvas = this.canvasRenderer.context.canvas;
+            const posX = ((canvas.width / 2) - this.pos.x - canvasPos.x) / -this.zoom;
+            const posY = ((canvas.height / 2) + this.pos.y - canvasPos.y) / this.zoom;
+            return new vector2_2.default(posX, posY);
+        }
+        getCanvasPosFromWorld(worldPos) {
+            const canvas = this.canvasRenderer.context.canvas;
+            const posX = (canvas.width / 2) + worldPos.x * this.zoom - this.pos.x;
+            const posY = (canvas.height / 2) - worldPos.y * this.zoom + this.pos.y;
+            return new vector2_2.default(posX, posY);
+        }
+        get pos() {
+            if (this.targetObjectPosition) {
+                return vector2_2.default.mult(this.targetObjectPosition.value, this.zoom);
+            }
+            return this._pos;
+        }
+        set pos(value) {
+            if (this.targetObjectPosition)
+                this.unfollowObject();
+            this._pos = value;
+        }
+        get objectBeingFollowed() {
+            if (this.targetObjectPosition)
+                return this.targetObjectPosition.object;
+            return null;
+        }
+        followObject(object) {
+            if (!object.isFollowable)
+                throw "Attemting to follow an unfollowable object";
+            this.targetObjectPosition = object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
+            this.changeButtonText(false);
+        }
+        unfollowObject() {
+            this.changeButtonText(true);
+            this.targetObjectPosition = null;
+        }
+        centralize() {
+            this.pos = vector2_2.default.zero;
+        }
+        changeButtonText(isFollowing) {
+            const followButton = document_1.miscButtons.get("follow-button");
+            if (document_1.ObjectSelectionController.selectedObject == this.objectBeingFollowed)
+                followButton.element.innerHTML = (isFollowing) ? "Seguir" : "Parar de seguir";
+        }
+        onWheelEvent(ev) {
+            this.zoom += ev.deltaY / -100;
+            if (this.zoom < 0.1)
+                this.zoom = 0.1;
+            else if (this.zoom > 200)
+                this.zoom = 200;
+        }
+    }
+    exports.Camera = Camera;
+    class Sprite {
+        constructor(renderer, imageSrc, copyPosition, copySize, drawPosition, drawSize) {
+            this.renderer = renderer;
+            this.copyPosition = copyPosition;
+            this.copySize = copySize;
+            this.drawPosition = drawPosition;
+            const imgElement = document.createElement('img');
+            imgElement.src = imageSrc;
+            this.image = imgElement;
+            this.drawSize = drawSize;
+            this.drawFunction = this.draw.bind(this);
+            renderer.add(this.drawFunction);
+        }
+        getZoomedSize(zoom) {
+            return vector2_2.default.mult(this.drawSize, zoom);
+        }
+        draw() {
+            // @ts-ignore
+            this.renderer.context.drawImage(this.image, ...this.copyPosition.toArray(), ...this.copySize.toArray(), ...this.getPositionInCanvas().toArray(), ...this.getZoomedSize(this.renderer.camera.zoom).toArray());
+        }
+        stopDrawing() {
+            this.renderer.remove(this.drawFunction);
+        }
+        getPositionInCanvas() {
+            const camera = this.renderer.camera;
+            return vector2_2.default.sub(camera.getCanvasPosFromWorld(this.drawPosition), vector2_2.default.div(this.getZoomedSize(camera.zoom), 2));
+        }
+        positionIsInsideSprite(pos) {
+            const posInCan = this.getPositionInCanvas();
+            const cam = this.renderer.camera;
+            if (pos.x > posInCan.x && pos.x < posInCan.x + this.getZoomedSize(cam.zoom).x && pos.y > posInCan.y && pos.y < posInCan.y + this.getZoomedSize(cam.zoom).y)
+                return true;
+            return false;
+        }
+    }
+    exports.Sprite = Sprite;
+    class Grid {
+        constructor(gridSize, canvasRenderer) {
+            this.gridSize = gridSize;
+            this.canvasRenderer = canvasRenderer;
+            this.canvasRenderer.add(this.draw.bind(this));
+        }
+        draw() {
+            let ctx = this.canvasRenderer.context;
+            let canvas = ctx.canvas;
+            let camera = this.canvasRenderer.camera;
+            let startPos = this.canvasRenderer.camera.getWorldPosFromCanvas(new vector2_2.default(0, 0));
+            let finishPos = this.canvasRenderer.camera.getWorldPosFromCanvas(new vector2_2.default(canvas.width, canvas.height));
+            let startX = Math.ceil(startPos.x / this.gridSize) * this.gridSize;
+            let startY = Math.floor(startPos.y / this.gridSize) * this.gridSize;
+            for (let i = startX; i < finishPos.x; i += this.gridSize) {
+                let x = (canvas.width / 2) + i * camera.zoom - camera.pos.x;
+                ctx.strokeStyle = (i == 0) ? "green" : "gray";
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = startY; i > finishPos.y; i -= this.gridSize) {
+                let y = (canvas.height / 2) - i * camera.zoom + camera.pos.y;
+                ctx.strokeStyle = (i == 0) ? "red" : "gray";
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+    }
+    exports.Grid = Grid;
+});
+define("input", ["require", "exports", "main", "vector2", "document"], function (require, exports, main_1, vector2_3, document_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_3 = __importDefault(vector2_3);
-    class PhysicsProperty {
-        constructor(kind, changeable, object, iValue, oValue, genericCalculator) {
-            this.kind = kind;
-            this.changeable = changeable;
-            this.object = object;
-            this.iValue = iValue;
-            this.oValue = oValue;
-            this.genericCalculator = genericCalculator;
-            this.propertyLI = null;
-            this.active = true;
-            this.onValueChangedCallbacks = [];
-        }
-        get initialValue() {
-            return this.iValue;
-        }
-        set initialValue(value) {
-            this.iValue = value;
-            this.propertyLI.setValue(this.value);
-            this.onValueChangedCallbacks.forEach(callback => callback());
-        }
-        get value() {
-            return this.genericCalculator.sum(this.iValue, this.oValue);
-        }
-        set value(value) {
-            this.oValue = this.genericCalculator.sub(value, this.iValue);
-            this.propertyLI.setValue(this.value);
-            this.onValueChangedCallbacks.forEach(callback => callback());
-        }
-        simulateStep(step) {
-        }
-        reset() {
-            this.value = this.initialValue;
-        }
-    }
-    exports.default = PhysicsProperty;
-    class ObjectPosition extends PhysicsProperty {
-        constructor(initialPosition, object) {
-            super(types_1.PhysicsPropertyType.ObjectPosition, true, object, initialPosition, vector2_3.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "pos<sub>(x, y)</sub>", "m, m", initialPosition);
-        }
-        updateSpritePosition() {
-            this.object.sprite.drawPosition = this.value;
-        }
-        set initialValue(value) {
-            super.initialValue = value;
-            this.updateSpritePosition();
-        }
-        get initialValue() {
-            return super.initialValue;
-        }
-        get value() {
-            return super.value;
-        }
-        set value(value) {
-            super.value = value;
-            this.updateSpritePosition();
-        }
-    }
-    exports.ObjectPosition = ObjectPosition;
-    class ObjectSize extends PhysicsProperty {
-        constructor(initialSize, object) {
-            super(types_1.PhysicsPropertyType.ObjectSize, true, object, initialSize, vector2_3.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "tam<sub>(x, y)</sub>", "m, m", initialSize);
-        }
-        updateSpriteSize() {
-            this.object.sprite.drawSize = this.value;
-        }
-        set initialValue(value) {
-            super.initialValue = value;
-            this.updateSpriteSize();
-            // Change area
-            const objArea = this.object.getProperty(types_1.PhysicsPropertyType.ObjectArea);
-            if (objArea)
-                objArea.initialValue = this.value.x * this.value.y;
-        }
-        get initialValue() {
-            return super.initialValue;
-        }
-        get value() {
-            return super.value;
-        }
-        set value(value) {
-            super.value = value;
-            this.updateSpriteSize();
-        }
-    }
-    exports.ObjectSize = ObjectSize;
-    class ObjectArea extends PhysicsProperty {
-        constructor(object) {
-            super(types_1.PhysicsPropertyType.ObjectArea, false, object, 0, 0, genericCalulator_1.NumberCalculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLINumber(this, "área", "m<sup>2</sup>", 0);
-            const objectSize = object.getProperty(types_1.PhysicsPropertyType.ObjectSize);
-            const sizeVector2 = (objectSize) ? objectSize.initialValue : vector2_3.default.zero;
-            this.initialValue = sizeVector2.x * sizeVector2.y;
-        }
-    }
-    exports.ObjectArea = ObjectArea;
-    class ObjectVelocity extends PhysicsProperty {
-        constructor(object) {
-            super(types_1.PhysicsPropertyType.ObjectVelocity, true, object, vector2_3.default.zero, vector2_3.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "velocidade", "<sup>m</sup>&frasl;<sub>s</sub>, <sup>m</sup>&frasl;<sub>s</sub>", vector2_3.default.zero);
-        }
-        simulateStep(step) {
-            const displacement = vector2_3.default.mult(this.value, step);
-            const objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
-            const objectDisplacement = this.object.getProperty(types_1.PhysicsPropertyType.ObjectDisplacement);
-            //add displacement to objectdisplacement
-            if (objectDisplacement)
-                objectDisplacement.value += vector2_3.default.distance(vector2_3.default.zero, displacement);
-            //displace object
-            if (objectPosition)
-                objectPosition.value = vector2_3.default.sum(displacement, objectPosition.value);
-        }
-    }
-    exports.ObjectVelocity = ObjectVelocity;
-    class ObjectDisplacement extends PhysicsProperty {
-        constructor(object) {
-            super(types_1.PhysicsPropertyType.ObjectDisplacement, false, object, 0, 0, genericCalulator_1.NumberCalculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLINumber(this, "deslocamento", "m", 0);
-        }
-    }
-    exports.ObjectDisplacement = ObjectDisplacement;
-    class ObjectAcceleration extends PhysicsProperty {
-        constructor(object) {
-            super(types_1.PhysicsPropertyType.ObjectAcceleration, true, object, vector2_3.default.zero, vector2_3.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue);
-        }
-        simulateStep(step) {
-            const objectVel = this.object.getProperty(types_1.PhysicsPropertyType.ObjectVelocity);
-            const velDisplacement = vector2_3.default.mult(this.value, step);
-            if (objectVel)
-                objectVel.value = vector2_3.default.sum(velDisplacement, objectVel.value);
-        }
-    }
-    exports.ObjectAcceleration = ObjectAcceleration;
-});
-define("input", ["require", "exports", "main", "vector2"], function (require, exports, main_1, vector2_4) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    vector2_4 = __importDefault(vector2_4);
     class Input {
         constructor(canvasRenderer) {
-            this.canvasRenderer = canvasRenderer;
             let canvas = canvasRenderer.context.canvas;
             this.isMouseDown = false;
-            this.clickedPos = vector2_4.default.zero;
-            this.cameraPosOnMouseDown = vector2_4.default.zero;
+            this.clickedPos = vector2_3.default.zero;
+            this.cameraPosOnMouseDown = vector2_3.default.zero;
             this.mouseMoved = false;
             this.camera = canvasRenderer.camera;
             canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
@@ -389,16 +322,16 @@ define("input", ["require", "exports", "main", "vector2"], function (require, ex
         onMouseDown(ev) {
             this.isMouseDown = true;
             this.mouseMoved = false;
-            this.clickedPos = new vector2_4.default(ev.offsetX, -ev.offsetY);
+            this.clickedPos = new vector2_3.default(ev.offsetX, -ev.offsetY);
             this.cameraPosOnMouseDown = this.camera.pos;
             console.log("click");
         }
         onMove(ev) {
             if (!this.isMouseDown)
                 return;
-            let currentMousePos = new vector2_4.default(ev.offsetX, -ev.offsetY);
-            this.camera.pos = vector2_4.default.sum(this.cameraPosOnMouseDown, vector2_4.default.sub(this.clickedPos, currentMousePos));
-            if (!vector2_4.default.equals(this.cameraPosOnMouseDown, this.camera.pos)) {
+            let currentMousePos = new vector2_3.default(ev.offsetX, -ev.offsetY);
+            this.camera.pos = vector2_3.default.sum(this.cameraPosOnMouseDown, vector2_3.default.sub(this.clickedPos, currentMousePos));
+            if (!vector2_3.default.equals(this.cameraPosOnMouseDown, this.camera.pos)) {
                 this.mouseMoved = true;
                 this.camera.unfollowObject();
             }
@@ -408,19 +341,19 @@ define("input", ["require", "exports", "main", "vector2"], function (require, ex
                 return;
             this.isMouseDown = false;
             if (!this.mouseMoved) {
-                let clickedPos = new vector2_4.default(ev.offsetX, ev.offsetY);
+                let clickedPos = new vector2_3.default(ev.offsetX, ev.offsetY);
                 let obj = main_1.ambient.getObjectOnPosition(clickedPos);
-                main_1.documentUI.selectObject((obj) ? obj : main_1.ambient);
+                document_2.ObjectSelectionController.selectObject((obj) ? obj : main_1.ambient);
             }
         }
     }
     exports.default = Input;
 });
-define("simulator", ["require", "exports", "document", "main", "types"], function (require, exports, document_1, main_2, types_2) {
+define("simulator", ["require", "exports", "main", "document"], function (require, exports, main_2, document_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Simulator {
-        constructor(documentUI) {
+        constructor() {
             this._time = 0;
             this._isPlaying = false;
             const bottomBar = document.querySelector("#mid-menu>div:last-child");
@@ -429,8 +362,8 @@ define("simulator", ["require", "exports", "document", "main", "types"], functio
                 throw "time input, play button or reset button not found";
             this.domInput = queryInput;
             this.domInput.value = this._time.toFixed(2);
-            this.playButton = document_1.buttons.get(types_2.CurrentButtons.PlayButton);
-            this.resetButton = document_1.buttons.get(types_2.CurrentButtons.ResetButton);
+            this.playButton = document_3.miscButtons.get("play-button");
+            this.resetButton = document_3.miscButtons.get("reset-button");
             this.domInput.addEventListener("change", () => {
                 if (this.isPlaying)
                     return;
@@ -450,10 +383,10 @@ define("simulator", ["require", "exports", "document", "main", "types"], functio
         set time(value) {
             this._time = value;
             this.domInput.value = value.toFixed(2);
-            main_2.documentUI.propertiesEnabled = value == 0;
-            main_2.documentUI.objectCreatable = value == 0;
+            document_3.ObjectSelectionController.propertiesEnabled = value == 0;
+            document_3.ObjectCreationController.objectCreatable = value == 0;
             this.resetButton.enabled = value > 0 && !this._isPlaying;
-            document_1.buttons.get(types_2.CurrentButtons.DestroyButton).enabled = value == 0 && main_2.documentUI.selectedObject != null && main_2.documentUI.selectedObject.isFollowable;
+            document_3.miscButtons.get("destroy-button").enabled = value == 0 && document_3.ObjectSelectionController.selectedObject != null && document_3.ObjectSelectionController.selectedObject.isFollowable;
         }
         get isPlaying() {
             return this._isPlaying;
@@ -503,34 +436,31 @@ define("simulator", ["require", "exports", "document", "main", "types"], functio
     Simulator.pauseSrc = "./assets/images/pause.png";
     exports.default = Simulator;
 });
-define("main", ["require", "exports", "ambient", "document", "input", "rendering", "simulator", "vector2"], function (require, exports, ambient_1, document_2, input_1, rendering_1, simulator_1, vector2_5) {
+define("main", ["require", "exports", "ambient", "input", "rendering", "simulator", "vector2"], function (require, exports, ambient_1, input_1, rendering_1, simulator_1, vector2_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     ambient_1 = __importDefault(ambient_1);
-    document_2 = __importDefault(document_2);
     input_1 = __importDefault(input_1);
     simulator_1 = __importDefault(simulator_1);
-    vector2_5 = __importDefault(vector2_5);
+    vector2_4 = __importDefault(vector2_4);
     let can = document.createElement('canvas');
     let ctx = can.getContext('2d');
     can.width = 500;
     can.height = 500;
     document.body.querySelector("#mid-menu>div").appendChild(can);
-    exports.canvasRenderer = new rendering_1.CanvasRenderer(ctx, vector2_5.default.zero, 100);
+    exports.canvasRenderer = new rendering_1.CanvasRenderer(ctx, vector2_4.default.zero, 100);
     exports.ambient = new ambient_1.default();
-    exports.documentUI = new document_2.default();
-    exports.documentUI.selectObject(exports.ambient);
-    exports.simulator = new simulator_1.default(exports.documentUI);
+    exports.simulator = new simulator_1.default();
     new input_1.default(exports.canvasRenderer);
     exports.canvasRenderer.add(() => ctx.clearRect(0, 0, can.width, can.height));
     new rendering_1.Grid(1, exports.canvasRenderer);
     exports.canvasRenderer.start();
 });
-define("propertyDescriptions", ["require", "exports", "types"], function (require, exports, types_3) {
+define("propertyDescriptions", ["require", "exports", "types"], function (require, exports, types_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.propertyDescriptions = new Map();
-    exports.propertyDescriptions.set(types_3.PhysicsPropertyType.ObjectPosition, `
+    exports.propertyDescriptions.set(types_2.PhysicsPropertyType.ObjectPosition, `
     <h1>
         Posição
     </h1>
@@ -543,10 +473,10 @@ define("selectable", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
 });
-define("document", ["require", "exports", "main", "physicsObjects", "propertyDescriptions", "types", "vector2"], function (require, exports, main_3, physicsObjects_1, propertyDescriptions_1, types_4, vector2_6) {
+define("document", ["require", "exports", "main", "physicsObjects", "propertyDescriptions", "types", "vector2"], function (require, exports, main_3, physicsObjects_1, propertyDescriptions_1, types_3, vector2_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    vector2_6 = __importDefault(vector2_6);
+    vector2_5 = __importDefault(vector2_5);
     class DocumentButton {
         constructor(parent, id, kind, _enabled, onClick, buttonColor) {
             this.id = id;
@@ -579,7 +509,7 @@ define("document", ["require", "exports", "main", "physicsObjects", "propertyDes
     exports.DocumentButton = DocumentButton;
     class MiscImageButton extends DocumentButton {
         constructor(parent, id, thumbSrc, buttonColor, onClick, title) {
-            super(parent, id, types_4.DocumentButtonKind.MiscButton, true, (onClick) ? onClick : null, buttonColor);
+            super(parent, id, types_3.DocumentButtonKind.MiscButton, true, (onClick) ? onClick : null, buttonColor);
             if (title)
                 this.element.setAttribute("title", title);
             const thumbImg = document.createElement("img");
@@ -592,26 +522,27 @@ define("document", ["require", "exports", "main", "physicsObjects", "propertyDes
     exports.MiscImageButton = MiscImageButton;
     class MiscTextButton extends DocumentButton {
         constructor(parent, id, text, buttonColor, onClick, title) {
-            super(parent, id, types_4.DocumentButtonKind.MiscButton, true, (onClick) ? onClick : null, buttonColor);
+            super(parent, id, types_3.DocumentButtonKind.MiscButton, true, (onClick) ? onClick : null, buttonColor);
             this.element.innerHTML = text;
             if (title)
                 this.element.setAttribute("title", title);
+            this.setButtonIdToDescendants();
+            this.setButtonKindToDescendants();
         }
     }
     exports.MiscTextButton = MiscTextButton;
     class CreateObjectButton extends DocumentButton {
         constructor(name, thumbSrc, createObject) {
-            super(exports.documentElements.get("object-list"), `create-${name}-button`, types_4.DocumentButtonKind.CreateObjectButton, true, createObject, types_4.ButtonColor.Dark);
+            super(exports.documentElements.get("object-list"), `create-${name}-button`, types_3.DocumentButtonKind.CreateObjectButton, true, createObject, types_3.ButtonColor.Dark);
             this.name = name;
             const parent = this.element.parentElement;
             const li = document.createElement("li");
-            li.appendChild(this.element);
-            parent.appendChild(li);
             const thumbImg = document.createElement("img");
+            li.setAttribute("title", `Criar um ${name.toLowerCase()}`);
             thumbImg.src = thumbSrc;
-            li.setAttribute("object-name", name);
-            li.querySelectorAll("*").forEach(el => el.setAttribute("object-name", name));
             this.element.appendChild(thumbImg);
+            parent.appendChild(li);
+            li.appendChild(this.element);
             this.setButtonIdToDescendants();
             this.setButtonKindToDescendants();
         }
@@ -653,87 +584,44 @@ define("document", ["require", "exports", "main", "physicsObjects", "propertyDes
     ObjectCreationController._objectCreatable = true;
     exports.ObjectCreationController = ObjectCreationController;
     /**
-     * A map that contains various Elements in the application HTML document.
+     * Controlls the selection of Selectable objects
      */
-    exports.documentElements = new Map();
-    exports.documentElements.set("header", document.querySelector("#buttons-header"));
-    exports.documentElements.set("object-interactor", document.querySelector("#object-interactor"));
-    exports.documentElements.set("property-list", document.querySelector("#property-list"));
-    exports.documentElements.set("simulation-controller-buttons", document.querySelector("#simulation-controller-buttons"));
-    exports.documentElements.set("object-list", document.querySelector("#object-list"));
-    exports.documentElements.set("property-description-interface", document.querySelector("#property-description-interface"));
-    /**
-     * A map that contains all of the buttons that creates objects
-     */
-    exports.objectCreationButtons = new Map();
-    exports.objectCreationButtons.set(types_4.PhysicsObjectType.Solid, new CreateObjectButton("Sólido", "./assets/images/dwagao.png", function (canvasRenderer, ambient) {
-        new physicsObjects_1.Solid(canvasRenderer, ambient, canvasRenderer.camera.getWorldPosFromCanvas(new vector2_6.default(canvasRenderer.context.canvas.width / 2, canvasRenderer.context.canvas.height / 2)), new vector2_6.default(1, 1));
-    }));
-    /**
-     * A map that contains all of the buttons that do various functions on the application
-     */
-    exports.miscButtons = new Map();
-    exports.miscButtons.set("play-button", new MiscImageButton(exports.documentElements.get("simulation-controller-buttons"), "play-button", "./assets/images/play.png", types_4.ButtonColor.Dark, undefined, "Iniciar simulação"));
-    exports.miscButtons.set("reset-button", new MiscTextButton(exports.documentElements.get("simulation-controller-buttons"), "reset-button", "t=0", types_4.ButtonColor.Dark, undefined, "Definir tempo igual a 0"));
-    exports.miscButtons.set("follow-button", new MiscTextButton(exports.documentElements.get("object-interactor"), "follow-button", "Seguir", types_4.ButtonColor.Dark));
-    exports.miscButtons.set("destroy-button", new MiscTextButton(exports.documentElements.get("object-interactor"), "destroy-button", "Destruir", types_4.ButtonColor.Dark));
-    exports.miscButtons.set("centralize-camera", new MiscImageButton(exports.documentElements.get("header"), "centralize-camera", "./assets/images/cameracenter.png", types_4.ButtonColor.White, undefined, "Posicionar câmera no centro do cenário"));
-    //Event listeners
-    document.addEventListener("click", e => {
-        const target = e.target;
-        const id = target.getAttribute("button-id");
-        let button = null;
-        switch (target.getAttribute("button-kind")) {
-            case types_4.DocumentButtonKind.MiscButton:
-                const miscArray = Array.from(exports.miscButtons);
-                button = miscArray.find(el => { return el[1].element.getAttribute("button-id") == id; })[1];
-                break;
-            case types_4.DocumentButtonKind.CreateObjectButton:
-                if (!ObjectCreationController.objectCreatable)
-                    return;
-                const objectCreationArray = Array.from(exports.objectCreationButtons);
-                button = objectCreationArray.find(el => { return el[1].element.getAttribute("button-id") == id; })[1];
-                break;
-            case types_4.DocumentButtonKind.PropertyButton:
-                const propertyKind = e.target.getAttribute("property-kind");
-                if (propertyKind)
-                    this.onPropertyClick(parseInt(propertyKind));
-                return;
-        }
-        if (button && button.onClick)
-            button.onClick();
-    });
-    //Configuration
-    exports.miscButtons.get("destory-button").onClick = function () {
-        if (!this._selectedObject || !this._selectedObject.destroy)
-            return;
-        if (main_3.simulator.time != 0)
-            throw "Attempted to delete object in simulation!";
-        this._selectedObject.destroy();
-        this.selectObject(main_3.ambient);
-    };
-    buttons.get(CurrentButtons.FollowButton).onClick = this.followSelectedObject.bind(this);
-    class old {
-        constructor() {
-            this.domObjectUL = document.querySelector("#object-list");
-            this.domPropertyUL = document.querySelector("#property-list");
-            this.domPropertyH1 = this.domPropertyUL.parentElement.querySelector("h1");
-            this._propertiesEnabled = true;
-            this._selectedObject = null;
-            objectLIs.forEach(objectLI => this.domObjectUL.appendChild(objectLI.li));
-        }
-        get selectedObject() {
+    class ObjectSelectionController {
+        /**
+         * @returns the currently selected object
+         */
+        static get selectedObject() {
             return this._selectedObject;
         }
-        //propertiesEnabled: boolean
-        get propertiesEnabled() {
+        /**
+         * Selects an object, displaying it's properties in the properties list
+         * @param object the object to be selected
+         */
+        static selectObject(object) {
+            console.log(`Selected ${object.name}`);
+            const domPropertyUL = exports.documentElements.get("property-list");
+            const domPropertyH1 = exports.documentElements.get("property-list-title");
+            this._selectedObject = object;
+            while (domPropertyUL.firstChild)
+                domPropertyUL.removeChild(domPropertyUL.firstChild);
+            domPropertyH1.innerHTML = `Propriedades do ${object.name}`;
+            this.propertiesEnabled = this.propertiesEnabled;
+            if (object.appendPropertyListItems)
+                object.appendPropertyListItems(domPropertyUL, this.propertiesEnabled);
+            const followButton = exports.miscButtons.get("follow-button");
+            const destroyButton = exports.miscButtons.get("destroy-button");
+            followButton.enabled = object.isFollowable;
+            followButton.element.innerHTML = (main_3.canvasRenderer.camera.objectBeingFollowed != this._selectedObject) ? "Seguir" : "Parar de seguir";
+            destroyButton.enabled = object.destroy != undefined && main_3.simulator.time == 0;
+        }
+        static get propertiesEnabled() {
             return this._propertiesEnabled;
         }
-        set propertiesEnabled(value) {
+        static set propertiesEnabled(value) {
             if (!this._selectedObject)
                 return;
             this._propertiesEnabled = value;
-            const physicsProperties = this._selectedObject.getProperty(types_4.PhysicsPropertyType.All);
+            const physicsProperties = this._selectedObject.getProperty(types_3.PhysicsPropertyType.All);
             if (physicsProperties) {
                 physicsProperties.forEach(objectProperty => {
                     if (objectProperty.propertyLI)
@@ -741,218 +629,334 @@ define("document", ["require", "exports", "main", "physicsObjects", "propertyDes
                 });
             }
         }
-        //Methods
-        selectObject(object) {
-            console.log(`Selected ${object.name}`);
-            this._selectedObject = object;
-            while (this.domPropertyUL.firstChild)
-                this.domPropertyUL.removeChild(this.domPropertyUL.firstChild);
-            this.domPropertyH1.innerHTML = `Propriedades do ${object.name}`;
-            this.propertiesEnabled = this.propertiesEnabled;
-            if (object.appendPropertyListItems)
-                object.appendPropertyListItems(this.domPropertyUL, this.propertiesEnabled);
-            const followButton = buttons.get(CurrentButtons.FollowButton);
-            const destroyButton = buttons.get(CurrentButtons.DestroyButton);
-            followButton.enabled = object.isFollowable;
-            followButton.element.innerHTML = (main_3.canvasRenderer.camera.objectBeingFollowed != this._selectedObject) ? "Seguir" : "Parar de seguir";
-            destroyButton.enabled = object.destroy != undefined && main_3.simulator.time == 0;
-        }
-        destroySelectedObject() {
-        }
-        followSelectedObject() {
-            if (!this._selectedObject || !this._selectedObject.isFollowable)
+    }
+    ObjectSelectionController._selectedObject = null;
+    ObjectSelectionController._propertiesEnabled = true;
+    exports.ObjectSelectionController = ObjectSelectionController;
+    /**
+     * A map that contains various Elements in the application HTML document.
+     */
+    exports.documentElements = new Map();
+    exports.documentElements.set("header", document.querySelector("#buttons-header"));
+    exports.documentElements.set("property-panel", document.querySelector(".side-panel:first-child > div"));
+    exports.documentElements.set("object-interactor", document.querySelector("#object-interactor"));
+    exports.documentElements.set("property-list-title", exports.documentElements.get("property-panel").querySelector("h1"));
+    exports.documentElements.set("property-list", document.querySelector("#property-list"));
+    exports.documentElements.set("simulation-controller-buttons", document.querySelector("#simulation-controller-buttons"));
+    exports.documentElements.set("object-list", document.querySelector("#object-list"));
+    exports.documentElements.set("property-description-interface", document.querySelector("#property-description-interface"));
+    exports.documentElements.set("property-description-header", exports.documentElements.get("property-description-interface").querySelector("header"));
+    /**
+     * A map that contains all of the buttons that creates objects
+     */
+    exports.objectCreationButtons = new Map();
+    exports.objectCreationButtons.set(types_3.PhysicsObjectType.Solid, new CreateObjectButton("Sólido", "./assets/images/dwagao.png", function (canvasRenderer, ambient) {
+        new physicsObjects_1.Solid(canvasRenderer, ambient, canvasRenderer.camera.getWorldPosFromCanvas(new vector2_5.default(canvasRenderer.context.canvas.width / 2, canvasRenderer.context.canvas.height / 2)), new vector2_5.default(1, 1));
+    }));
+    /**
+     * A map that contains all of the buttons that do various functions on the application
+     */
+    exports.miscButtons = new Map();
+    exports.miscButtons.set("play-button", new MiscImageButton(exports.documentElements.get("simulation-controller-buttons"), "play-button", "./assets/images/play.png", types_3.ButtonColor.Dark, undefined, "Iniciar simulação"));
+    exports.miscButtons.set("reset-button", new MiscTextButton(exports.documentElements.get("simulation-controller-buttons"), "reset-button", "t=0", types_3.ButtonColor.Dark, undefined, "Definir tempo igual a 0"));
+    exports.miscButtons.set("follow-button", new MiscTextButton(exports.documentElements.get("object-interactor"), "follow-button", "Seguir", types_3.ButtonColor.Dark));
+    exports.miscButtons.set("destroy-button", new MiscTextButton(exports.documentElements.get("object-interactor"), "destroy-button", "Destruir", types_3.ButtonColor.Dark));
+    exports.miscButtons.set("centralize-camera", new MiscImageButton(exports.documentElements.get("header"), "centralize-camera", "./assets/images/cameracenter.png", types_3.ButtonColor.White, undefined, "Posicionar câmera no centro do cenário"));
+    exports.miscButtons.set("close-property-description", new MiscImageButton(exports.documentElements.get("property-description-header"), "close-property-description", "./assets/images/closeicon.png", types_3.ButtonColor.White));
+    //Event listeners
+    document.addEventListener("click", e => {
+        const target = e.target;
+        const buttonId = target.getAttribute("button-id");
+        switch (target.getAttribute("button-kind")) {
+            case types_3.DocumentButtonKind.MiscButton:
+                const button = exports.miscButtons.get(buttonId);
+                if (button && button.onClick)
+                    button.onClick();
+                break;
+            case types_3.DocumentButtonKind.CreateObjectButton:
+                if (!ObjectCreationController.objectCreatable)
+                    return;
+                const objectCreationArray = Array.from(exports.objectCreationButtons);
+                const objectButton = objectCreationArray.find(el => { return el[1].element.getAttribute("button-id") == buttonId; })[1];
+                objectButton.onClick(main_3.canvasRenderer, main_3.ambient);
+                break;
+            case types_3.DocumentButtonKind.PropertyButton:
+                const propertyKind = e.target.getAttribute("property-kind");
+                if (propertyKind)
+                    PropertyDescriptionUI.show(parseInt(propertyKind));
                 return;
-            const camera = main_3.canvasRenderer.camera;
-            if (camera.objectBeingFollowed != this._selectedObject)
-                camera.followObject(this._selectedObject);
-            else
-                camera.unfollowObject();
         }
-        onDocumentButtonClick(buttonName) {
-            const buttonsArray = Array.from(buttons);
-            const button = buttonsArray.find(el => { return el[1].element.getAttribute("button-name") == buttonName; })[1];
-            if (button.onClick)
-                button.onClick();
+    });
+    //Configuration
+    exports.miscButtons.get("destroy-button").onClick = function () {
+        const selectedObject = ObjectSelectionController.selectedObject;
+        if (!selectedObject || !selectedObject.destroy || main_3.simulator.time != 0)
+            return;
+        selectedObject.destroy();
+        ObjectSelectionController.selectObject(main_3.ambient);
+    };
+    exports.miscButtons.get("follow-button").onClick = function () {
+        const selectedObject = ObjectSelectionController.selectedObject;
+        if (!selectedObject || !selectedObject.isFollowable)
+            return;
+        const camera = main_3.canvasRenderer.camera;
+        if (camera.objectBeingFollowed != selectedObject)
+            camera.followObject(selectedObject);
+        else
+            camera.unfollowObject();
+    };
+    exports.miscButtons.get("close-property-description").onClick = PropertyDescriptionUI.hide.bind(PropertyDescriptionUI);
+});
+define("propertyLI", ["require", "exports", "vector2", "document", "types"], function (require, exports, vector2_6, document_4, types_4) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    vector2_6 = __importDefault(vector2_6);
+    class PropertyLI {
+        constructor(property, title, propertyUnit, regExp, initialValue) {
+            this.property = property;
+            this.regExp = regExp;
+            this.li = document.createElement("li");
+            this.input = document.createElement("input");
+            this.domNameLabel = document.createElement("label");
+            this.domUnitLabel = document.createElement("label");
+            const descriptionButton = document.createElement("button");
+            const descriptionIcon = document.createElement("img");
+            descriptionIcon.src = "./assets/images/description.png";
+            this.domNameLabel.innerHTML = title;
+            this.domUnitLabel.innerHTML = propertyUnit;
+            descriptionButton.appendChild(descriptionIcon);
+            this.li.appendChild(descriptionButton);
+            this.li.appendChild(this.domNameLabel);
+            this.li.appendChild(this.input);
+            this.li.appendChild(this.domUnitLabel);
+            descriptionButton.setAttribute("class", "button dark-button");
+            descriptionButton.setAttribute("title", "Descrição");
+            this.input.setAttribute("type", "text");
+            descriptionButton.setAttribute("property-kind", this.property.kind.toString());
+            descriptionButton.setAttribute("button-kind", types_4.DocumentButtonKind.PropertyButton);
+            descriptionButton.querySelectorAll("*").forEach(el => {
+                el.setAttribute("button-kind", types_4.DocumentButtonKind.PropertyButton);
+                el.setAttribute("property-kind", this.property.kind.toString());
+            });
+            this.lastValue = "";
+            this.enabled = this.property.changeable;
+            this.setValue(initialValue);
+            this.input.addEventListener("change", this.onInputChanged.bind(this));
         }
-        onPropertyClick(propertyKind) {
-            PropertyDescriptionInterface.show(propertyKind);
+        setValue(value) {
+            const formattedValue = this.formatValue(value);
+            this.input.value = formattedValue;
+            this.lastValue = formattedValue;
+        }
+        onInputChanged() {
+            let match = this.input.value.match(this.regExp);
+            if (!match) {
+                this.resetToLastString();
+                return;
+            }
+            match = match.filter(el => { return el != ""; });
+            let matchResult = this.processMatch(match);
+            if (!matchResult) {
+                this.resetToLastString();
+                return;
+            }
+            this.property.initialValue = matchResult;
+        }
+        formatValue(value) {
+            throw "formatValue(value: T) has not been implemented";
+        }
+        processMatch(match) {
+            throw "processMatch(match: RegExpMatchArray): T has not been implemented";
+        }
+        resetToLastString() {
+            this.input.value = this.lastValue;
+        }
+        appendToPropertyUL() {
+            document_4.documentElements.get("property-list").appendChild(this.li);
+        }
+        set enabled(value) {
+            const isDisabled = !value || !this.property.changeable;
+            this.input.disabled = isDisabled;
+            this.li.style.backgroundColor = (isDisabled) ? "#474747" : "#282828";
+            const textColor = (isDisabled) ? "#a0a0a0" : "#ffffff";
+            this.input.style.color = textColor;
+            this.domNameLabel.style.color = textColor;
+            this.domUnitLabel.style.color = textColor;
         }
     }
-    exports.old = old;
+    exports.default = PropertyLI;
+    class PropertyLIVector2 extends PropertyLI {
+        constructor(property, title, propertyUnit, initialValue) {
+            super(property, title, propertyUnit, /\-?\d*\.?\d*/g, initialValue);
+        }
+        formatValue(value) {
+            return `(${value.x.toFixed(2)}, ${value.y.toFixed(2)})`;
+        }
+        processMatch(match) {
+            if (!match[0] || !match[1]) {
+                this.resetToLastString();
+                return undefined;
+            }
+            return new vector2_6.default(Number(match[0]), Number(match[1]));
+        }
+    }
+    exports.PropertyLIVector2 = PropertyLIVector2;
+    class PropertyLINumber extends PropertyLI {
+        constructor(property, title, propertyUnit, initialValue) {
+            super(property, title, propertyUnit, /\-?\d*\.?\d*/i, initialValue);
+        }
+        formatValue(value) {
+            return value.toFixed(2);
+        }
+        processMatch(match) {
+            if (!match[0]) {
+                this.resetToLastString();
+                return;
+            }
+            return Number(match[0]);
+        }
+    }
+    exports.PropertyLINumber = PropertyLINumber;
 });
-define("rendering", ["require", "exports", "document", "main", "types", "vector2"], function (require, exports, document_3, main_4, types_5, vector2_7) {
+define("physicsProperties", ["require", "exports", "genericCalulator", "types", "vector2", "propertyLI"], function (require, exports, genericCalulator_1, types_5, vector2_7, propertyLI_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_7 = __importDefault(vector2_7);
-    class CanvasRenderer {
-        constructor(context, cameraPos, cameraZoom) {
-            this.context = context;
-            this.isRunning = false;
-            this.functions = [];
-            this.camera = new Camera(this, cameraPos, cameraZoom);
+    class PhysicsProperty {
+        constructor(kind, changeable, object, iValue, oValue, genericCalculator) {
+            this.kind = kind;
+            this.changeable = changeable;
+            this.object = object;
+            this.iValue = iValue;
+            this.oValue = oValue;
+            this.genericCalculator = genericCalculator;
+            this.propertyLI = null;
+            this.active = true;
+            this.onValueChangedCallbacks = [];
         }
-        start() {
-            this.isRunning = true;
-            this.render();
+        get initialValue() {
+            return this.iValue;
         }
-        stop() {
-            this.isRunning = false;
+        set initialValue(value) {
+            this.iValue = value;
+            this.propertyLI.setValue(this.value);
+            this.onValueChangedCallbacks.forEach(callback => callback());
         }
-        add(fn) {
-            this.functions.push(fn);
+        get value() {
+            return this.genericCalculator.sum(this.iValue, this.oValue);
         }
-        remove(fn) {
-            const index = this.functions.indexOf(fn);
-            if (index > -1)
-                this.functions.splice(index, 1);
+        set value(value) {
+            this.oValue = this.genericCalculator.sub(value, this.iValue);
+            this.propertyLI.setValue(this.value);
+            this.onValueChangedCallbacks.forEach(callback => callback());
         }
-        render() {
-            const cam = this.camera;
-            const con = this.context;
-            const canvas = this.context.canvas;
-            const canvasParent = canvas.parentElement;
-            canvas.height = canvasParent.offsetHeight;
-            canvas.width = canvasParent.offsetWidth;
-            this.functions.forEach(fn => fn(cam, con));
-            if (this.isRunning)
-                window.requestAnimationFrame(this.render.bind(this));
+        simulateStep(step) {
         }
-    }
-    exports.CanvasRenderer = CanvasRenderer;
-    class Camera {
-        constructor(canvasRenderer, _pos, zoom) {
-            this.canvasRenderer = canvasRenderer;
-            this._pos = _pos;
-            this.zoom = zoom;
-            this.targetObjectPosition = null;
-            document_3.buttons.get(types_5.CurrentButtons.CentralizeCamera).onClick = this.centralize.bind(this);
-            let canvas = this.canvasRenderer.context.canvas;
-            canvas.addEventListener("wheel", this.onWheelEvent.bind(this));
-        }
-        getWorldPosFromCanvas(canvasPos) {
-            const canvas = this.canvasRenderer.context.canvas;
-            const posX = ((canvas.width / 2) - this.pos.x - canvasPos.x) / -this.zoom;
-            const posY = ((canvas.height / 2) + this.pos.y - canvasPos.y) / this.zoom;
-            return new vector2_7.default(posX, posY);
-        }
-        getCanvasPosFromWorld(worldPos) {
-            const canvas = this.canvasRenderer.context.canvas;
-            const posX = (canvas.width / 2) + worldPos.x * this.zoom - this.pos.x;
-            const posY = (canvas.height / 2) - worldPos.y * this.zoom + this.pos.y;
-            return new vector2_7.default(posX, posY);
-        }
-        get pos() {
-            if (this.targetObjectPosition) {
-                return vector2_7.default.mult(this.targetObjectPosition.value, this.zoom);
-            }
-            return this._pos;
-        }
-        set pos(value) {
-            if (this.targetObjectPosition)
-                this.unfollowObject();
-            this._pos = value;
-        }
-        get objectBeingFollowed() {
-            if (this.targetObjectPosition)
-                return this.targetObjectPosition.object;
-            return null;
-        }
-        followObject(object) {
-            if (!object.isFollowable)
-                throw "Attemting to follow an unfollowable object";
-            this.targetObjectPosition = object.getProperty(types_5.PhysicsPropertyType.ObjectPosition);
-            this.changeButtonText(false);
-        }
-        unfollowObject() {
-            this.changeButtonText(true);
-            this.targetObjectPosition = null;
-        }
-        centralize() {
-            this.pos = vector2_7.default.zero;
-        }
-        changeButtonText(isFollowing) {
-            const followButton = document_3.buttons.get(types_5.CurrentButtons.FollowButton);
-            if (main_4.documentUI.selectedObject == this.objectBeingFollowed)
-                followButton.element.innerHTML = (isFollowing) ? "Seguir" : "Parar de seguir";
-        }
-        onWheelEvent(ev) {
-            this.zoom += ev.deltaY / -100;
-            if (this.zoom < 0.1)
-                this.zoom = 0.1;
-            else if (this.zoom > 200)
-                this.zoom = 200;
+        reset() {
+            this.value = this.initialValue;
         }
     }
-    exports.Camera = Camera;
-    class Sprite {
-        constructor(renderer, imageSrc, copyPosition, copySize, drawPosition, drawSize) {
-            this.renderer = renderer;
-            this.copyPosition = copyPosition;
-            this.copySize = copySize;
-            this.drawPosition = drawPosition;
-            const imgElement = document.createElement('img');
-            imgElement.src = imageSrc;
-            this.image = imgElement;
-            this.drawSize = drawSize;
-            this.drawFunction = this.draw.bind(this);
-            renderer.add(this.drawFunction);
+    exports.default = PhysicsProperty;
+    class ObjectPosition extends PhysicsProperty {
+        constructor(initialPosition, object) {
+            super(types_5.PhysicsPropertyType.ObjectPosition, true, object, initialPosition, vector2_7.default.zero, genericCalulator_1.Vector2Calculator.instance);
+            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "pos<sub>(x, y)</sub>", "m, m", initialPosition);
         }
-        getZoomedSize(zoom) {
-            return vector2_7.default.mult(this.drawSize, zoom);
+        updateSpritePosition() {
+            this.object.sprite.drawPosition = this.value;
         }
-        draw() {
-            // @ts-ignore
-            this.renderer.context.drawImage(this.image, ...this.copyPosition.toArray(), ...this.copySize.toArray(), ...this.getPositionInCanvas().toArray(), ...this.getZoomedSize(this.renderer.camera.zoom).toArray());
+        set initialValue(value) {
+            super.initialValue = value;
+            this.updateSpritePosition();
         }
-        stopDrawing() {
-            this.renderer.remove(this.drawFunction);
+        get initialValue() {
+            return super.initialValue;
         }
-        getPositionInCanvas() {
-            const camera = this.renderer.camera;
-            return vector2_7.default.sub(camera.getCanvasPosFromWorld(this.drawPosition), vector2_7.default.div(this.getZoomedSize(camera.zoom), 2));
+        get value() {
+            return super.value;
         }
-        positionIsInsideSprite(pos) {
-            const posInCan = this.getPositionInCanvas();
-            const cam = this.renderer.camera;
-            if (pos.x > posInCan.x && pos.x < posInCan.x + this.getZoomedSize(cam.zoom).x && pos.y > posInCan.y && pos.y < posInCan.y + this.getZoomedSize(cam.zoom).y)
-                return true;
-            return false;
+        set value(value) {
+            super.value = value;
+            this.updateSpritePosition();
         }
     }
-    exports.Sprite = Sprite;
-    class Grid {
-        constructor(gridSize, canvasRenderer) {
-            this.gridSize = gridSize;
-            this.canvasRenderer = canvasRenderer;
-            this.canvasRenderer.add(this.draw.bind(this));
+    exports.ObjectPosition = ObjectPosition;
+    class ObjectSize extends PhysicsProperty {
+        constructor(initialSize, object) {
+            super(types_5.PhysicsPropertyType.ObjectSize, true, object, initialSize, vector2_7.default.zero, genericCalulator_1.Vector2Calculator.instance);
+            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "tam<sub>(x, y)</sub>", "m, m", initialSize);
         }
-        draw() {
-            let ctx = this.canvasRenderer.context;
-            let canvas = ctx.canvas;
-            let camera = this.canvasRenderer.camera;
-            let startPos = this.canvasRenderer.camera.getWorldPosFromCanvas(new vector2_7.default(0, 0));
-            let finishPos = this.canvasRenderer.camera.getWorldPosFromCanvas(new vector2_7.default(canvas.width, canvas.height));
-            let startX = Math.ceil(startPos.x / this.gridSize) * this.gridSize;
-            let startY = Math.floor(startPos.y / this.gridSize) * this.gridSize;
-            for (let i = startX; i < finishPos.x; i += this.gridSize) {
-                let x = (canvas.width / 2) + i * camera.zoom - camera.pos.x;
-                ctx.strokeStyle = (i == 0) ? "green" : "gray";
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvas.height);
-                ctx.stroke();
-            }
-            for (let i = startY; i > finishPos.y; i -= this.gridSize) {
-                let y = (canvas.height / 2) - i * camera.zoom + camera.pos.y;
-                ctx.strokeStyle = (i == 0) ? "red" : "gray";
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
-            }
+        updateSpriteSize() {
+            this.object.sprite.drawSize = this.value;
+        }
+        set initialValue(value) {
+            super.initialValue = value;
+            this.updateSpriteSize();
+            // Change area
+            const objArea = this.object.getProperty(types_5.PhysicsPropertyType.ObjectArea);
+            if (objArea)
+                objArea.initialValue = this.value.x * this.value.y;
+        }
+        get initialValue() {
+            return super.initialValue;
+        }
+        get value() {
+            return super.value;
+        }
+        set value(value) {
+            super.value = value;
+            this.updateSpriteSize();
         }
     }
-    exports.Grid = Grid;
+    exports.ObjectSize = ObjectSize;
+    class ObjectArea extends PhysicsProperty {
+        constructor(object) {
+            super(types_5.PhysicsPropertyType.ObjectArea, false, object, 0, 0, genericCalulator_1.NumberCalculator.instance);
+            this.propertyLI = new propertyLI_1.PropertyLINumber(this, "área", "m<sup>2</sup>", 0);
+            const objectSize = object.getProperty(types_5.PhysicsPropertyType.ObjectSize);
+            const sizeVector2 = (objectSize) ? objectSize.initialValue : vector2_7.default.zero;
+            this.initialValue = sizeVector2.x * sizeVector2.y;
+        }
+    }
+    exports.ObjectArea = ObjectArea;
+    class ObjectVelocity extends PhysicsProperty {
+        constructor(object) {
+            super(types_5.PhysicsPropertyType.ObjectVelocity, true, object, vector2_7.default.zero, vector2_7.default.zero, genericCalulator_1.Vector2Calculator.instance);
+            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "velocidade", "<sup>m</sup>&frasl;<sub>s</sub>, <sup>m</sup>&frasl;<sub>s</sub>", vector2_7.default.zero);
+        }
+        simulateStep(step) {
+            const displacement = vector2_7.default.mult(this.value, step);
+            const objectPosition = this.object.getProperty(types_5.PhysicsPropertyType.ObjectPosition);
+            const objectDisplacement = this.object.getProperty(types_5.PhysicsPropertyType.ObjectDisplacement);
+            //add displacement to objectdisplacement
+            if (objectDisplacement)
+                objectDisplacement.value += vector2_7.default.distance(vector2_7.default.zero, displacement);
+            //displace object
+            if (objectPosition)
+                objectPosition.value = vector2_7.default.sum(displacement, objectPosition.value);
+        }
+    }
+    exports.ObjectVelocity = ObjectVelocity;
+    class ObjectDisplacement extends PhysicsProperty {
+        constructor(object) {
+            super(types_5.PhysicsPropertyType.ObjectDisplacement, false, object, 0, 0, genericCalulator_1.NumberCalculator.instance);
+            this.propertyLI = new propertyLI_1.PropertyLINumber(this, "deslocamento", "m", 0);
+        }
+    }
+    exports.ObjectDisplacement = ObjectDisplacement;
+    class ObjectAcceleration extends PhysicsProperty {
+        constructor(object) {
+            super(types_5.PhysicsPropertyType.ObjectAcceleration, true, object, vector2_7.default.zero, vector2_7.default.zero, genericCalulator_1.Vector2Calculator.instance);
+            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>, <sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue);
+        }
+        simulateStep(step) {
+            const objectVel = this.object.getProperty(types_5.PhysicsPropertyType.ObjectVelocity);
+            const velDisplacement = vector2_7.default.mult(this.value, step);
+            if (objectVel)
+                objectVel.value = vector2_7.default.sum(velDisplacement, objectVel.value);
+        }
+    }
+    exports.ObjectAcceleration = ObjectAcceleration;
 });
 define("physicsObjects", ["require", "exports", "physicsProperties", "rendering", "types", "vector2"], function (require, exports, PhysicsProperties, rendering_2, types_6, vector2_8) {
     "use strict";

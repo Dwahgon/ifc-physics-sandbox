@@ -1,9 +1,8 @@
-import { buttons } from 'document';
-import { documentUI } from 'main';
 import PhysicsObject from 'physicsObjects';
 import { ObjectPosition } from 'physicsProperties';
-import { CurrentButtons, PhysicsPropertyType } from 'types';
+import { PhysicsPropertyType } from 'types';
 import Vector2 from 'vector2';
+import { miscButtons, ObjectSelectionController } from './document';
 
 export class CanvasRenderer{
     private isRunning: boolean;
@@ -57,7 +56,7 @@ export class Camera {
     constructor(private canvasRenderer: CanvasRenderer, private _pos: Vector2, public zoom: number) {
         this.targetObjectPosition = null;
         
-        buttons.get(CurrentButtons.CentralizeCamera)!.onClick = this.centralize.bind(this);
+        miscButtons.get("centralize-camera")!.onClick = this.centralize.bind(this);
 
         let canvas = this.canvasRenderer.context.canvas;
         canvas.addEventListener("wheel", this.onWheelEvent.bind(this))
@@ -123,9 +122,9 @@ export class Camera {
     }
 
     private changeButtonText(isFollowing: boolean): void{
-        const followButton = buttons.get(CurrentButtons.FollowButton)!;
+        const followButton = miscButtons.get("follow-button")!;
         
-        if(documentUI.selectedObject == this.objectBeingFollowed)
+        if(ObjectSelectionController.selectedObject == this.objectBeingFollowed)
             followButton.element.innerHTML = (isFollowing) ? "Seguir" : "Parar de seguir";
     }
 

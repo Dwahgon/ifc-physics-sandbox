@@ -162,7 +162,7 @@ export class ObjectDisplacement extends PhysicsProperty<number>{
 export class ObjectAcceleration extends PhysicsProperty<Vector2>{
     constructor(object: PhysicsObject){
         super(PhysicsPropertyType.ObjectAcceleration, true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
-        this.propertyLI = new PropertyLIVector2(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue);
+        this.propertyLI = new PropertyLIVector2(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>, <sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue);
     }
 
     simulateStep(step: 0): void{

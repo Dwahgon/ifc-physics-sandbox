@@ -1,6 +1,8 @@
 :root {
-    --midpanel-width: 50vw;
+    --property-panel-width: 25vw;
+    --object-panel-width: 125px;
     --header-height: 70px;
+    --simulation-controller-height: 100px;
 }
 
 @font-face{
@@ -54,6 +56,7 @@
 
 .button > img, .inactive-button > img{
     width: 100%;
+    height: 100%;
 }
 
 /*App layout*/
@@ -84,28 +87,32 @@ header > .button{
 #main-interface{
     width: 100vw;
     height: calc(100vh - var(--header-height));
-    display: flex;
+    display: table;
 }
 
 /*Panels*/
-#main-interface > div{
-    height: 100%;
-    display: flex;
-    flex-flow: column;
+.side-panel{
+    display: table-cell;
+    vertical-align: middle;
+    padding: 10px;
+    background-color: #3f3f3f;
+    box-sizing: border-box;
 }
 
-.side-panel{
-    width: calc((100vw - var(--midpanel-width)) / 2);
-    padding: 10px;
-    background-color: rgb(63, 63, 63);
-    box-sizing: border-box;
+.side-panel:first-child{
+    width: var(--property-panel-width);
+}
+
+.side-panel:last-child{
+    width: var(--object-panel-width);
 }
 
 /*Mid Panel*/
 #mid-menu{
-    width: var(--midpanel-width);
+    height: 100%;
+    width: calc(100vw - var(--object-panel-width) - var(--property-panel-width));
+    vertical-align: middle;
     background-color: #ffffff;
-    column-gap: 0px;
 }
 
 #mid-menu div{
@@ -115,16 +122,11 @@ header > .button{
 #mid-menu > div:first-child{
     height: calc(100% - 100px);
     display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#mid-menu > div:first-child > canvas{
-    border: 1px solid rgb(26, 26, 26);
+    box-sizing: border-box;
 }
 
 #mid-menu > div:last-child {
-    height: 100px;
+    height: var(--simulation-controller-height);
     padding:  10px 0px;
     box-sizing: border-box;
     background-color: rgb(63, 63, 63);
@@ -140,7 +142,7 @@ header > .button{
     background-color: rgb(100, 100, 100);
 }
 
-#mid-menu > div:last-child > div > button {
+#mid-menu > div:last-child > div > div > button {
     height: auto;
     width: 58px;
     margin-right: 10px;
@@ -177,42 +179,40 @@ header > .button{
 
 /*Side panels*/
 .side-panel > div{
+    width: 100%;
     height: 100%;
-    padding: 10px;
+    padding: 0 10px;
     border: 1px solid #2f2f2f;
+    display: flex;
+    flex-direction: column;
     box-sizing: border-box;
     border-radius: 4px;
     background-color: #646464;
-    display: flex;
-    flex-direction: column;
-}
-
-.side-panel > div, #side-panel > h1{
-    width: 100%;
 }
 
 .side-panel > div > h1{
-    height: 3vw;
-    padding: 4px;
-    margin: 0px;
-    text-align: center;
+    height: 50px;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border: 0px solid rgb(47, 47, 47);
     border-bottom-width: 1px;
     box-sizing: border-box;
+    overflow: hidden;
     font: 1.2vw Arial, Helvetica, sans-serif;
     text-shadow: 2px 2px 4px #000000;
-    overflow: hidden;
     word-wrap: break-word;
     color: #ffffff;
-    line-height: 2.25vw;
 }
 
 .side-panel > div > ul{
     box-sizing: border-box;
     height: 90%;
-    margin: .5vw;
+    margin: 10px 0;
     overflow: auto;
     padding: 0px;
+    flex: 1;
 }
 
 .side-panel > div > ul > li{
@@ -222,8 +222,8 @@ header > .button{
 /*Object Buttons*/
 
 #object-list > li{
-    width: calc(100% - 2px);
-    height: 5vw;
+    width: 100%;
+    height: calc(var(--object-panel-width) - 42px);
     margin-bottom: 10px;
     display: flex;
     flex-direction: row;
@@ -262,15 +262,16 @@ header > .button{
     width: 0;
     margin: 0px 10px;
     flex-grow: 1;
+    font: 1.0vw "XITS Regular";
 }
 
 #property-list > li {
     width: 100%;
     height: 2.5vw;
-    border: 1px solid rgb(26, 26, 26);
+    border: 1px solid #1a1a1a;
     margin-bottom: .5vw;
     box-sizing: border-box;
-    background-color: rgb(40, 40, 40);
+    background-color: #282828;
     border-radius: 4px;
     display: flex;
     
@@ -296,6 +297,20 @@ header > .button{
 #property-list > li > label {
     display: inline-block;
     margin: auto 0px;
+    box-sizing: border-box;
+}
+
+#property-list > li > button {
+    height: 100%;
+    padding: .25vw;
+    width: 2.5vw;
+    box-sizing: border-box;
+    border: 0px solid #1a1a1a;
+    border-right-width: 1px;
+    margin-right: 5px;
+}
+
+#property-list > li > button > img{
     box-sizing: border-box;
 }
 
@@ -331,20 +346,38 @@ header > .button{
 }
 
 #property-description-interface > div{
-    width: 20vw;
-    height: 30vw;
-    padding: 5px;
+    width: 30vw;
+    height: 35vw;
     border-radius: 4px;
-    background-color: #282828;
+    background-color: #3f3f3f;
     border: 1px solid #2f2f2f;
     box-sizing: border-box;
 }
 
+#property-description-interface > div > header{
+    height: 10%;
+    width: 100%;
+    padding: .5vw;
+    background-color: #282828;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+#property-description-interface > div > header > button {
+    height: 100%;
+    width: calc(35vw * .1 - 1vw);
+}
+
 #property-description-interface > div > article{
     width: 100%;
-    height: 100%;
+    height: 90%;
+    padding: 0 10px;
     overflow: auto;
+    box-sizing: border-box;
     overflow-x: hidden;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 #property-description-interface > div > article > h1{

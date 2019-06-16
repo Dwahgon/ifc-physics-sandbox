@@ -1,5 +1,4 @@
 import Ambient from 'ambient';
-import DocumentUI from 'document';
 import Input from 'input';
 import { CanvasRenderer, Grid } from 'rendering';
 import Simulator from 'simulator';
@@ -13,15 +12,9 @@ can.height = 500;
 
 document.body.querySelector("#mid-menu>div")!.appendChild(can);
 
-
 export const canvasRenderer = new CanvasRenderer(ctx!, Vector2.zero, 100);
-
 export const ambient = new Ambient();
-
-export const documentUI = new DocumentUI();
-documentUI.selectObject(ambient);
-
-export const simulator = new Simulator(documentUI);
+export const simulator = new Simulator();
 
 new Input(canvasRenderer);
 
