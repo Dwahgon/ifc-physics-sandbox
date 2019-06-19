@@ -436,7 +436,7 @@ define("simulator", ["require", "exports", "main", "document"], function (requir
     Simulator.pauseSrc = "./assets/images/pause.png";
     exports.default = Simulator;
 });
-define("main", ["require", "exports", "ambient", "input", "rendering", "simulator", "vector2"], function (require, exports, ambient_1, input_1, rendering_1, simulator_1, vector2_4) {
+define("main", ["require", "exports", "ambient", "input", "rendering", "simulator", "vector2", "document"], function (require, exports, ambient_1, input_1, rendering_1, simulator_1, vector2_4, document_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     ambient_1 = __importDefault(ambient_1);
@@ -451,6 +451,7 @@ define("main", ["require", "exports", "ambient", "input", "rendering", "simulato
     exports.canvasRenderer = new rendering_1.CanvasRenderer(ctx, vector2_4.default.zero, 100);
     exports.ambient = new ambient_1.default();
     exports.simulator = new simulator_1.default();
+    document_4.ObjectSelectionController.selectObject(exports.ambient);
     new input_1.default(exports.canvasRenderer);
     exports.canvasRenderer.add(() => ctx.clearRect(0, 0, can.width, can.height));
     new rendering_1.Grid(1, exports.canvasRenderer);
@@ -663,6 +664,9 @@ define("document", ["require", "exports", "main", "physicsObjects", "propertyDes
     exports.miscButtons.set("destroy-button", new MiscTextButton(exports.documentElements.get("object-interactor"), "destroy-button", "Destruir", types_3.ButtonColor.Dark));
     exports.miscButtons.set("centralize-camera", new MiscImageButton(exports.documentElements.get("header"), "centralize-camera", "./assets/images/cameracenter.png", types_3.ButtonColor.White, undefined, "Posicionar câmera no centro do cenário"));
     exports.miscButtons.set("close-property-description", new MiscImageButton(exports.documentElements.get("property-description-header"), "close-property-description", "./assets/images/closeicon.png", types_3.ButtonColor.White));
+    exports.miscButtons.set("new-button", new MiscImageButton(exports.documentElements.get("header"), "new-button", "./assets/images/closeicon.png", types_3.ButtonColor.White));
+    exports.miscButtons.set("save-button", new MiscImageButton(exports.documentElements.get("header"), "save-button", "./assets/images/closeicon.png", types_3.ButtonColor.White));
+    exports.miscButtons.set("load-button", new MiscImageButton(exports.documentElements.get("header"), "laod-button", "./assets/images/closeicon.png", types_3.ButtonColor.White));
     //Event listeners
     document.addEventListener("click", e => {
         const target = e.target;
@@ -707,7 +711,7 @@ define("document", ["require", "exports", "main", "physicsObjects", "propertyDes
     };
     exports.miscButtons.get("close-property-description").onClick = PropertyDescriptionUI.hide.bind(PropertyDescriptionUI);
 });
-define("propertyLI", ["require", "exports", "vector2", "document", "types"], function (require, exports, vector2_6, document_4, types_4) {
+define("propertyLI", ["require", "exports", "vector2", "document", "types"], function (require, exports, vector2_6, document_5, types_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_6 = __importDefault(vector2_6);
@@ -772,7 +776,7 @@ define("propertyLI", ["require", "exports", "vector2", "document", "types"], fun
             this.input.value = this.lastValue;
         }
         appendToPropertyUL() {
-            document_4.documentElements.get("property-list").appendChild(this.li);
+            document_5.documentElements.get("property-list").appendChild(this.li);
         }
         set enabled(value) {
             const isDisabled = !value || !this.property.changeable;

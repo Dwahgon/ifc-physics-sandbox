@@ -87,7 +87,7 @@ header > .button{
 #main-interface{
     width: 100vw;
     height: calc(100vh - var(--header-height));
-    display: table;
+    display: flex;
 }
 
 /*Panels*/

@@ -244,6 +244,9 @@ miscButtons.set("follow-button", new MiscTextButton(documentElements.get("object
 miscButtons.set("destroy-button", new MiscTextButton(documentElements.get("object-interactor")!, "destroy-button", "Destruir", ButtonColor.Dark));
 miscButtons.set("centralize-camera", new MiscImageButton(documentElements.get("header")!, "centralize-camera", "./assets/images/cameracenter.png", ButtonColor.White, undefined, "Posicionar câmera no centro do cenário"));
 miscButtons.set("close-property-description", new MiscImageButton(documentElements.get("property-description-header")!, "close-property-description", "./assets/images/closeicon.png", ButtonColor.White));
+miscButtons.set("new-button", new MiscImageButton(documentElements.get("header")!, "new-button", "./assets/images/closeicon.png", ButtonColor.White));
+miscButtons.set("save-button", new MiscImageButton(documentElements.get("header")!, "save-button", "./assets/images/closeicon.png", ButtonColor.White));
+miscButtons.set("load-button", new MiscImageButton(documentElements.get("header")!, "laod-button", "./assets/images/closeicon.png", ButtonColor.White));
 
 //Event listeners
 document.addEventListener("click", e => {
