@@ -315,22 +315,30 @@ define("input", ["require", "exports", "main", "vector2", "document"], function 
             this.cameraPosOnMouseDown = vector2_3.default.zero;
             this.mouseMoved = false;
             this.camera = canvasRenderer.camera;
-            canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
-            canvas.addEventListener("mousemove", this.onMove.bind(this));
+            canvas.addEventListener("mousedown", ev => { this.onInputStart(new vector2_3.default(ev.offsetX, -ev.offsetY)); });
+            canvas.addEventListener("touchstart", ev => { this.onInputStart(this.getOffsetVector2(ev)); });
+            canvas.addEventListener("mousemove", ev => { this.onMove(new vector2_3.default(ev.offsetX, -ev.offsetY)); });
+            canvas.addEventListener("touchmove", ev => { this.onMove(this.getOffsetVector2(ev)); });
             document.addEventListener("mouseup", this.onMouseUp.bind(this));
         }
-        onMouseDown(ev) {
+        getOffsetVector2(ev) {
+            const touchTarget = ev.targetTouches[0].target;
+            const rect = touchTarget.getBoundingClientRect();
+            const x = ev.targetTouches[0].pageX - rect.left;
+            const y = ev.targetTouches[0].pageY - rect.top;
+            return new vector2_3.default(x, -y);
+        }
+        onInputStart(cursorCoordinates) {
             this.isMouseDown = true;
             this.mouseMoved = false;
-            this.clickedPos = new vector2_3.default(ev.offsetX, -ev.offsetY);
+            this.clickedPos = cursorCoordinates;
             this.cameraPosOnMouseDown = this.camera.pos;
             console.log("click");
         }
-        onMove(ev) {
+        onMove(cursorCoordinates) {
             if (!this.isMouseDown)
                 return;
-            let currentMousePos = new vector2_3.default(ev.offsetX, -ev.offsetY);
-            this.camera.pos = vector2_3.default.sum(this.cameraPosOnMouseDown, vector2_3.default.sub(this.clickedPos, currentMousePos));
+            this.camera.pos = vector2_3.default.sum(this.cameraPosOnMouseDown, vector2_3.default.sub(this.clickedPos, cursorCoordinates));
             if (!vector2_3.default.equals(this.cameraPosOnMouseDown, this.camera.pos)) {
                 this.mouseMoved = true;
                 this.camera.unfollowObject();
@@ -340,6 +348,7 @@ define("input", ["require", "exports", "main", "vector2", "document"], function 
             if (!this.isMouseDown)
                 return;
             this.isMouseDown = false;
+            console.log("mouseup");
             if (!this.mouseMoved) {
                 let clickedPos = new vector2_3.default(ev.offsetX, ev.offsetY);
                 let obj = main_1.ambient.getObjectOnPosition(clickedPos);
@@ -733,6 +742,8 @@ define("propertyLI", ["require", "exports", "vector2", "document", "types"], fun
             this.li.appendChild(this.domNameLabel);
             this.li.appendChild(this.input);
             this.li.appendChild(this.domUnitLabel);
+            this.input.setAttribute("id", `${title}-property-input`);
+            this.domNameLabel.setAttribute("for", `${title}-property-input`);
             descriptionButton.setAttribute("class", "button dark-button");
             descriptionButton.setAttribute("title", "Descrição");
             this.input.setAttribute("type", "text");

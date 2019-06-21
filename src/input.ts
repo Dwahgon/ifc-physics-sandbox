@@ -19,25 +19,35 @@ export default class Input{
         this.mouseMoved = false;
         this.camera = canvasRenderer.camera;
 
-        canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
-        canvas.addEventListener("mousemove", this.onMove.bind(this));
+        canvas.addEventListener("mousedown", ev => { this.onInputStart(new Vector2(ev.offsetX, -ev.offsetY)); });
+        canvas.addEventListener("touchstart", ev => { this.onInputStart(this.getOffsetVector2(ev)); });
+        canvas.addEventListener("mousemove", ev => { this.onMove(new Vector2(ev.offsetX, -ev.offsetY)); });
+        canvas.addEventListener("touchmove", ev => { this.onMove(this.getOffsetVector2(ev)); });
         document.addEventListener("mouseup", this.onMouseUp.bind(this));
     }
+
+    private getOffsetVector2(ev: TouchEvent): Vector2{
+        const touchTarget = <Element>ev.targetTouches[0].target;
+        const rect = touchTarget.getBoundingClientRect();
+        const x = ev.targetTouches[0].pageX - rect.left;
+        const y = ev.targetTouches[0].pageY - rect.top;
+
+        return new Vector2(x, -y);
+    }
     
-    private onMouseDown(ev: MouseEvent){
+    private onInputStart(cursorCoordinates: Vector2){
         this.isMouseDown = true;
         this.mouseMoved = false;
-        this.clickedPos = new Vector2(ev.offsetX, -ev.offsetY);
+        this.clickedPos = cursorCoordinates;
         this.cameraPosOnMouseDown = this.camera.pos;
         console.log("click");
     }
 
-    private onMove(ev: MouseEvent){
+    private onMove(cursorCoordinates: Vector2){
         if(!this.isMouseDown)
             return;
 
-        let currentMousePos = new Vector2(ev.offsetX, -ev.offsetY);
-        this.camera.pos = Vector2.sum(this.cameraPosOnMouseDown, Vector2.sub(this.clickedPos, currentMousePos));
+        this.camera.pos = Vector2.sum(this.cameraPosOnMouseDown, Vector2.sub(this.clickedPos, cursorCoordinates));
 
         if(!Vector2.equals(this.cameraPosOnMouseDown, this.camera.pos)){
             this.mouseMoved = true;
@@ -50,6 +60,8 @@ export default class Input{
             return;
         
         this.isMouseDown = false;
+
+        console.log("mouseup");
         
         if(!this.mouseMoved){
             let clickedPos = new Vector2(ev.offsetX, ev.offsetY);

@@ -29,6 +29,7 @@
 
 .button, .inactive-button{
     box-sizing: border-box;
+    display: grid;
     padding: 10px;
     border: 1px solid #1a1a1a;
     border-radius: 4px;
@@ -252,7 +253,7 @@ header > .button{
 /* Property List */
 
 .side-panel:first-child > div > div{
-    height: 40px;
+    height: 2.5vw;
     padding: 10px 0px;
     display: flex;
     justify-content: space-evenly;
@@ -260,9 +261,10 @@ header > .button{
 
 .side-panel:first-child > div > div > button{
     width: 0;
-    margin: 0px 10px;
+    padding: .5vw;
+    margin: 0px .5vw;
     flex-grow: 1;
-    font: 1.0vw "XITS Regular";
+    font-size: 1vw;
 }
 
 #property-list > li {
@@ -368,6 +370,7 @@ header > .button{
 #property-description-interface > div > header > button {
     height: 100%;
     width: calc(35vw * .1 - 1vw);
+    padding: .5vw;
 }
 
 #property-description-interface > div > article{

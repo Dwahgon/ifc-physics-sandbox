@@ -29,6 +29,8 @@ export default abstract class PropertyLI<T>{
         this.li.appendChild(this.input);
         this.li.appendChild(this.domUnitLabel);
 
+        this.input.setAttribute("id", `${title}-property-input`);
+        this.domNameLabel.setAttribute("for", `${title}-property-input`);
         descriptionButton.setAttribute("class", "button dark-button");
         descriptionButton.setAttribute("title", "Descrição");
         this.input.setAttribute("type", "text");
