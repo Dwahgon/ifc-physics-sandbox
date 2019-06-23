@@ -79,7 +79,13 @@ body > header{
     align-items: center;
 }
 
-header > .button{
+header > div{
+    height: 100%;
+    margin-right: 20px;
+    display: flex;
+}
+
+header > div > .button{
     height: 100%;
     width: calc(var(--header-height) - 20px);
     padding: 5px;

@@ -208,6 +208,8 @@ export abstract class ObjectSelectionController {
  */
 export const documentElements = new Map<string, Element>();
 documentElements.set("header", document.querySelector("#buttons-header")!);
+documentElements.set("file-buttons", documentElements.get("header")!.querySelector("#header-file-buttons")!);
+documentElements.set("camera-buttons", documentElements.get("header")!.querySelector("#header-camera-buttons")!);
 documentElements.set("property-panel", document.querySelector(".side-panel:first-child > div")!);
 documentElements.set("object-interactor", document.querySelector("#object-interactor")!);
 documentElements.set("property-list-title", documentElements.get("property-panel")!.querySelector("h1")!);
@@ -242,11 +244,11 @@ miscButtons.set("play-button", new MiscImageButton(documentElements.get("simulat
 miscButtons.set("reset-button", new MiscTextButton(documentElements.get("simulation-controller-buttons")!, "reset-button", "t=0", ButtonColor.Dark, undefined, "Definir tempo igual a 0"));
 miscButtons.set("follow-button", new MiscTextButton(documentElements.get("object-interactor")!, "follow-button", "Seguir", ButtonColor.Dark));
 miscButtons.set("destroy-button", new MiscTextButton(documentElements.get("object-interactor")!, "destroy-button", "Destruir", ButtonColor.Dark));
-miscButtons.set("centralize-camera", new MiscImageButton(documentElements.get("header")!, "centralize-camera", "./assets/images/cameracenter.png", ButtonColor.White, undefined, "Posicionar câmera no centro do cenário"));
+miscButtons.set("centralize-camera", new MiscImageButton(documentElements.get("camera-buttons")!, "centralize-camera", "./assets/images/cameracenter.png", ButtonColor.White, undefined, "Posicionar câmera no centro do cenário"));
 miscButtons.set("close-property-description", new MiscImageButton(documentElements.get("property-description-header")!, "close-property-description", "./assets/images/closeicon.png", ButtonColor.White));
-miscButtons.set("new-button", new MiscImageButton(documentElements.get("header")!, "new-button", "./assets/images/closeicon.png", ButtonColor.White));
-miscButtons.set("save-button", new MiscImageButton(documentElements.get("header")!, "save-button", "./assets/images/closeicon.png", ButtonColor.White));
-miscButtons.set("load-button", new MiscImageButton(documentElements.get("header")!, "laod-button", "./assets/images/closeicon.png", ButtonColor.White));
+miscButtons.set("new-button", new MiscImageButton(documentElements.get("file-buttons")!, "new-button", "./assets/images/newfile.png", ButtonColor.White, undefined, "Novo ambiente"));
+miscButtons.set("save-button", new MiscImageButton(documentElements.get("file-buttons")!, "save-button", "./assets/images/save.png", ButtonColor.White, undefined, "Salvar ambiente"));
+miscButtons.set("load-button", new MiscImageButton(documentElements.get("file-buttons")!, "load-button", "./assets/images/load.png", ButtonColor.White, undefined, "Abrir ambiente"));
 
 //Event listeners
 document.addEventListener("click", e => {

@@ -648,6 +648,8 @@ define("document", ["require", "exports", "main", "physicsObjects", "propertyDes
      */
     exports.documentElements = new Map();
     exports.documentElements.set("header", document.querySelector("#buttons-header"));
+    exports.documentElements.set("file-buttons", exports.documentElements.get("header").querySelector("#header-file-buttons"));
+    exports.documentElements.set("camera-buttons", exports.documentElements.get("header").querySelector("#header-camera-buttons"));
     exports.documentElements.set("property-panel", document.querySelector(".side-panel:first-child > div"));
     exports.documentElements.set("object-interactor", document.querySelector("#object-interactor"));
     exports.documentElements.set("property-list-title", exports.documentElements.get("property-panel").querySelector("h1"));
@@ -671,11 +673,11 @@ define("document", ["require", "exports", "main", "physicsObjects", "propertyDes
     exports.miscButtons.set("reset-button", new MiscTextButton(exports.documentElements.get("simulation-controller-buttons"), "reset-button", "t=0", types_3.ButtonColor.Dark, undefined, "Definir tempo igual a 0"));
     exports.miscButtons.set("follow-button", new MiscTextButton(exports.documentElements.get("object-interactor"), "follow-button", "Seguir", types_3.ButtonColor.Dark));
     exports.miscButtons.set("destroy-button", new MiscTextButton(exports.documentElements.get("object-interactor"), "destroy-button", "Destruir", types_3.ButtonColor.Dark));
-    exports.miscButtons.set("centralize-camera", new MiscImageButton(exports.documentElements.get("header"), "centralize-camera", "./assets/images/cameracenter.png", types_3.ButtonColor.White, undefined, "Posicionar câmera no centro do cenário"));
+    exports.miscButtons.set("centralize-camera", new MiscImageButton(exports.documentElements.get("camera-buttons"), "centralize-camera", "./assets/images/cameracenter.png", types_3.ButtonColor.White, undefined, "Posicionar câmera no centro do cenário"));
     exports.miscButtons.set("close-property-description", new MiscImageButton(exports.documentElements.get("property-description-header"), "close-property-description", "./assets/images/closeicon.png", types_3.ButtonColor.White));
-    exports.miscButtons.set("new-button", new MiscImageButton(exports.documentElements.get("header"), "new-button", "./assets/images/closeicon.png", types_3.ButtonColor.White));
-    exports.miscButtons.set("save-button", new MiscImageButton(exports.documentElements.get("header"), "save-button", "./assets/images/closeicon.png", types_3.ButtonColor.White));
-    exports.miscButtons.set("load-button", new MiscImageButton(exports.documentElements.get("header"), "laod-button", "./assets/images/closeicon.png", types_3.ButtonColor.White));
+    exports.miscButtons.set("new-button", new MiscImageButton(exports.documentElements.get("file-buttons"), "new-button", "./assets/images/newfile.png", types_3.ButtonColor.White, undefined, "Novo ambiente"));
+    exports.miscButtons.set("save-button", new MiscImageButton(exports.documentElements.get("file-buttons"), "save-button", "./assets/images/save.png", types_3.ButtonColor.White, undefined, "Salvar ambiente"));
+    exports.miscButtons.set("load-button", new MiscImageButton(exports.documentElements.get("file-buttons"), "load-button", "./assets/images/load.png", types_3.ButtonColor.White, undefined, "Abrir ambiente"));
     //Event listeners
     document.addEventListener("click", e => {
         const target = e.target;
