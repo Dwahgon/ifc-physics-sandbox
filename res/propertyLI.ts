@@ -1,5 +1,5 @@
-import PhysicsProperty from 'physicsProperties';
-import Vector2 from 'vector2';
+import PhysicsProperty from './physicsProperties';
+import Vector2 from './vector2';
 import { documentElements } from './document';
 import { DocumentButtonKind } from './types';
 

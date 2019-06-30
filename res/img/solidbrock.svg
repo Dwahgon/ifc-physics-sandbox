@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="512"
+   height="512"
+   viewBox="0 0 135.46666 135.46667"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="solidbrock.svg">
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient5411">
+      <stop
+         style="stop-color:#dbe3de;stop-opacity:1;"
+         offset="0"
+         id="stop5407" />
+      <stop
+         style="stop-color:#dbe3de;stop-opacity:0;"
+         offset="1"
+         id="stop5409" />
+    </linearGradient>
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="11.150297 : 119.1381 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="146.61696 : 119.1381 : 1"
+       inkscape:persp3d-origin="78.883627 : 96.56032 : 1"
+       id="perspective5387" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5411"
+       id="linearGradient5413"
+       x1="68.413696"
+       y1="159.03868"
+       x2="68.413696"
+       y2="203.63986"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-8.2457869,-5.1837286)" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="213.92206"
+     inkscape:cy="289.39511"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:pagecheckerboard="true"
+     inkscape:window-width="1920"
+     inkscape:window-height="1018"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Camada 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-161.53332)">
+    <rect
+       style="opacity:1;fill:#53676c;fill-opacity:1;stroke:#1c2422;stroke-width:5.01728392;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect5403"
+       width="130.44939"
+       height="130.44939"
+       x="2.5086401"
+       y="164.04196"
+       rx="6.7048321"
+       ry="6.7048321" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot5665"
+       style="font-style:normal;font-weight:normal;font-size:440.00006104px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#dbe3e2;fill-opacity:1;stroke:none"
+       transform="matrix(0.26458333,0,0,0.26458333,-4.2901817,133.66887)"><flowRegion
+         id="flowRegion5667"
+         style="font-size:440.00006104px;fill:#dbe3e2"><rect
+           id="rect5669"
+           width="451.53818"
+           height="505.07632"
+           x="130.30968"
+           y="132.18265"
+           style="font-size:440.00006104px;fill:#dbe3e2" /></flowRegion><flowPara
+         id="flowPara5671"
+         style="font-size:440.00006104px">S</flowPara></flowRoot>    <rect
+       style="opacity:0.56800005;fill:url(#linearGradient5413);fill-opacity:1;stroke:none;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect5405"
+       width="119.83026"
+       height="37.631561"
+       x="7.818202"
+       y="169.72997"
+       rx="10.156239"
+       ry="10.156239" />
+  </g>
+</svg>

@@ -1,4 +1,4 @@
-import { ambient } from 'main';
+import { ambient } from './main';
 import { DocumentButton, miscButtons, ObjectSelectionController, ObjectCreationController } from './document';
 
 

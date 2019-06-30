@@ -1,17 +1,21 @@
-import PhysicsObject from 'physicsObjects';
-import { ObjectPosition } from 'physicsProperties';
-import { PhysicsPropertyType } from 'types';
-import Vector2 from 'vector2';
+import { PhysicsObject } from './physicsObjects';
+import { ObjectPosition } from './physicsProperties';
+import { PhysicsPropertyType } from './types';
+import Vector2 from './vector2';
 import { miscButtons, ObjectSelectionController } from './document';
+
+export interface Renderable{
+    draw(cam: Camera, con: CanvasRenderingContext2D): void;
+}
 
 export class CanvasRenderer{
     private isRunning: boolean;
-    private functions: Function[];
+    private renderables: Renderable[];
     public readonly camera: Camera;
 
     constructor(public readonly context: CanvasRenderingContext2D, cameraPos: Vector2, cameraZoom: number){
         this.isRunning = false;
-        this.functions = [];
+        this.renderables = [];
         this.camera = new Camera(this, cameraPos, cameraZoom);
     }
 
@@ -24,14 +28,14 @@ export class CanvasRenderer{
         this.isRunning = false;
     }
 
-    add(fn: Function){
-        this.functions.push(fn);
+    add(fn: Renderable){
+        this.renderables.push(fn);
     }
 
-    remove(fn: Function){
-        const index = this.functions.indexOf(fn);
+    remove(fn: Renderable){
+        const index = this.renderables.indexOf(fn);
         if(index > -1) 
-            this.functions.splice(index, 1);
+            this.renderables.splice(index, 1);
     }
 
     render(){
@@ -43,7 +47,7 @@ export class CanvasRenderer{
         canvas.height = canvasParent.offsetHeight;
         canvas.width = canvasParent.offsetWidth;
 
-        this.functions.forEach(fn => fn(cam, con));
+        this.renderables.forEach(rn => rn.draw(cam, con));
         
         if(this.isRunning)
             window.requestAnimationFrame(this.render.bind(this));
@@ -129,7 +133,7 @@ export class Camera {
     }
 
     private onWheelEvent(ev: WheelEvent): void{
-        this.zoom += ev.deltaY / -100;
+        this.zoom += ev.deltaY / -20;
 
         if (this.zoom < 0.1)
             this.zoom = 0.1;
@@ -138,7 +142,7 @@ export class Camera {
     }
 }
 
-export class Sprite {
+export class Sprite implements Renderable{
     public drawSize: Vector2;
     private image: HTMLImageElement;
     private drawFunction: Function;
@@ -150,8 +154,6 @@ export class Sprite {
 
         this.drawSize = drawSize;
         this.drawFunction = this.draw.bind(this);
-
-        renderer.add(this.drawFunction);
     }
 
     getZoomedSize(zoom: number): Vector2{
@@ -169,7 +171,7 @@ export class Sprite {
     }
 
     stopDrawing(): void{
-        this.renderer.remove(this.drawFunction);
+        this.renderer.remove(this);
     }
 
     getPositionInCanvas(): Vector2{
@@ -189,23 +191,20 @@ export class Sprite {
     }
 }
 
-export class Grid{
-    constructor(public gridSize: number, public canvasRenderer: CanvasRenderer){
-        this.canvasRenderer.add(this.draw.bind(this));
+export class Grid implements Renderable{
+    constructor(public gridSize: number){
     }
 
-    draw(){
-        let ctx = this.canvasRenderer.context;
+    draw(cam: Camera, ctx: CanvasRenderingContext2D){
         let canvas = ctx.canvas;
-        let camera = this.canvasRenderer.camera;
-        let startPos = this.canvasRenderer.camera.getWorldPosFromCanvas(new Vector2(0, 0));
-        let finishPos = this.canvasRenderer.camera.getWorldPosFromCanvas(new Vector2(canvas.width, canvas.height));
+        let startPos = cam.getWorldPosFromCanvas(new Vector2(0, 0));
+        let finishPos = cam.getWorldPosFromCanvas(new Vector2(canvas.width, canvas.height));
 
         let startX = Math.ceil(startPos.x / this.gridSize) * this.gridSize;
         let startY = Math.floor(startPos.y / this.gridSize) * this.gridSize;
 
         for (let i = startX; i < finishPos.x; i += this.gridSize) {
-            let x = (canvas.width / 2) + i * camera.zoom - camera.pos.x;
+            let x = (canvas.width / 2) + i * cam.zoom - cam.pos.x;
 
             ctx.strokeStyle = (i == 0) ? "green" : "gray";            
 
@@ -216,7 +215,7 @@ export class Grid{
         }
 
         for (let i = startY; i > finishPos.y; i -= this.gridSize) {
-            let y = (canvas.height / 2) - i * camera.zoom + camera.pos.y;
+            let y = (canvas.height / 2) - i * cam.zoom + cam.pos.y;
 
             ctx.strokeStyle = (i == 0) ? "red" : "gray";
 

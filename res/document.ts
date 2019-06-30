@@ -1,12 +1,12 @@
-import Ambient from 'ambient';
-import { ambient, canvasRenderer, simulator } from "main";
-import PhysicsObject, { Solid } from "physicsObjects";
-import PhysicsProperty from "physicsProperties";
-import { propertyDescriptions } from 'propertyDescriptions';
-import { CanvasRenderer } from 'rendering';
-import Selectable from 'selectable';
-import { ButtonColor, DocumentButtonKind, PhysicsObjectType, PhysicsPropertyType } from 'types';
-import Vector2 from 'vector2';
+import { ambient, canvasRenderer, simulator, setAmbient } from "./main";
+import { PhysicsObject, PhysicsObjectConfig } from "./physicsObjects";
+import PhysicsProperty from "./physicsProperties";
+import { propertyDescriptions } from './propertyDescriptions';
+import Selectable from './selectable';
+import { ButtonColor, DocumentButtonKind, PhysicsObjectType, PhysicsPropertyType } from './types';
+import Vector2 from './vector2';
+import { CanvasRenderer } from "./rendering";
+import Ambient from "./ambient";
 
 export class DocumentButton {
     public readonly element: HTMLButtonElement;
@@ -73,21 +73,28 @@ export class MiscTextButton extends DocumentButton {
 }
 
 export class CreateObjectButton extends DocumentButton {
-    constructor(public readonly name: string, thumbSrc: string, createObject: Function) {
-        super(documentElements.get("object-list")!, `create-${name}-button`, DocumentButtonKind.CreateObjectButton, true, createObject, ButtonColor.Dark);
+    constructor(public readonly name: string, thumbSrc: string, public readonly createObjectConfig: Function) {
+        super(
+            documentElements.get("object-list")!, 
+            `create-${name}-button`, 
+            DocumentButtonKind.CreateObjectButton, 
+            true, 
+            function (t: PhysicsObjectType, cR: CanvasRenderer, a: Ambient, c: PhysicsObjectConfig) { PhysicsObject.createPhysicsObject(t, cR, a, c) }, 
+            ButtonColor.Dark
+        );
 
         const parent = this.element.parentElement!;
         const li = document.createElement("li");
         const thumbImg = document.createElement("img");
 
         li.setAttribute("title", `Criar um ${name.toLowerCase()}`);
-        
+
         thumbImg.src = thumbSrc;
-        
+
         this.element.appendChild(thumbImg);
         parent.appendChild(li);
         li.appendChild(this.element);
-        
+
         this.setButtonIdToDescendants();
         this.setButtonKindToDescendants();
     }
@@ -124,6 +131,9 @@ export abstract class PropertyDescriptionUI {
     }
 }
 
+/**
+ * Class that controls if the CreateObjectButtons are enabled or not
+ */
 export abstract class ObjectCreationController {
     private static _objectCreatable: boolean = true;
 
@@ -156,7 +166,7 @@ export abstract class ObjectSelectionController {
      * @param object the object to be selected
      */
     static selectObject(object: Selectable): void {
-        console.log(`Selected ${object.name}`);
+        console.log("Selected:", object);
         const domPropertyUL = <HTMLUListElement>documentElements.get("property-list")!;
         const domPropertyH1 = documentElements.get("property-list-title")!;
 
@@ -223,53 +233,54 @@ documentElements.set("property-description-header", documentElements.get("proper
  * A map that contains all of the buttons that creates objects
  */
 export const objectCreationButtons = new Map<PhysicsObjectType, CreateObjectButton>();
-objectCreationButtons.set(PhysicsObjectType.Solid, new CreateObjectButton("Sólido", "./assets/images/dwagao.png",
-    function (canvasRenderer: CanvasRenderer, ambient: Ambient) {
-        new Solid(
-            canvasRenderer,
-            ambient,
-            canvasRenderer.camera.getWorldPosFromCanvas(
+objectCreationButtons.set(PhysicsObjectType.Solid, new CreateObjectButton("Sólido", "./assets/images/solid.png",
+    function () {
+        return {
+            position: canvasRenderer.camera.getWorldPosFromCanvas(
                 new Vector2(canvasRenderer.context.canvas.width / 2, canvasRenderer.context.canvas.height / 2)
             ),
-            new Vector2(1, 1)
-        )
+            size: new Vector2(1, 1)
+        }
     }
 ));
 
 /**
- * A map that contains all of the buttons that do various functions on the application
+ * A map that contains all of the buttons that do various functions on the application.
+ * @method get Gets a button. Current buttons: play-button, reset-button, follow-button, destroy-button, centralize-camera, close-property-description, new-button, save-button, load-button
  */
 export const miscButtons = new Map<string, DocumentButton>();
 miscButtons.set("play-button", new MiscImageButton(documentElements.get("simulation-controller-buttons")!, "play-button", "./assets/images/play.png", ButtonColor.Dark, undefined, "Iniciar simulação"));
 miscButtons.set("reset-button", new MiscTextButton(documentElements.get("simulation-controller-buttons")!, "reset-button", "t=0", ButtonColor.Dark, undefined, "Definir tempo igual a 0"));
 miscButtons.set("follow-button", new MiscTextButton(documentElements.get("object-interactor")!, "follow-button", "Seguir", ButtonColor.Dark));
 miscButtons.set("destroy-button", new MiscTextButton(documentElements.get("object-interactor")!, "destroy-button", "Destruir", ButtonColor.Dark));
-miscButtons.set("centralize-camera", new MiscImageButton(documentElements.get("camera-buttons")!, "centralize-camera", "./assets/images/cameracenter.png", ButtonColor.White, undefined, "Posicionar câmera no centro do cenário"));
+miscButtons.set("centralize-camera", new MiscImageButton(documentElements.get("camera-buttons")!, "centralize-camera", "./assets/images/cameracenter.png", ButtonColor.InvisibleBackground, undefined, "Posicionar câmera na origem"));
 miscButtons.set("close-property-description", new MiscImageButton(documentElements.get("property-description-header")!, "close-property-description", "./assets/images/closeicon.png", ButtonColor.White));
-miscButtons.set("new-button", new MiscImageButton(documentElements.get("file-buttons")!, "new-button", "./assets/images/newfile.png", ButtonColor.White, undefined, "Novo ambiente"));
-miscButtons.set("save-button", new MiscImageButton(documentElements.get("file-buttons")!, "save-button", "./assets/images/save.png", ButtonColor.White, undefined, "Salvar ambiente"));
-miscButtons.set("load-button", new MiscImageButton(documentElements.get("file-buttons")!, "load-button", "./assets/images/load.png", ButtonColor.White, undefined, "Abrir ambiente"));
+miscButtons.set("new-button", new MiscImageButton(documentElements.get("file-buttons")!, "new-button", "./assets/images/newfile.png", ButtonColor.InvisibleBackground, undefined, "Novo ambiente"));
+miscButtons.set("save-button", new MiscImageButton(documentElements.get("file-buttons")!, "save-button", "./assets/images/save.png", ButtonColor.InvisibleBackground, undefined, "Salvar ambiente"));
+miscButtons.set("load-button", new MiscImageButton(documentElements.get("file-buttons")!, "load-button", "./assets/images/load.png", ButtonColor.InvisibleBackground, undefined, "Abrir ambiente"));
 
 //Event listeners
 document.addEventListener("click", e => {
     const target = (<HTMLElement>e.target);
     const buttonId = target.getAttribute("button-id");
-    
+
     switch (target.getAttribute("button-kind")) {
         case DocumentButtonKind.MiscButton:
             const button = miscButtons.get(buttonId!);
             if (button && button.onClick)
                 button.onClick();
-        
+
             break;
         case DocumentButtonKind.CreateObjectButton:
             if (!ObjectCreationController.objectCreatable)
                 return;
 
             const objectCreationArray = Array.from(objectCreationButtons);
-            const objectButton = objectCreationArray.find(el => { return el[1].element.getAttribute("button-id") == buttonId })![1];
+            const objectPair = objectCreationArray.find(el => { return el[1].element.getAttribute("button-id") == buttonId })!;
+            const objectKind = objectPair[0];
+            const objectButton = objectPair[1];
 
-            objectButton.onClick!(canvasRenderer, ambient);
+            objectButton.onClick!(objectKind, canvasRenderer, ambient, objectButton.createObjectConfig());
             break;
         case DocumentButtonKind.PropertyButton:
             const propertyKind: string | null = (<HTMLDivElement>e.target)!.getAttribute("property-kind");
@@ -278,7 +289,7 @@ document.addEventListener("click", e => {
             return;
     }
 
-    
+
 });
 
 //Configuration

@@ -1,9 +1,10 @@
-import GenericCalculator, { NumberCalculator, Vector2Calculator } from 'genericCalulator';
-import PhysicsObject from 'physicsObjects';
-import PropertyLI from 'propertyLI';
-import { PhysicsPropertyType } from 'types';
-import Vector2 from 'vector2';
+import GenericCalculator, { NumberCalculator, Vector2Calculator } from './genericCalulator';
+import { PhysicsObject } from './physicsObjects';
+import PropertyLI from './propertyLI';
+import { PhysicsPropertyType } from './types';
+import Vector2 from './vector2';
 import { PropertyLINumber, PropertyLIVector2 } from './propertyLI';
+import { PhysicsPropertyJSON } from './fileController';
 
 export default abstract class PhysicsProperty<T>{
     public active: boolean;
@@ -48,6 +49,13 @@ export default abstract class PhysicsProperty<T>{
     reset(): void{
         this.value = this.initialValue;
     }
+
+    toJSON(): PhysicsPropertyJSON<any> {
+        return Object.assign({}, {
+            kind: this.kind,
+            iValue: this.iValue
+        });
+    }
 }
 
 export class ObjectPosition extends PhysicsProperty<Vector2>{
@@ -57,6 +65,7 @@ export class ObjectPosition extends PhysicsProperty<Vector2>{
     ){
         super(PhysicsPropertyType.ObjectPosition, true, object, initialPosition, Vector2.zero, Vector2Calculator.instance);
         this.propertyLI = new PropertyLIVector2(this, "pos<sub>(x, y)</sub>", "m, m", initialPosition);
+        this.updateSpritePosition();
     }
 
     private updateSpritePosition(): void{
@@ -89,6 +98,7 @@ export class ObjectSize extends PhysicsProperty<Vector2>{
     ){
         super(PhysicsPropertyType.ObjectSize, true, object, initialSize, Vector2.zero, Vector2Calculator.instance);
         this.propertyLI = new PropertyLIVector2(this, "tam<sub>(x, y)</sub>", "m, m", initialSize);
+        this.updateSpriteSize();
     }
 
     private updateSpriteSize(): void{
@@ -173,3 +183,4 @@ export class ObjectAcceleration extends PhysicsProperty<Vector2>{
             (<ObjectVelocity>objectVel).value = Vector2.sum(velDisplacement, (<ObjectVelocity>objectVel).value);
     }
 }
+

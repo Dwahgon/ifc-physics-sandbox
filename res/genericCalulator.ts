@@ -1,4 +1,4 @@
-import Vector2 from "vector2";
+import Vector2 from "./vector2";
 
 export default interface GenericCalculator<T>{
     sum(a: T, b: T): T;

@@ -1,6 +1,6 @@
-import { ambient } from 'main';
-import { Camera, CanvasRenderer } from 'rendering';
-import Vector2 from 'vector2';
+import { ambient } from './main';
+import { Camera, CanvasRenderer } from './rendering';
+import Vector2 from './vector2';
 import { ObjectSelectionController } from './document';
 
 export default class Input{
@@ -21,9 +21,9 @@ export default class Input{
 
         canvas.addEventListener("mousedown", ev => { this.onInputStart(new Vector2(ev.offsetX, -ev.offsetY)); });
         canvas.addEventListener("touchstart", ev => { this.onInputStart(this.getOffsetVector2(ev)); });
-        canvas.addEventListener("mousemove", ev => { this.onMove(new Vector2(ev.offsetX, -ev.offsetY)); });
-        canvas.addEventListener("touchmove", ev => { this.onMove(this.getOffsetVector2(ev)); });
-        document.addEventListener("mouseup", this.onMouseUp.bind(this));
+        canvas.addEventListener("mousemove", ev => { this.onMove(new Vector2(ev.offsetX, -ev.offsetY), canvas); });
+        canvas.addEventListener("touchmove", ev => { this.onMove(this.getOffsetVector2(ev), canvas); });
+        document.addEventListener("mouseup", ev => { this.onMouseUp(ev, canvas) });
     }
 
     private getOffsetVector2(ev: TouchEvent): Vector2{
@@ -40,29 +40,31 @@ export default class Input{
         this.mouseMoved = false;
         this.clickedPos = cursorCoordinates;
         this.cameraPosOnMouseDown = this.camera.pos;
-        console.log("click");
     }
 
-    private onMove(cursorCoordinates: Vector2){
-        if(!this.isMouseDown)
-            return;
+    private onMove(cursorCoordinates: Vector2, canvas: HTMLCanvasElement){
+        if(this.isMouseDown){
+            this.camera.pos = Vector2.sum(this.cameraPosOnMouseDown, Vector2.sub(this.clickedPos, cursorCoordinates));
+            canvas.style.cursor = "move";
 
-        this.camera.pos = Vector2.sum(this.cameraPosOnMouseDown, Vector2.sub(this.clickedPos, cursorCoordinates));
-
-        if(!Vector2.equals(this.cameraPosOnMouseDown, this.camera.pos)){
-            this.mouseMoved = true;
-            this.camera.unfollowObject();
+            if(!Vector2.equals(this.cameraPosOnMouseDown, this.camera.pos)){
+                this.mouseMoved = true;
+                this.camera.unfollowObject();
+                
+            }
+        }else{
+            const obj = ambient.getObjectOnPosition(new Vector2(cursorCoordinates.x, -cursorCoordinates.y));
+            canvas.style.cursor = (obj) ? "pointer" : "default";
         }
     }
 
-    private onMouseUp(ev: MouseEvent){
+    private onMouseUp(ev: MouseEvent, canvas: HTMLCanvasElement){
         if(!this.isMouseDown)
             return;
-        
-        this.isMouseDown = false;
 
-        console.log("mouseup");
-        
+        this.isMouseDown = false;
+        canvas.style.cursor = "default";
+
         if(!this.mouseMoved){
             let clickedPos = new Vector2(ev.offsetX, ev.offsetY);
             let obj = ambient.getObjectOnPosition(clickedPos);

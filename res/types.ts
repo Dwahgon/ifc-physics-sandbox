@@ -1,6 +1,7 @@
 export enum ButtonColor{
     Dark = "dark-button",
-    White = "white-button"
+    White = "white-button",
+    InvisibleBackground = "invisible-bg-button"
 }
 
 export enum DocumentButtonKind{

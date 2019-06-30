@@ -1,5 +1,5 @@
-import PhysicsProperty from 'physicsProperties';
-import { PhysicsPropertyType } from 'types';
+import PhysicsProperty from './physicsProperties';
+import { PhysicsPropertyType } from './types';
 
 export default interface Selectable {
     isFollowable: boolean;
