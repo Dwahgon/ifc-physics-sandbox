@@ -1,7 +1,7 @@
 :root {
     --property-panel-width: 25vw;
     --object-panel-width: 125px;
-    --header-height: 70px;
+    --header-height: 36px;
     --simulation-controller-height: 100px;
 }
 
@@ -19,6 +19,10 @@
 
 /* Default Button*/
 
+.dark-button, .white-button {
+    border: 1px solid #1a1a1a;
+}
+
 .dark-button{
     background-color: #282828;
 }
@@ -27,11 +31,15 @@
     background-color: #3f3f3f;
 }
 
+.invisible-bg-button{
+    background-color: #00000000;
+    border: none;
+}
+
 .button, .inactive-button{
     box-sizing: border-box;
     display: grid;
     padding: 10px;
-    border: 1px solid #1a1a1a;
     border-radius: 4px;
 }
 
@@ -71,7 +79,7 @@ body{
 body > header{
     width: 100vw;
     height: var(--header-height);
-    padding: 10px;
+    padding: 2px;
     background-color: #282828;
     display: flex;
     box-sizing: border-box;
@@ -87,7 +95,7 @@ header > div{
 
 header > div > .button{
     height: 100%;
-    width: calc(var(--header-height) - 20px);
+    width: calc(var(--header-height) - 4px);
     padding: 5px;
 }
 
