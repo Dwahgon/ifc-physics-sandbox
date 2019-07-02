@@ -2,7 +2,7 @@ import { PhysicsObject } from './physicsObjects';
 import { ObjectPosition } from './physicsProperties';
 import { PhysicsPropertyType } from './types';
 import Vector2 from './vector2';
-import { miscButtons, ObjectSelectionController } from './document';
+import { miscButtons, ObjectSelectionController, MiscToggleImageButton } from './document';
 
 export interface Renderable{
     draw(cam: Camera, con: CanvasRenderingContext2D): void;
@@ -126,10 +126,10 @@ export class Camera {
     }
 
     private changeButtonText(isFollowing: boolean): void{
-        const followButton = miscButtons.get("follow-button")!;
+        const followButton = <MiscToggleImageButton>miscButtons.get("follow-button")!;
         
         if(ObjectSelectionController.selectedObject == this.objectBeingFollowed)
-            followButton.element.innerHTML = (isFollowing) ? "Seguir" : "Parar de seguir";
+            followButton.toggled = !isFollowing;
     }
 
     private onWheelEvent(ev: WheelEvent): void{

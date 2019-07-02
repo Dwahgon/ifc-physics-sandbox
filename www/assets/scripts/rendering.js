@@ -104,7 +104,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         changeButtonText(isFollowing) {
             const followButton = document_1.miscButtons.get("follow-button");
             if (document_1.ObjectSelectionController.selectedObject == this.objectBeingFollowed)
-                followButton.element.innerHTML = (isFollowing) ? "Seguir" : "Parar de seguir";
+                followButton.toggled = !isFollowing;
         }
         onWheelEvent(ev) {
             this.zoom += ev.deltaY / -20;

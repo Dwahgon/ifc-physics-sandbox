@@ -43,25 +43,44 @@ export class DocumentButton {
 }
 
 export class MiscImageButton extends DocumentButton {
-    constructor(parent: Element, id: string, thumbSrc: string, buttonColor: ButtonColor, onClick?: Function, title?: string) {
-        super(parent, id, DocumentButtonKind.MiscButton, true, (onClick) ? onClick : null, buttonColor);
+    protected thumbImgElement: HTMLImageElement;
+
+    constructor(parent: Element, id: string, protected thumbSrc: string, buttonColor: ButtonColor, title?: string) {
+        super(parent, id, DocumentButtonKind.MiscButton, true, null, buttonColor);
 
         if (title)
             this.element.setAttribute("title", title);
 
-        const thumbImg = document.createElement("img");
-        thumbImg.src = thumbSrc;
+        this.thumbImgElement = document.createElement("img");
+        this.thumbImgElement.src = thumbSrc;
 
-        this.element.appendChild(thumbImg);
+        this.element.appendChild(this.thumbImgElement);
 
         this.setButtonIdToDescendants();
         this.setButtonKindToDescendants();
     }
 }
 
+/**
+ * A child class of @class MiscImageButton that contains two states: toggled and non-toggled. When it's non-toggled, it will display the thumbImg and the originalTitle,
+ * but when it's toggled, it will display the toggledThumbImg and the toggledTitle. If toggleTitle is not specified, the button's title will always be the originalTitle.
+ */
+export class MiscToggleImageButton extends MiscImageButton {
+    constructor(parent: Element, id: string, thumbSrc: string, private toggledThumbSrc: string, buttonColor: ButtonColor, private originalTitle?: string, private toggledTitle?: string){
+        super(parent, id, thumbSrc, buttonColor, originalTitle);
+    }
+
+    set toggled(t: boolean){
+        this.thumbImgElement.src = t ? this.toggledThumbSrc : this.thumbSrc;
+
+        if(this.originalTitle)
+            this.element.setAttribute("title", t && this.toggledTitle ? this.toggledTitle : this.originalTitle);
+    }
+}
+
 export class MiscTextButton extends DocumentButton {
-    constructor(parent: Element, id: string, text: string, buttonColor: ButtonColor, onClick?: Function, title?: string) {
-        super(parent, id, DocumentButtonKind.MiscButton, true, (onClick) ? onClick : null, buttonColor);
+    constructor(parent: Element, id: string, text: string, buttonColor: ButtonColor, title?: string) {
+        super(parent, id, DocumentButtonKind.MiscButton, true,  null, buttonColor);
 
         this.element.innerHTML = text;
         if (title)
@@ -182,11 +201,11 @@ export abstract class ObjectSelectionController {
         if (object.appendPropertyListItems)
             object.appendPropertyListItems(domPropertyUL, this.propertiesEnabled);
 
-        const followButton = miscButtons.get("follow-button");
+        const followButton = <MiscToggleImageButton>miscButtons.get("follow-button");
         const destroyButton = miscButtons.get("destroy-button");
 
-        followButton!.enabled = object.isFollowable;
-        followButton!.element.innerHTML = (canvasRenderer.camera.objectBeingFollowed != this._selectedObject) ? "Seguir" : "Parar de seguir";
+        followButton.enabled = object.isFollowable;
+        followButton.toggled = canvasRenderer.camera.objectBeingFollowed == this._selectedObject;
 
         destroyButton!.enabled = object.destroy != undefined && simulator.time == 0;
     }
@@ -249,15 +268,15 @@ objectCreationButtons.set(PhysicsObjectType.Solid, new CreateObjectButton("Sóli
  * @method get Gets a button. Current buttons: play-button, reset-button, follow-button, destroy-button, centralize-camera, close-property-description, new-button, save-button, load-button
  */
 export const miscButtons = new Map<string, DocumentButton>();
-miscButtons.set("play-button", new MiscImageButton(documentElements.get("simulation-controller-buttons")!, "play-button", "./assets/images/play.png", ButtonColor.Dark, undefined, "Iniciar simulação"));
-miscButtons.set("reset-button", new MiscTextButton(documentElements.get("simulation-controller-buttons")!, "reset-button", "t=0", ButtonColor.Dark, undefined, "Definir tempo igual a 0"));
-miscButtons.set("follow-button", new MiscTextButton(documentElements.get("object-interactor")!, "follow-button", "Seguir", ButtonColor.Dark));
-miscButtons.set("destroy-button", new MiscTextButton(documentElements.get("object-interactor")!, "destroy-button", "Destruir", ButtonColor.Dark));
-miscButtons.set("centralize-camera", new MiscImageButton(documentElements.get("camera-buttons")!, "centralize-camera", "./assets/images/cameracenter.png", ButtonColor.InvisibleBackground, undefined, "Posicionar câmera na origem"));
+miscButtons.set("play-button", new MiscImageButton(documentElements.get("simulation-controller-buttons")!, "play-button", "./assets/images/play.png", ButtonColor.Dark, "Iniciar simulação"));
+miscButtons.set("reset-button", new MiscTextButton(documentElements.get("simulation-controller-buttons")!, "reset-button", "t=0", ButtonColor.Dark, "Definir tempo igual a 0"));
+miscButtons.set("destroy-button", new MiscImageButton(documentElements.get("object-interactor")!, "destroy-button", "./assets/images/delete.png", ButtonColor.Dark, "Destruir objecto"));
+miscButtons.set("follow-button", new MiscToggleImageButton(documentElements.get("object-interactor")!, "follow-button", "./assets/images/follow.png", "./assets/images/cancelfollow.png", ButtonColor.Dark, "Focar/seguir objeto", "Parar de focar/seguir objeto"));
+miscButtons.set("centralize-camera", new MiscImageButton(documentElements.get("camera-buttons")!, "centralize-camera", "./assets/images/cameracenter.png", ButtonColor.InvisibleBackground, "Posicionar câmera na origem"));
 miscButtons.set("close-property-description", new MiscImageButton(documentElements.get("property-description-header")!, "close-property-description", "./assets/images/closeicon.png", ButtonColor.White));
-miscButtons.set("new-button", new MiscImageButton(documentElements.get("file-buttons")!, "new-button", "./assets/images/newfile.png", ButtonColor.InvisibleBackground, undefined, "Novo ambiente"));
-miscButtons.set("save-button", new MiscImageButton(documentElements.get("file-buttons")!, "save-button", "./assets/images/save.png", ButtonColor.InvisibleBackground, undefined, "Salvar ambiente"));
-miscButtons.set("load-button", new MiscImageButton(documentElements.get("file-buttons")!, "load-button", "./assets/images/load.png", ButtonColor.InvisibleBackground, undefined, "Abrir ambiente"));
+miscButtons.set("new-button", new MiscImageButton(documentElements.get("file-buttons")!, "new-button", "./assets/images/newfile.png", ButtonColor.InvisibleBackground, "Novo ambiente"));
+miscButtons.set("save-button", new MiscImageButton(documentElements.get("file-buttons")!, "save-button", "./assets/images/save.png", ButtonColor.InvisibleBackground, "Salvar ambiente"));
+miscButtons.set("load-button", new MiscImageButton(documentElements.get("file-buttons")!, "load-button", "./assets/images/load.png", ButtonColor.InvisibleBackground, "Abrir ambiente"));
 
 //Event listeners
 document.addEventListener("click", e => {

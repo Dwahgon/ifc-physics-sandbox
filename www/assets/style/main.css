@@ -68,6 +68,10 @@
     height: 100%;
 }
 
+.inactive-button > img{
+    opacity: .25;
+}
+
 /*App layout*/
 body{
     margin: 0px;
@@ -267,18 +271,18 @@ header > div > .button{
 /* Property List */
 
 .side-panel:first-child > div > div{
-    height: 2.5vw;
-    padding: 10px 0px;
+    min-height: 32px;
+    margin: 10px 0px;
     display: flex;
-    justify-content: space-evenly;
+    justify-content: left;
+    flex-wrap: wrap;
 }
 
 .side-panel:first-child > div > div > button{
-    width: 0;
-    padding: .5vw;
-    margin: 0px .5vw;
-    flex-grow: 1;
-    font-size: 1vw;
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+    margin: 0px 2px;
 }
 
 #property-list > li {
