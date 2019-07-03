@@ -1,21 +1,11 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-(function (factory) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        var v = factory(require, exports);
-        if (v !== undefined) module.exports = v;
-    }
-    else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./genericCalulator", "./types", "./vector2", "./propertyLI"], factory);
-    }
-})(function (require, exports) {
+define(["require", "exports", "./genericCalulator", "./types", "./vector2", "./propertyLI"], function (require, exports, genericCalulator_1, types_1, vector2_1, propertyLI_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const genericCalulator_1 = require("./genericCalulator");
-    const types_1 = require("./types");
-    const vector2_1 = __importDefault(require("./vector2"));
-    const propertyLI_1 = require("./propertyLI");
+    vector2_1 = __importDefault(vector2_1);
+    console.log("Loading physicsProperties");
     class PhysicsProperty {
         constructor(kind, changeable, object, iValue, oValue, genericCalculator) {
             this.kind = kind;

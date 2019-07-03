@@ -1,23 +1,20 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-(function (factory) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        var v = factory(require, exports);
-        if (v !== undefined) module.exports = v;
-    }
-    else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./ambient", "./input", "./rendering", "./simulator", "./vector2", "./document"], factory);
-    }
-})(function (require, exports) {
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+define(["require", "exports", "./ambient", "./rendering", "./simulator", "./vector2", "./document"], function (require, exports, ambient_1, rendering_1, simulator_1, vector2_1, document_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const ambient_1 = __importDefault(require("./ambient"));
-    const input_1 = __importDefault(require("./input"));
-    const rendering_1 = require("./rendering");
-    const simulator_1 = __importDefault(require("./simulator"));
-    const vector2_1 = __importDefault(require("./vector2"));
-    const document_1 = require("./document");
+    ambient_1 = __importDefault(ambient_1);
+    simulator_1 = __importDefault(simulator_1);
+    vector2_1 = __importDefault(vector2_1);
+    console.log("Loading main");
     let can = document.createElement('canvas');
     let ctx = can.getContext('2d');
     can.width = 500;
@@ -26,6 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.canvasRenderer = new rendering_1.CanvasRenderer(ctx, vector2_1.default.zero, 100);
     exports.ambient = new ambient_1.default();
     exports.simulator = new simulator_1.default();
+    new Promise((resolve_1, reject_1) => { require(["./input"], resolve_1, reject_1); }).then(__importStar);
     exports.setAmbient = function (a) {
         exports.canvasRenderer.remove(exports.ambient);
         exports.ambient = a;
@@ -33,7 +31,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         document_1.ObjectSelectionController.selectObject(exports.ambient);
     };
     document_1.ObjectSelectionController.selectObject(exports.ambient);
-    new input_1.default(exports.canvasRenderer);
     exports.canvasRenderer.add({ draw() { ctx.clearRect(0, 0, can.width, can.height); } });
     exports.canvasRenderer.add(new rendering_1.Grid(1));
     exports.canvasRenderer.add(exports.ambient);

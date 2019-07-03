@@ -1,20 +1,11 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-(function (factory) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        var v = factory(require, exports);
-        if (v !== undefined) module.exports = v;
-    }
-    else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./types", "./vector2", "./document"], factory);
-    }
-})(function (require, exports) {
+define(["require", "exports", "./types", "./vector2", "./document"], function (require, exports, types_1, vector2_1, document_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const types_1 = require("./types");
-    const vector2_1 = __importDefault(require("./vector2"));
-    const document_1 = require("./document");
+    vector2_1 = __importDefault(vector2_1);
+    console.log("Loading rendering");
     class CanvasRenderer {
         constructor(context, cameraPos, cameraZoom) {
             this.context = context;
@@ -56,7 +47,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             this._pos = _pos;
             this.zoom = zoom;
             this.targetObjectPosition = null;
-            document_1.miscButtons.get("centralize-camera").onClick = this.centralize.bind(this);
+            document_1.miscButtons.get("centralize-camera").onClick = this.focusOrigin.bind(this);
             let canvas = this.canvasRenderer.context.canvas;
             canvas.addEventListener("wheel", this.onWheelEvent.bind(this));
         }
@@ -98,7 +89,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             this.changeButtonText(true);
             this.targetObjectPosition = null;
         }
-        centralize() {
+        focusOrigin() {
             this.pos = vector2_1.default.zero;
         }
         changeButtonText(isFollowing) {
@@ -125,7 +116,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             imgElement.src = imageSrc;
             this.image = imgElement;
             this.drawSize = drawSize;
-            this.drawFunction = this.draw.bind(this);
         }
         getZoomedSize(zoom) {
             return vector2_1.default.mult(this.drawSize, zoom);
@@ -140,13 +130,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         getPositionInCanvas() {
             const camera = this.renderer.camera;
             return vector2_1.default.sub(camera.getCanvasPosFromWorld(this.drawPosition), vector2_1.default.div(this.getZoomedSize(camera.zoom), 2));
-        }
-        positionIsInsideSprite(pos) {
-            const posInCan = this.getPositionInCanvas();
-            const cam = this.renderer.camera;
-            if (pos.x > posInCan.x && pos.x < posInCan.x + this.getZoomedSize(cam.zoom).x && pos.y > posInCan.y && pos.y < posInCan.y + this.getZoomedSize(cam.zoom).y)
-                return true;
-            return false;
         }
     }
     exports.Sprite = Sprite;

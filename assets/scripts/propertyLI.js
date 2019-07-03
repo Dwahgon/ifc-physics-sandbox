@@ -1,20 +1,11 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-(function (factory) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        var v = factory(require, exports);
-        if (v !== undefined) module.exports = v;
-    }
-    else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./vector2", "./document", "./types"], factory);
-    }
-})(function (require, exports) {
+define(["require", "exports", "./vector2", "./document", "./types"], function (require, exports, vector2_1, document_1, types_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const vector2_1 = __importDefault(require("./vector2"));
-    const document_1 = require("./document");
-    const types_1 = require("./types");
+    vector2_1 = __importDefault(vector2_1);
+    console.log("Loading propertyLI");
     class PropertyLI {
         constructor(property, title, propertyUnit, regExp, initialValue) {
             this.property = property;

@@ -1,15 +1,6 @@
-(function (factory) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        var v = factory(require, exports);
-        if (v !== undefined) module.exports = v;
-    }
-    else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./types"], factory);
-    }
-})(function (require, exports) {
+define(["require", "exports", "./types"], function (require, exports, types_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const types_1 = require("./types");
     exports.propertyDescriptions = new Map();
     exports.propertyDescriptions.set(types_1.PhysicsPropertyType.ObjectPosition, `
     <h1>
