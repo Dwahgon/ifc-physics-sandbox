@@ -1,3 +1,5 @@
+console.log("Loading document");
+
 import { ambient, canvasRenderer, simulator, setAmbient } from "./main";
 import { PhysicsObject, PhysicsObjectConfig } from "./physicsObjects";
 import PhysicsProperty from "./physicsProperties";
@@ -277,39 +279,6 @@ miscButtons.set("close-property-description", new MiscImageButton(documentElemen
 miscButtons.set("new-button", new MiscImageButton(documentElements.get("file-buttons")!, "new-button", "./assets/images/newfile.png", ButtonColor.InvisibleBackground, "Novo ambiente"));
 miscButtons.set("save-button", new MiscImageButton(documentElements.get("file-buttons")!, "save-button", "./assets/images/save.png", ButtonColor.InvisibleBackground, "Salvar ambiente"));
 miscButtons.set("load-button", new MiscImageButton(documentElements.get("file-buttons")!, "load-button", "./assets/images/load.png", ButtonColor.InvisibleBackground, "Abrir ambiente"));
-
-//Event listeners
-document.addEventListener("click", e => {
-    const target = (<HTMLElement>e.target);
-    const buttonId = target.getAttribute("button-id");
-
-    switch (target.getAttribute("button-kind")) {
-        case DocumentButtonKind.MiscButton:
-            const button = miscButtons.get(buttonId!);
-            if (button && button.onClick)
-                button.onClick();
-
-            break;
-        case DocumentButtonKind.CreateObjectButton:
-            if (!ObjectCreationController.objectCreatable)
-                return;
-
-            const objectCreationArray = Array.from(objectCreationButtons);
-            const objectPair = objectCreationArray.find(el => { return el[1].element.getAttribute("button-id") == buttonId })!;
-            const objectKind = objectPair[0];
-            const objectButton = objectPair[1];
-
-            objectButton.onClick!(objectKind, canvasRenderer, ambient, objectButton.createObjectConfig());
-            break;
-        case DocumentButtonKind.PropertyButton:
-            const propertyKind: string | null = (<HTMLDivElement>e.target)!.getAttribute("property-kind");
-            if (propertyKind)
-                PropertyDescriptionUI.show(parseInt(propertyKind));
-            return;
-    }
-
-
-});
 
 //Configuration
 miscButtons.get("destroy-button")!.onClick = function () {

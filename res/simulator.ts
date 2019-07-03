@@ -1,3 +1,5 @@
+console.log("Loading simulator");
+
 import { ambient } from './main';
 import { DocumentButton, miscButtons, ObjectSelectionController, ObjectCreationController } from './document';
 

@@ -8,21 +8,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-(function (factory) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        var v = factory(require, exports);
-        if (v !== undefined) module.exports = v;
-    }
-    else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./physicsProperties", "./rendering", "./types", "./vector2"], factory);
-    }
-})(function (require, exports) {
+define(["require", "exports", "./physicsProperties", "./rendering", "./types", "./vector2"], function (require, exports, PhysicsProperties, rendering_1, types_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const PhysicsProperties = __importStar(require("./physicsProperties"));
-    const rendering_1 = require("./rendering");
-    const types_1 = require("./types");
-    const vector2_1 = __importDefault(require("./vector2"));
+    PhysicsProperties = __importStar(PhysicsProperties);
+    vector2_1 = __importDefault(vector2_1);
+    console.log("Loading physicsobjects");
     class PhysicsObject {
         constructor(kind, name, sprite, ambient) {
             this.kind = kind;
@@ -40,6 +31,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
         }
         reset() {
             this.objectProperties.forEach(property => property.reset());
+        }
+        /**
+         * Returns rather the position(world position) parameter is located inside the object
+         * @param position
+         */
+        isPositionInsideObject(position) {
+            let objPos = this.getProperty(types_1.PhysicsPropertyType.ObjectPosition).value;
+            let objSize = this.getProperty(types_1.PhysicsPropertyType.ObjectSize).value;
+            objSize = vector2_1.default.div(objSize, 2);
+            return position.x >= objPos.x - objSize.x &&
+                position.x <= objPos.x + objSize.x &&
+                position.y >= objPos.y - objSize.y &&
+                position.y <= objPos.y + objSize.y;
         }
         getProperty(type) {
             switch (type) {

@@ -1,3 +1,5 @@
+console.log("Loading physicsProperties");
+
 import GenericCalculator, { NumberCalculator, Vector2Calculator } from './genericCalulator';
 import { PhysicsObject } from './physicsObjects';
 import PropertyLI from './propertyLI';

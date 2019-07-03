@@ -1,3 +1,5 @@
+console.log("Loading physicsobjects");
+
 import Ambient from './ambient';
 import PhysicsProperty, * as PhysicsProperties from './physicsProperties';
 import { CanvasRenderer, Sprite } from './rendering';
@@ -29,6 +31,21 @@ export class PhysicsObject implements Selectable{
 
     reset(): void{
         this.objectProperties.forEach(property => property.reset())
+    }
+
+    /**
+     * Returns rather the position(world position) parameter is located inside the object
+     * @param position 
+     */
+    isPositionInsideObject(position: Vector2): boolean{
+        let objPos = (<PhysicsProperties.ObjectPosition>this.getProperty(PhysicsPropertyType.ObjectPosition)).value;
+        let objSize = (<PhysicsProperties.ObjectSize>this.getProperty(PhysicsPropertyType.ObjectSize)).value;
+        objSize = Vector2.div(objSize, 2);
+
+        return position.x >= objPos.x  - objSize.x && 
+                position.x <= objPos.x + objSize.x && 
+                position.y >= objPos.y - objSize.y &&
+                position.y <= objPos.y + objSize.y
     }
 
     

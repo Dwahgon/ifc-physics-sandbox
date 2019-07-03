@@ -1,22 +1,11 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-(function (factory) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        var v = factory(require, exports);
-        if (v !== undefined) module.exports = v;
-    }
-    else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./main", "./physicsObjects", "./propertyDescriptions", "./types", "./vector2"], factory);
-    }
-})(function (require, exports) {
+define(["require", "exports", "./main", "./physicsObjects", "./propertyDescriptions", "./types", "./vector2"], function (require, exports, main_1, physicsObjects_1, propertyDescriptions_1, types_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const main_1 = require("./main");
-    const physicsObjects_1 = require("./physicsObjects");
-    const propertyDescriptions_1 = require("./propertyDescriptions");
-    const types_1 = require("./types");
-    const vector2_1 = __importDefault(require("./vector2"));
+    vector2_1 = __importDefault(vector2_1);
+    console.log("Loading document");
     class DocumentButton {
         constructor(parent, id, kind, _enabled, onClick, buttonColor) {
             this.id = id;
@@ -235,32 +224,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     exports.miscButtons.set("new-button", new MiscImageButton(exports.documentElements.get("file-buttons"), "new-button", "./assets/images/newfile.png", types_1.ButtonColor.InvisibleBackground, "Novo ambiente"));
     exports.miscButtons.set("save-button", new MiscImageButton(exports.documentElements.get("file-buttons"), "save-button", "./assets/images/save.png", types_1.ButtonColor.InvisibleBackground, "Salvar ambiente"));
     exports.miscButtons.set("load-button", new MiscImageButton(exports.documentElements.get("file-buttons"), "load-button", "./assets/images/load.png", types_1.ButtonColor.InvisibleBackground, "Abrir ambiente"));
-    //Event listeners
-    document.addEventListener("click", e => {
-        const target = e.target;
-        const buttonId = target.getAttribute("button-id");
-        switch (target.getAttribute("button-kind")) {
-            case types_1.DocumentButtonKind.MiscButton:
-                const button = exports.miscButtons.get(buttonId);
-                if (button && button.onClick)
-                    button.onClick();
-                break;
-            case types_1.DocumentButtonKind.CreateObjectButton:
-                if (!ObjectCreationController.objectCreatable)
-                    return;
-                const objectCreationArray = Array.from(exports.objectCreationButtons);
-                const objectPair = objectCreationArray.find(el => { return el[1].element.getAttribute("button-id") == buttonId; });
-                const objectKind = objectPair[0];
-                const objectButton = objectPair[1];
-                objectButton.onClick(objectKind, main_1.canvasRenderer, main_1.ambient, objectButton.createObjectConfig());
-                break;
-            case types_1.DocumentButtonKind.PropertyButton:
-                const propertyKind = e.target.getAttribute("property-kind");
-                if (propertyKind)
-                    PropertyDescriptionUI.show(parseInt(propertyKind));
-                return;
-        }
-    });
     //Configuration
     exports.miscButtons.get("destroy-button").onClick = function () {
         const selectedObject = ObjectSelectionController.selectedObject;

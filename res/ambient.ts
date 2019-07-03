@@ -1,10 +1,12 @@
+console.log("Loading ambient");
+
 import { PhysicsObject } from './physicsObjects';
 import Selectable from './selectable';
 import Vector2 from './vector2';
 import { CanvasRenderer, Renderable } from './rendering';
 import { AmbientJSON, PhysicsObjectJSON, downloadJSON } from './fileController';
 import { miscButtons } from './document';
-import { setAmbient, canvasRenderer, ambient } from './main';
+import { setAmbient, canvasRenderer, ambient, simulator } from './main';
 
 export default class Ambient implements Selectable, Renderable {
     public readonly objects: PhysicsObject[];
@@ -36,9 +38,12 @@ export default class Ambient implements Selectable, Renderable {
         }
     }
 
-    getObjectOnPosition(pos: Vector2): PhysicsObject | null {
+    getObjectOnPosition(pos: Vector2, convertToWorldPos?: boolean): PhysicsObject | null {
+        if(convertToWorldPos)
+            pos = canvasRenderer.camera.getWorldPosFromCanvas(pos);
+
         for (const obj of this.objects) {
-            if (obj.sprite.positionIsInsideSprite(pos))
+            if (obj.isPositionInsideObject(pos))
                 return obj;
         }
 
@@ -70,8 +75,11 @@ export default class Ambient implements Selectable, Renderable {
 
 miscButtons.get("new-button")!.onClick = function() {
     const isOKClicked = confirm("Você tem certeza que quer criar um novo ambiente? As alterações não salvas serão perdidas!");
-    if(isOKClicked)
+    if(isOKClicked){
         setAmbient(new Ambient());
+        simulator.reset();
+        canvasRenderer.camera.focusOrigin();
+    }
 };
 
 miscButtons.get("save-button")!.onClick = function() {

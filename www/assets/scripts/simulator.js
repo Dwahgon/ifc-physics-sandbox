@@ -1,16 +1,7 @@
-(function (factory) {
-    if (typeof module === "object" && typeof module.exports === "object") {
-        var v = factory(require, exports);
-        if (v !== undefined) module.exports = v;
-    }
-    else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./main", "./document"], factory);
-    }
-})(function (require, exports) {
+define(["require", "exports", "./main", "./document"], function (require, exports, main_1, document_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const main_1 = require("./main");
-    const document_1 = require("./document");
+    console.log("Loading simulator");
     class Simulator {
         constructor() {
             this._time = 0;

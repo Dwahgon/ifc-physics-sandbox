@@ -1,3 +1,5 @@
+console.log("Loading rendering");
+
 import { PhysicsObject } from './physicsObjects';
 import { ObjectPosition } from './physicsProperties';
 import { PhysicsPropertyType } from './types';
@@ -60,7 +62,7 @@ export class Camera {
     constructor(private canvasRenderer: CanvasRenderer, private _pos: Vector2, public zoom: number) {
         this.targetObjectPosition = null;
         
-        miscButtons.get("centralize-camera")!.onClick = this.centralize.bind(this);
+        miscButtons.get("centralize-camera")!.onClick = this.focusOrigin.bind(this);
 
         let canvas = this.canvasRenderer.context.canvas;
         canvas.addEventListener("wheel", this.onWheelEvent.bind(this))
@@ -121,7 +123,7 @@ export class Camera {
         this.targetObjectPosition = null;
     }
 
-    centralize(): void{
+    focusOrigin(): void{
         this.pos = Vector2.zero;
     }
 
@@ -145,7 +147,6 @@ export class Camera {
 export class Sprite implements Renderable{
     public drawSize: Vector2;
     private image: HTMLImageElement;
-    private drawFunction: Function;
 
     constructor(private renderer: CanvasRenderer, imageSrc: string, public copyPosition: Vector2, public copySize: Vector2, public drawPosition: Vector2, drawSize: Vector2) {
         const imgElement = document.createElement('img');
@@ -153,7 +154,6 @@ export class Sprite implements Renderable{
         this.image = imgElement;
 
         this.drawSize = drawSize;
-        this.drawFunction = this.draw.bind(this);
     }
 
     getZoomedSize(zoom: number): Vector2{
@@ -178,16 +178,6 @@ export class Sprite implements Renderable{
         const camera = this.renderer.camera;
         
         return Vector2.sub(camera.getCanvasPosFromWorld(this.drawPosition), Vector2.div(this.getZoomedSize(camera.zoom), 2));
-    }
-
-    positionIsInsideSprite(pos: Vector2){
-        const posInCan = this.getPositionInCanvas();
-        const cam = this.renderer.camera;
-
-        if(pos.x > posInCan.x && pos.x < posInCan.x + this.getZoomedSize(cam.zoom).x && pos.y > posInCan.y && pos.y < posInCan.y + this.getZoomedSize(cam.zoom).y)
-            return true;
-
-        return false;
     }
 }
 

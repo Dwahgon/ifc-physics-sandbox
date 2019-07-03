@@ -1,3 +1,5 @@
+console.log("Loading Selectable");
+
 import PhysicsProperty from './physicsProperties';
 import { PhysicsPropertyType } from './types';
 

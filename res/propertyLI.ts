@@ -1,3 +1,5 @@
+console.log("Loading propertyLI");
+
 import PhysicsProperty from './physicsProperties';
 import Vector2 from './vector2';
 import { documentElements } from './document';
