@@ -29,6 +29,8 @@ export default class Simulator {
         this.playButton = miscButtons.get("play-button")!;
         this.resetButton = miscButtons.get("reset-button")!;
 
+        this.resetButton.enabled = false;
+
         this.domInput.addEventListener("change", () => {
             if(this.isPlaying)
                 return;

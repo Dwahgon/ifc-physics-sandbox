@@ -14,6 +14,7 @@ define(["require", "exports", "./main", "./document"], function (require, export
             this.domInput.value = this._time.toFixed(2);
             this.playButton = document_1.miscButtons.get("play-button");
             this.resetButton = document_1.miscButtons.get("reset-button");
+            this.resetButton.enabled = false;
             this.domInput.addEventListener("change", () => {
                 if (this.isPlaying)
                     return;

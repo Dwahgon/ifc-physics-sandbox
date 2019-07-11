@@ -1,7 +1,7 @@
 :root {
     --property-panel-width: 25vw;
     --object-panel-width: 125px;
-    --header-height: 70px;
+    --header-height: 36px;
     --simulation-controller-height: 100px;
 }
 
@@ -16,8 +16,11 @@
     src: url("../vendor/XITS-Regular.otf");
 }
 
-
 /* Default Button*/
+
+.dark-button, .white-button {
+    border: 1px solid #1a1a1a;
+}
 
 .dark-button{
     background-color: #282828;
@@ -27,11 +30,16 @@
     background-color: #3f3f3f;
 }
 
+.invisible-bg-button{
+    background-color: #00000000;
+    background-color: rgba(0,0,0,0);
+    border: none;
+}
+
 .button, .inactive-button{
     box-sizing: border-box;
     display: grid;
     padding: 10px;
-    border: 1px solid #1a1a1a;
     border-radius: 4px;
 }
 
@@ -60,7 +68,15 @@
     height: 100%;
 }
 
+.inactive-button > img{
+    opacity: .25;
+}
+
 /*App layout*/
+* {
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
 body{
     margin: 0px;
     overflow: hidden;
@@ -71,7 +87,7 @@ body{
 body > header{
     width: 100vw;
     height: var(--header-height);
-    padding: 10px;
+    padding: 2px;
     background-color: #282828;
     display: flex;
     box-sizing: border-box;
@@ -87,7 +103,7 @@ header > div{
 
 header > div > .button{
     height: 100%;
-    width: calc(var(--header-height) - 20px);
+    width: calc(var(--header-height) - 4px);
     padding: 5px;
 }
 
@@ -259,18 +275,18 @@ header > div > .button{
 /* Property List */
 
 .side-panel:first-child > div > div{
-    height: 2.5vw;
-    padding: 10px 0px;
+    min-height: 32px;
+    margin: 10px 0px;
     display: flex;
-    justify-content: space-evenly;
+    justify-content: left;
+    flex-wrap: wrap;
 }
 
 .side-panel:first-child > div > div > button{
-    width: 0;
-    padding: .5vw;
-    margin: 0px .5vw;
-    flex-grow: 1;
-    font-size: 1vw;
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+    margin: 0px 2px;
 }
 
 #property-list > li {

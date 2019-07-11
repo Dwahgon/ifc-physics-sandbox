@@ -16,7 +16,6 @@
     src: url("../vendor/XITS-Regular.otf");
 }
 
-
 /* Default Button*/
 
 .dark-button, .white-button {
@@ -33,6 +32,7 @@
 
 .invisible-bg-button{
     background-color: #00000000;
+    background-color: rgba(0,0,0,0);
     border: none;
 }
 
@@ -73,6 +73,10 @@
 }
 
 /*App layout*/
+* {
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
 body{
     margin: 0px;
     overflow: hidden;
@@ -306,6 +310,7 @@ header > div > .button{
     border: 0px;
     margin-right: 5px;
     background-color: #00000000;
+    background-color: rgba(0,0,0,0);
     box-sizing: border-box;
     font-size: 1.0vw;
     color: #ffffff;

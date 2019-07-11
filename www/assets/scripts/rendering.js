@@ -143,9 +143,18 @@ define(["require", "exports", "./types", "./vector2", "./document"], function (r
             let finishPos = cam.getWorldPosFromCanvas(new vector2_1.default(canvas.width, canvas.height));
             let startX = Math.ceil(startPos.x / this.gridSize) * this.gridSize;
             let startY = Math.floor(startPos.y / this.gridSize) * this.gridSize;
+            let axisLocation = new vector2_1.default(0, 0);
+            ctx.font = "italic 30px CMU Serif";
             for (let i = startX; i < finishPos.x; i += this.gridSize) {
                 let x = (canvas.width / 2) + i * cam.zoom - cam.pos.x;
-                ctx.strokeStyle = (i == 0) ? "green" : "gray";
+                const style = (i == 0) ? "green" : "gray";
+                ctx.strokeStyle = style;
+                ctx.fillStyle = style;
+                ctx.lineWidth = i == 0 ? 3 : 1;
+                if (i == 0) {
+                    axisLocation.x = x;
+                    ctx.fillText("y", x + 10, 25);
+                }
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
                 ctx.lineTo(x, canvas.height);
@@ -153,11 +162,23 @@ define(["require", "exports", "./types", "./vector2", "./document"], function (r
             }
             for (let i = startY; i > finishPos.y; i -= this.gridSize) {
                 let y = (canvas.height / 2) - i * cam.zoom + cam.pos.y;
-                ctx.strokeStyle = (i == 0) ? "red" : "gray";
+                const style = (i == 0) ? "red" : "gray";
+                ctx.strokeStyle = style;
+                ctx.fillStyle = style;
+                ctx.lineWidth = i == 0 ? 3 : 1;
+                if (i == 0) {
+                    axisLocation.y = y;
+                    ctx.fillText("x", canvas.width - 25, y - 10);
+                }
                 ctx.beginPath();
                 ctx.moveTo(0, y);
                 ctx.lineTo(canvas.width, y);
                 ctx.stroke();
+            }
+            if (axisLocation.x > 0 && axisLocation.y > 0) {
+                ctx.fillStyle = "blue";
+                ctx.fillRect(axisLocation.x - 3, axisLocation.y - 3, 6, 6);
+                ctx.fillText("O", axisLocation.x - 35, axisLocation.y - 10);
             }
         }
     }
