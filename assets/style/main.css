@@ -1,5 +1,5 @@
 :root {
-    --property-panel-width: 25vw;
+    --property-panel-width: 30vw;
     --object-panel-width: 125px;
     --header-height: 36px;
     --simulation-controller-height: 100px;
@@ -41,6 +41,7 @@
     display: grid;
     padding: 10px;
     border-radius: 4px;
+    outline: none;
 }
 
 .button{
@@ -75,6 +76,7 @@
 /*App layout*/
 * {
     -webkit-tap-highlight-color: rgba(0,0,0,0);
+    user-select: none;
 }
 
 body{
