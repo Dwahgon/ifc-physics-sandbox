@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="512"
+   height="512"
+   viewBox="0 0 135.46666 135.46667"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="solidicon.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="22.182975"
+     inkscape:cy="253.54699"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:pagecheckerboard="true"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Camada 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-161.53332)">
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1366"
+       width="125.46674"
+       height="125.46674"
+       x="4.9999614"
+       y="166.53328"
+       rx="10.156242"
+       ry="10.156242" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot1368"
+       style="fill:black;fill-opacity:1;stroke:none;font-family:sans-serif;font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;letter-spacing:0px;word-spacing:0px;-inkscape-font-specification:sans-serif;font-stretch:normal;font-variant:normal;"><flowRegion
+         id="flowRegion1370"
+         style="-inkscape-font-specification:sans-serif;font-family:sans-serif;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;"><rect
+           id="rect1372"
+           width="289.91379"
+           height="273.75134"
+           x="80.307129"
+           y="87.735931"
+           style="-inkscape-font-specification:sans-serif;font-family:sans-serif;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;" /></flowRegion><flowPara
+         id="flowPara1374" /></flowRoot>    <g
+       aria-label="s"
+       transform="matrix(0.26458333,0,0,0.26458333,-2.0999557,108.95273)"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:533.33331299px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none"
+       id="flowRoot1376">
+      <path
+         d="m 359.77017,317.22981 v 45.3125 q -20.3125,-10.41667 -42.1875,-15.625 -21.87499,-5.20833 -45.31249,-5.20833 -35.67709,0 -53.64583,10.9375 -17.70834,10.9375 -17.70834,32.81249 0,16.66667 12.76042,26.30209 12.76042,9.375 51.30208,17.96875 l 16.40625,3.64583 q 51.04166,10.9375 72.39583,30.98958 21.61458,19.79167 21.61458,55.46875 0,40.625 -32.29166,64.32291 -32.03125,23.69792 -88.28125,23.69792 -23.4375,0 -48.95833,-4.6875 -25.26042,-4.42708 -53.38542,-13.54167 v -49.47916 q 26.5625,13.80208 52.34375,20.83333 25.78125,6.77083 51.04167,6.77083 33.85416,0 52.08333,-11.45833 18.22916,-11.71875 18.22916,-32.8125 0,-19.53125 -13.28124,-29.94791 -13.02084,-10.41667 -57.55209,-20.05209 l -16.66666,-3.90625 q -44.53125,-9.37499 -64.32292,-28.64583 -19.79166,-19.53125 -19.79166,-53.38541 0,-41.14583 29.16666,-63.54167 29.16667,-22.39583 82.8125,-22.39583 26.5625,0 50,3.90625 23.4375,3.90625 43.22916,11.71875 z"
+         style=""
+         id="path821" />
+    </g>
+  </g>
+</svg>

@@ -1,17 +1,17 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./types", "./vector2", "./document"], function (require, exports, types_1, vector2_1, document_1) {
+define(["require", "exports", "./document", "./types", "./vector2"], function (require, exports, document_1, types_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_1 = __importDefault(vector2_1);
     console.log("Loading rendering");
     class CanvasRenderer {
-        constructor(context, cameraPos, cameraZoom) {
+        constructor(context, cameraPos, cameraZoom, cameraMinZoom, cameraMaxZoom) {
             this.context = context;
             this.isRunning = false;
             this.renderables = [];
-            this.camera = new Camera(this, cameraPos, cameraZoom);
+            this.camera = new Camera(this, cameraPos, cameraZoom, cameraMinZoom, cameraMaxZoom, 5);
         }
         start() {
             this.isRunning = true;
@@ -42,14 +42,35 @@ define(["require", "exports", "./types", "./vector2", "./document"], function (r
     }
     exports.CanvasRenderer = CanvasRenderer;
     class Camera {
-        constructor(canvasRenderer, _pos, zoom) {
+        constructor(canvasRenderer, _pos, defaultZoom, minZoom, maxZoom, zoomStep) {
             this.canvasRenderer = canvasRenderer;
             this._pos = _pos;
-            this.zoom = zoom;
+            this.defaultZoom = defaultZoom;
+            this.minZoom = minZoom;
+            this.maxZoom = maxZoom;
+            this.zoomStep = zoomStep;
             this.targetObjectPosition = null;
+            this._zoom = this.defaultZoom;
             document_1.miscButtons.get("centralize-camera").onClick = this.focusOrigin.bind(this);
-            let canvas = this.canvasRenderer.context.canvas;
-            canvas.addEventListener("wheel", this.onWheelEvent.bind(this));
+        }
+        get zoom() {
+            return this._zoom;
+        }
+        set zoom(n) {
+            this._zoom = n;
+            if (this._zoom < this.minZoom)
+                this._zoom = this.minZoom;
+            else if (this._zoom > this.maxZoom)
+                this._zoom = this.maxZoom;
+        }
+        nextZoom() {
+            this.zoom += this.zoomStep;
+        }
+        previousZoom() {
+            this.zoom -= this.zoomStep;
+        }
+        resetZoom() {
+            this.zoom = this.defaultZoom;
         }
         getWorldPosFromCanvas(canvasPos) {
             const canvas = this.canvasRenderer.context.canvas;
@@ -97,18 +118,10 @@ define(["require", "exports", "./types", "./vector2", "./document"], function (r
             if (document_1.ObjectSelectionController.selectedObject == this.objectBeingFollowed)
                 followButton.toggled = !isFollowing;
         }
-        onWheelEvent(ev) {
-            this.zoom += ev.deltaY / -20;
-            if (this.zoom < 0.1)
-                this.zoom = 0.1;
-            else if (this.zoom > 200)
-                this.zoom = 200;
-        }
     }
     exports.Camera = Camera;
     class Sprite {
-        constructor(renderer, imageSrc, copyPosition, copySize, drawPosition, drawSize) {
-            this.renderer = renderer;
+        constructor(imageSrc, copyPosition, copySize, drawPosition, drawSize) {
             this.copyPosition = copyPosition;
             this.copySize = copySize;
             this.drawPosition = drawPosition;
@@ -120,20 +133,14 @@ define(["require", "exports", "./types", "./vector2", "./document"], function (r
         getZoomedSize(zoom) {
             return vector2_1.default.mult(this.drawSize, zoom);
         }
-        draw() {
+        draw(cam, context) {
+            const posInCanvas = vector2_1.default.sub(cam.getCanvasPosFromWorld(this.drawPosition), vector2_1.default.div(this.getZoomedSize(cam.zoom), 2));
             // @ts-ignore
-            this.renderer.context.drawImage(this.image, ...this.copyPosition.toArray(), ...this.copySize.toArray(), ...this.getPositionInCanvas().toArray(), ...this.getZoomedSize(this.renderer.camera.zoom).toArray());
-        }
-        stopDrawing() {
-            this.renderer.remove(this);
-        }
-        getPositionInCanvas() {
-            const camera = this.renderer.camera;
-            return vector2_1.default.sub(camera.getCanvasPosFromWorld(this.drawPosition), vector2_1.default.div(this.getZoomedSize(camera.zoom), 2));
+            context.drawImage(this.image, ...this.copyPosition.toArray(), ...this.copySize.toArray(), ...posInCanvas.toArray(), ...this.getZoomedSize(cam.zoom).toArray());
         }
     }
     exports.Sprite = Sprite;
-    class Grid {
+    class CartesianPlane {
         constructor(gridSize) {
             this.gridSize = gridSize;
         }
@@ -182,5 +189,5 @@ define(["require", "exports", "./types", "./vector2", "./document"], function (r
             }
         }
     }
-    exports.Grid = Grid;
+    exports.CartesianPlane = CartesianPlane;
 });

@@ -1,92 +1,98 @@
 :root {
     --property-panel-width: 30vw;
-    --object-panel-width: 125px;
     --header-height: 36px;
     --simulation-controller-height: 100px;
+    --property-li-height: 30px;
 }
 
-@font-face{
+@font-face {
     font-family: "CMU Serif";
     src: url("../vendor/cmunbi.ttf");
 }
 
-
-@font-face{
+@font-face {
     font-family: "XITS Regular";
     src: url("../vendor/XITS-Regular.otf");
 }
 
+
 /* Default Button*/
 
-.dark-button, .white-button {
+.dark-button,
+.white-button {
     border: 1px solid #1a1a1a;
 }
 
-.dark-button{
+.dark-button {
     background-color: #282828;
 }
 
-.white-button{
+.white-button {
     background-color: #3f3f3f;
 }
 
-.invisible-bg-button{
+.invisible-bg-button {
     background-color: #00000000;
-    background-color: rgba(0,0,0,0);
+    background-color: rgba(0, 0, 0, 0);
     border: none;
 }
 
-.button, .inactive-button{
+.button,
+.inactive-button {
     box-sizing: border-box;
     display: grid;
     padding: 10px;
     border-radius: 4px;
     outline: none;
+    font-family: inherit;
 }
 
-.button{
+.button {
     cursor: pointer;
     color: #ffffff;
     transition: background-color .25s, transform .05s;
 }
 
-.inactive-button{
+.inactive-button {
     background-color: #474747;
     color: #a0a0a0;
     cursor: default;
 }
 
-.button:hover{
+.button:hover {
     background-color: #3d3d3d;
 }
 
-.button:active{
+.button:active {
     transform: scale(0.95);
 }
 
-.button > img, .inactive-button > img{
+.button>img,
+.inactive-button>img {
     width: 100%;
     height: 100%;
 }
 
-.inactive-button > img{
+.inactive-button>img {
     opacity: .25;
 }
 
+
 /*App layout*/
+
 * {
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     user-select: none;
 }
 
-body{
+body {
     margin: 0px;
     overflow: hidden;
-    font: 1.0vw "XITS Regular";
+    font: 1.0vw "CMU Serif";
     color: #ffffff;
 }
 
-body > header{
+body>header {
     width: 100vw;
     height: var(--header-height);
     padding: 2px;
@@ -97,26 +103,28 @@ body > header{
     align-items: center;
 }
 
-header > div{
+header>div {
     height: 100%;
     margin-right: 20px;
     display: flex;
 }
 
-header > div > .button{
+header>div>.button {
     height: 100%;
     width: calc(var(--header-height) - 4px);
     padding: 5px;
 }
 
-#main-interface{
+#main-interface {
     width: 100vw;
     height: calc(100vh - var(--header-height));
     display: flex;
 }
 
+
 /*Panels*/
-.side-panel{
+
+.side-panel {
     display: table-cell;
     vertical-align: middle;
     padding: 10px;
@@ -124,40 +132,35 @@ header > div > .button{
     box-sizing: border-box;
 }
 
-.side-panel:first-child{
-    width: var(--property-panel-width);
-}
-
-.side-panel:last-child{
-    width: var(--object-panel-width);
-}
 
 /*Mid Panel*/
-#mid-menu{
+
+#mid-menu {
     height: 100%;
-    width: calc(100vw - var(--object-panel-width) - var(--property-panel-width));
+    width: calc(100vw - var(--header-height));
     vertical-align: middle;
     background-color: #ffffff;
 }
 
-#mid-menu div{
+#mid-menu>div {
     width: 100%;
 }
 
-#mid-menu > div:first-child{
+#mid-menu>div:first-child {
     height: calc(100% - 100px);
     display: flex;
     box-sizing: border-box;
+    position: relative;
 }
 
-#mid-menu > div:last-child {
+#mid-menu>div:last-child {
     height: var(--simulation-controller-height);
-    padding:  10px 0px;
+    padding: 10px;
     box-sizing: border-box;
     background-color: rgb(63, 63, 63);
 }
 
-#mid-menu > div:last-child > div {
+#mid-menu>div:last-child>div {
     height: 100%;
     padding: 10px;
     border: 1px solid rgb(47, 47, 47);
@@ -167,15 +170,15 @@ header > div > .button{
     background-color: rgb(100, 100, 100);
 }
 
-#mid-menu > div:last-child > div > div > button {
+#mid-menu>div:last-child>div>div>button {
     height: auto;
     width: 58px;
     margin-right: 10px;
     vertical-align: middle;
-    font: 20px "CMU Serif";
+    font-size: 20px;
 }
 
-#mid-menu > div:last-child > div > div {
+#mid-menu>div:last-child>div>div {
     display: flex;
     box-sizing: border-box;
     width: 50%;
@@ -183,12 +186,12 @@ header > div > .button{
     margin-left: auto;
 }
 
-#mid-menu > div:last-child > div > div > span {
+#mid-menu>div:last-child>div>div>span {
     margin: auto 5px auto 0px;
-    font: 20px "CMU Serif";
+    font-size: 20px;
 }
 
-#mid-menu > div:last-child > div > div > input {
+#mid-menu>div:last-child>div>div>input {
     height: 100%;
     width: 100%;
     border: 1px solid #1A1A1A;
@@ -196,14 +199,17 @@ header > div > .button{
     background-color: #282828;
     display: inline-block;
     box-sizing: border-box;
-    font: 1.5vw "CMU Serif";
+    font-size: 1.5vw;
+    font-family: inherit;
     color: #ffffff;
     text-align: right;
     flex-grow: 1;
 }
 
+
 /*Side panels*/
-.side-panel > div{
+
+.side-panel>div {
     width: 100%;
     height: 100%;
     padding: 0 10px;
@@ -215,7 +221,7 @@ header > div > .button{
     background-color: #646464;
 }
 
-.side-panel > div > h1{
+.side-panel>div>h1 {
     height: 50px;
     margin: 0;
     display: flex;
@@ -231,7 +237,8 @@ header > div > .button{
     color: #ffffff;
 }
 
-.side-panel > div > ul{
+.side-panel>div>ul,
+.side-panel>ul {
     box-sizing: border-box;
     height: 90%;
     margin: 10px 0;
@@ -240,43 +247,68 @@ header > div > .button{
     flex: 1;
 }
 
-.side-panel > div > ul > li{
+.side-panel>div>ul>li {
     width: 100%;
 }
+
 
 /*Object Buttons*/
 
-#object-list > li{
-    width: 100%;
-    height: calc(var(--object-panel-width) - 42px);
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: row;
+#object-list {
+    padding: 2px;
+    width: var(--header-height);
+    background-color: #282828;
 }
 
-#object-list > li > img{
-    width: calc(5vw - 20px);
-    height: auto;
-    margin-right: 10px;
+#object-list>button {
+    padding: 5px;
 }
 
-#object-list > li > div{
-    width: calc(100% - 100px);
-    border: 1px solid #474747;
-    border-width: 0px 0px 0px 1px;
-}
-
-#object-list > li > div > span{
-    margin-left: 4px;
-    box-sizing: border-box;
-    display: inline-block;
-    font-size: 1.2vw;
-    font-style: italic;
-}
 
 /* Property List */
 
-.side-panel:first-child > div > div{
+#property-side-panel {
+    width: var(--property-panel-width);
+    max-height: calc(100% - 10px);
+    z-index: 1;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    border: 1px solid #2f2f2f;
+    padding: 0 5px 5px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    border-radius: 4px;
+    background-color: #646464;
+}
+
+#property-side-panel>h1 {
+    height: 50px;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 0px solid rgb(47, 47, 47);
+    border-bottom-width: 1px;
+    box-sizing: border-box;
+    overflow: hidden;
+    font-size: 1.5vw;
+    text-shadow: 2px 2px 4px #000000;
+    word-wrap: break-word;
+    color: #ffffff;
+}
+
+#property-side-panel>ul {
+    box-sizing: border-box;
+    height: 90%;
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+    flex: 1;
+}
+
+#object-interactor {
     min-height: 32px;
     margin: 10px 0px;
     display: flex;
@@ -284,71 +316,72 @@ header > div > .button{
     flex-wrap: wrap;
 }
 
-.side-panel:first-child > div > div > button{
+#object-interactor>button {
     width: 32px;
     height: 32px;
     padding: 4px;
     margin: 0px 2px;
 }
 
-#property-list > li {
+#property-list>li {
     width: 100%;
-    height: 2.5vw;
+    height: var(--property-li-height);
+    font-size: calc(var(--property-li-height) / 2.75);
     border: 1px solid #1a1a1a;
-    margin-bottom: .5vw;
+    margin-bottom: 3px;
     box-sizing: border-box;
     background-color: #282828;
     border-radius: 4px;
     display: flex;
-    
 }
 
-#property-list > li:last-child{
+#property-list>li:last-child {
     margin-bottom: 0px;
 }
 
-#property-list > li > input {
-    width: 40%;
+#property-list>li>input {
+    width: 30%;
     border: 0px;
     margin-right: 5px;
     background-color: #00000000;
-    background-color: rgba(0,0,0,0);
+    background-color: rgba(0, 0, 0, 0);
     box-sizing: border-box;
-    font-size: 1.0vw;
     color: #ffffff;
-    font-family: "CMU Serif";
+    font-size: inherit;
+    font-family: inherit;
     text-align: right;
     flex-grow: 1;
 }
 
-#property-list > li > label {
+#property-list>li>label {
     display: inline-block;
     margin: auto 0px;
+    font-size: inherit;
     box-sizing: border-box;
 }
 
-#property-list > li > button {
-    height: 100%;
-    padding: .25vw;
-    width: 2.5vw;
-    box-sizing: border-box;
+#property-list>li>button {
+    height: calc(var(--property-li-height) - 6px);
+    width: calc(var(--property-li-height) - 6px);
+    padding: 2px;
     border: 0px solid #1a1a1a;
     border-right-width: 1px;
     margin-right: 5px;
+    box-sizing: content-box;
 }
 
-#property-list > li > button > img{
+#property-list>li>button>img {
     box-sizing: border-box;
 }
 
-#property-list > li > label:first-child {
+#property-list>li>label:first-child {
     width: 30%;
     padding-left: .5vw;
     border: solid #474747;
     border-width: 0px 1px 0px 0px;
 }
 
-#property-list > li > label:last-child {
+#property-list>li>label:last-child {
     padding-right: .5vw;
     box-sizing: content-box;
     display: inline;
@@ -356,9 +389,10 @@ header > div > .button{
     overflow: hidden;
 }
 
+
 /* Property Description */
 
-#property-description-interface{
+#property-description-interface {
     position: fixed;
     background-color: #000000aa;
     width: 100vw;
@@ -372,7 +406,7 @@ header > div > .button{
     align-items: center;
 }
 
-#property-description-interface > div{
+#property-description-interface>div {
     width: 30vw;
     height: 35vw;
     border-radius: 4px;
@@ -381,7 +415,7 @@ header > div > .button{
     box-sizing: border-box;
 }
 
-#property-description-interface > div > header{
+#property-description-interface>div>header {
     height: 10%;
     width: 100%;
     padding: .5vw;
@@ -392,13 +426,13 @@ header > div > .button{
     justify-content: flex-end;
 }
 
-#property-description-interface > div > header > button {
+#property-description-interface>div>header>button {
     height: 100%;
     width: calc(35vw * .1 - 1vw);
     padding: .5vw;
 }
 
-#property-description-interface > div > article{
+#property-description-interface>div>article {
     width: 100%;
     height: 90%;
     padding: 0 10px;
@@ -408,6 +442,6 @@ header > div > .button{
     font-family: Arial, Helvetica, sans-serif;
 }
 
-#property-description-interface > div > article > h1{
+#property-description-interface>div>article>h1 {
     text-align: center;
 }

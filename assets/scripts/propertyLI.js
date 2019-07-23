@@ -7,7 +7,7 @@ define(["require", "exports", "./vector2", "./document", "./types"], function (r
     vector2_1 = __importDefault(vector2_1);
     console.log("Loading propertyLI");
     class PropertyLI {
-        constructor(property, title, propertyUnit, regExp, initialValue) {
+        constructor(property, name, propertyUnit, regExp, initialValue, title) {
             this.property = property;
             this.regExp = regExp;
             this.li = document.createElement("li");
@@ -16,16 +16,17 @@ define(["require", "exports", "./vector2", "./document", "./types"], function (r
             this.domUnitLabel = document.createElement("label");
             const descriptionButton = document.createElement("button");
             const descriptionIcon = document.createElement("img");
-            descriptionIcon.src = "./assets/images/description.png";
-            this.domNameLabel.innerHTML = title;
+            descriptionIcon.src = "./assets/images/descriptionicon.svg";
+            this.domNameLabel.innerHTML = name;
             this.domUnitLabel.innerHTML = propertyUnit;
             descriptionButton.appendChild(descriptionIcon);
             this.li.appendChild(descriptionButton);
             this.li.appendChild(this.domNameLabel);
             this.li.appendChild(this.input);
             this.li.appendChild(this.domUnitLabel);
-            this.input.setAttribute("id", `${title}-property-input`);
-            this.domNameLabel.setAttribute("for", `${title}-property-input`);
+            this.input.setAttribute("id", `${name}-property-input`);
+            this.domNameLabel.setAttribute("for", `${name}-property-input`);
+            this.domNameLabel.setAttribute("title", title);
             descriptionButton.setAttribute("class", "button dark-button");
             descriptionButton.setAttribute("title", "Descrição");
             this.input.setAttribute("type", "text");
@@ -83,8 +84,8 @@ define(["require", "exports", "./vector2", "./document", "./types"], function (r
     }
     exports.default = PropertyLI;
     class PropertyLIVector2 extends PropertyLI {
-        constructor(property, title, propertyUnit, initialValue) {
-            super(property, title, propertyUnit, /\-?\d*\.?\d*/g, initialValue);
+        constructor(property, name, propertyUnit, initialValue, title) {
+            super(property, name, propertyUnit, /\-?\d*\.?\d*/g, initialValue, title);
         }
         formatValue(value) {
             return `(${value.x.toFixed(2)}, ${value.y.toFixed(2)})`;
@@ -99,8 +100,8 @@ define(["require", "exports", "./vector2", "./document", "./types"], function (r
     }
     exports.PropertyLIVector2 = PropertyLIVector2;
     class PropertyLINumber extends PropertyLI {
-        constructor(property, title, propertyUnit, initialValue) {
-            super(property, title, propertyUnit, /\-?\d*\.?\d*/i, initialValue);
+        constructor(property, name, propertyUnit, initialValue, title) {
+            super(property, name, propertyUnit, /\-?\d*\.?\d*/i, initialValue, title);
         }
         formatValue(value) {
             return value.toFixed(2);

@@ -1,6 +1,7 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    console.log("Loading types");
     var ButtonColor;
     (function (ButtonColor) {
         ButtonColor["Dark"] = "dark-button";

@@ -20,19 +20,22 @@ define(["require", "exports", "./ambient", "./rendering", "./simulator", "./vect
     can.width = 500;
     can.height = 500;
     document.body.querySelector("#mid-menu>div").appendChild(can);
-    exports.canvasRenderer = new rendering_1.CanvasRenderer(ctx, vector2_1.default.zero, 100);
+    exports.canvasRenderer = new rendering_1.CanvasRenderer(ctx, vector2_1.default.zero, 100, 5, 500);
     exports.ambient = new ambient_1.default();
     exports.simulator = new simulator_1.default();
     new Promise((resolve_1, reject_1) => { require(["./input"], resolve_1, reject_1); }).then(__importStar);
     exports.setAmbient = function (a) {
         exports.canvasRenderer.remove(exports.ambient);
+        exports.simulator.remove(exports.ambient);
         exports.ambient = a;
         exports.canvasRenderer.add(exports.ambient);
+        exports.simulator.add(exports.ambient);
         document_1.ObjectSelectionController.selectObject(exports.ambient);
     };
     document_1.ObjectSelectionController.selectObject(exports.ambient);
+    exports.simulator.add(exports.ambient);
     exports.canvasRenderer.add({ draw() { ctx.clearRect(0, 0, can.width, can.height); } });
-    exports.canvasRenderer.add(new rendering_1.Grid(1));
+    exports.canvasRenderer.add(new rendering_1.CartesianPlane(1));
     exports.canvasRenderer.add(exports.ambient);
     exports.canvasRenderer.start();
 });

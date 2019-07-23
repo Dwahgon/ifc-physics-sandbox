@@ -1,4 +1,4 @@
-define(["require", "exports", "./main", "./document"], function (require, exports, main_1, document_1) {
+define(["require", "exports", "./document"], function (require, exports, document_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     console.log("Loading simulator");
@@ -14,6 +14,7 @@ define(["require", "exports", "./main", "./document"], function (require, export
             this.domInput.value = this._time.toFixed(2);
             this.playButton = document_1.miscButtons.get("play-button");
             this.resetButton = document_1.miscButtons.get("reset-button");
+            this.simulatables = [];
             this.resetButton.enabled = false;
             this.domInput.addEventListener("change", () => {
                 if (this.isPlaying)
@@ -48,11 +49,13 @@ define(["require", "exports", "./main", "./document"], function (require, export
             if (!value && this.time > 0)
                 this.resetButton.enabled = false;
         }
-        changeButtonImage(src) {
-            let img = this.playButton.element.querySelector("img");
-            if (!img)
-                throw "img not found in play button";
-            img.src = src;
+        add(simulatable) {
+            this.simulatables.push(simulatable);
+        }
+        remove(simulatable) {
+            const index = this.simulatables.indexOf(simulatable);
+            if (index > -1)
+                this.simulatables.splice(index, 1);
         }
         start() {
             this.isPlaying = true;
@@ -67,14 +70,20 @@ define(["require", "exports", "./main", "./document"], function (require, export
             if (this.isPlaying || this.time == 0)
                 return;
             this.time = 0;
-            main_1.ambient.objects.forEach(object => object.reset());
+            this.simulatables.forEach(simulatable => simulatable.reset());
         }
         fastForwardTo(time) {
             this.reset();
             this.passTime(time);
         }
+        changeButtonImage(src) {
+            let img = this.playButton.element.querySelector("img");
+            if (!img)
+                throw "img not found in play button";
+            img.src = src;
+        }
         passTime(step) {
-            main_1.ambient.objects.forEach(object => object.simulate(step));
+            this.simulatables.forEach(simulatable => simulatable.simulate(step));
             this.time += step;
         }
         simulate() {

@@ -1,4 +1,4 @@
-define(["require", "exports", "./physicsObjects", "./fileController", "./document", "./main"], function (require, exports, physicsObjects_1, fileController_1, document_1, main_1) {
+define(["require", "exports", "./document", "./fileController", "./main", "./physicsObjects"], function (require, exports, document_1, fileController_1, main_1, physicsObjects_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     console.log("Loading ambient");
@@ -13,15 +13,15 @@ define(["require", "exports", "./physicsObjects", "./fileController", "./documen
                 objects: objectsArrayJson
             });
         }
-        static fromJSON(json, canvasRenderer) {
+        static fromJSON(json) {
             if (typeof json === "string") {
                 return JSON.parse(json, function (key, value) {
-                    return key === "" ? Ambient.fromJSON(value, canvasRenderer) : value;
+                    return key === "" ? Ambient.fromJSON(value) : value;
                 });
             }
             else {
                 const loadedAmbient = new Ambient();
-                json.objects.forEach(obj => physicsObjects_1.PhysicsObject.fromJSON(obj, canvasRenderer, loadedAmbient));
+                json.objects.forEach(obj => physicsObjects_1.PhysicsObject.fromJSON(obj, loadedAmbient));
                 return loadedAmbient;
             }
         }
@@ -37,7 +37,6 @@ define(["require", "exports", "./physicsObjects", "./fileController", "./documen
         addObject(obj) {
             this.objects.push(obj);
         }
-        /* Selectable */
         get name() {
             return "Ambiente";
         }
@@ -47,8 +46,14 @@ define(["require", "exports", "./physicsObjects", "./fileController", "./documen
         get isFollowable() {
             return false;
         }
-        draw() {
-            this.objects.forEach(obj => obj.sprite.draw());
+        draw(cam, ctx) {
+            this.objects.forEach(obj => obj.sprite.draw(cam, ctx));
+        }
+        simulate(step) {
+            this.objects.forEach(object => object.simulate(step));
+        }
+        reset() {
+            this.objects.forEach(object => object.reset());
         }
     }
     exports.default = Ambient;
@@ -73,7 +78,7 @@ define(["require", "exports", "./physicsObjects", "./fileController", "./documen
                 reader.readAsText(file, "utf-8");
                 reader.onload = ev => {
                     const result = ev.target.result;
-                    main_1.setAmbient(Ambient.fromJSON(result, main_1.canvasRenderer));
+                    main_1.setAmbient(Ambient.fromJSON(result));
                 };
             }
         });
