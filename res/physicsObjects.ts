@@ -1,19 +1,13 @@
 console.log("Loading physicsobjects");
 
 import Ambient from './ambient';
-import PhysicsProperty, * as PhysicsProperties from './physicsProperties';
-import { CanvasRenderer, Sprite } from './rendering';
-import Selectable from './selectable';
-import { PhysicsPropertyType, PhysicsObjectType } from './types';
-import Vector2 from './vector2';
 import { PhysicsObjectJSON, PhysicsPropertyJSON } from './fileController';
+import PhysicsProperty, * as PhysicsProperties from './physicsProperties';
+import { Sprite } from './rendering';
+import { PhysicsObjectConfig, PhysicsObjectType, PhysicsPropertyType, Selectable, Simulatable } from './types';
+import Vector2 from './vector2';
 
-export interface PhysicsObjectConfig{
-    position: Vector2;
-    size: Vector2;
-}
-
-export class PhysicsObject implements Selectable{
+export class PhysicsObject implements Selectable, Simulatable{
     private objectProperties: PhysicsProperty<any>[];
 
     private constructor(public readonly kind: PhysicsObjectType, public name: string, public readonly sprite: Sprite, protected ambient: Ambient){
@@ -26,7 +20,7 @@ export class PhysicsObject implements Selectable{
     }
 
     simulate(step: number): void{
-        this.objectProperties.forEach(property => property.simulateStep(step))
+        this.objectProperties.forEach(property => property.simulate(step))
     }
 
     reset(): void{
@@ -38,7 +32,7 @@ export class PhysicsObject implements Selectable{
      * @param position 
      */
     isPositionInsideObject(position: Vector2): boolean{
-        let objPos = (<PhysicsProperties.ObjectPosition>this.getProperty(PhysicsPropertyType.ObjectPosition)).value;
+        const objPos = (<PhysicsProperties.ObjectPosition>this.getProperty(PhysicsPropertyType.ObjectPosition)).value;
         let objSize = (<PhysicsProperties.ObjectSize>this.getProperty(PhysicsPropertyType.ObjectSize)).value;
         objSize = Vector2.div(objSize, 2);
 
@@ -58,15 +52,14 @@ export class PhysicsObject implements Selectable{
         }
     }
 
-    public static createPhysicsObject(type: PhysicsObjectType, canvasRenderer: CanvasRenderer, ambient: Ambient, properties?: PhysicsObjectConfig): PhysicsObject{
+    public static createPhysicsObject(type: PhysicsObjectType, ambient: Ambient, properties?: PhysicsObjectConfig): PhysicsObject{
         switch(type){
             case PhysicsObjectType.Solid:
                 const obj = new PhysicsObject(
                     type,
                     "Sólido", 
                     new Sprite(
-                        canvasRenderer, 
-                        "./assets/images/solid.png", 
+                        "./assets/images/solid.svg", 
                         new Vector2(0, 0), 
                         new Vector2(512, 512), 
                         Vector2.zero,
@@ -86,12 +79,6 @@ export class PhysicsObject implements Selectable{
         }
     }
     
-    /* Selectable */
-    
-    getName(): string {
-        return this.name;
-    }
-    
     appendPropertyListItems(): void{
         this.objectProperties.forEach(property=>{
             if(property.propertyLI)
@@ -108,8 +95,6 @@ export class PhysicsObject implements Selectable{
     }
     
     destroy(): void{
-        this.sprite.stopDrawing();
-    
         const index = this.ambient.objects.indexOf(this);
         this.ambient.objects.splice(index, 1);
     }
@@ -123,16 +108,16 @@ export class PhysicsObject implements Selectable{
         });
     }
 
-    static fromJSON(json: PhysicsObjectJSON | string, canvasRenderer: CanvasRenderer, ambient: Ambient): PhysicsObject{
+    static fromJSON(json: PhysicsObjectJSON | string, ambient: Ambient): PhysicsObject{
         if(typeof json === "string"){
             return JSON.parse(
                 json, 
                 function(key: string, value: any){
-                    return key === "" ? PhysicsObject.fromJSON(value, canvasRenderer, ambient) : value
+                    return key === "" ? PhysicsObject.fromJSON(value, ambient) : value
                 }
             );
         }else{
-            const physicsObj = this.createPhysicsObject(json.kind, canvasRenderer, ambient);
+            const physicsObj = this.createPhysicsObject(json.kind, ambient);
             json.properties.forEach(prop => {
                 (<PhysicsProperty<any>>physicsObj.getProperty(prop.kind)!).initialValue = prop.iValue;
             });

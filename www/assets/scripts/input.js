@@ -14,26 +14,26 @@ define(["require", "exports", "./main", "./vector2", "./document", "./types"], f
     Main = __importStar(Main);
     vector2_1 = __importDefault(vector2_1);
     console.log("loading input");
+    const canvas = Main.canvasRenderer.context.canvas;
+    const camera = Main.canvasRenderer.camera;
+    let mouseMoved = false;
     let isMouseDown = false;
     let clickedPos = vector2_1.default.zero;
     let cameraPosOnMouseDown = vector2_1.default.zero;
-    let mouseMoved = false;
-    let canvas = Main.canvasRenderer.context.canvas;
-    let camera = Main.canvasRenderer.camera;
-    let getOffsetVector2 = (ev) => {
+    const getOffsetVector2 = (ev) => {
         const touchTarget = ev.targetTouches[0].target;
         const rect = touchTarget.getBoundingClientRect();
         const x = ev.targetTouches[0].pageX - rect.left;
         const y = ev.targetTouches[0].pageY - rect.top;
         return new vector2_1.default(x, -y);
     };
-    let onInputStart = (cursorCoordinates) => {
+    const onInputStart = (cursorCoordinates) => {
         isMouseDown = true;
         mouseMoved = false;
         clickedPos = cursorCoordinates;
         cameraPosOnMouseDown = camera.pos;
     };
-    let onMove = (cursorCoordinates, canvas) => {
+    const onMove = (cursorCoordinates, canvas) => {
         if (isMouseDown) {
             camera.pos = vector2_1.default.sum(cameraPosOnMouseDown, vector2_1.default.sub(clickedPos, cursorCoordinates));
             canvas.style.cursor = "move";
@@ -47,7 +47,7 @@ define(["require", "exports", "./main", "./vector2", "./document", "./types"], f
             canvas.style.cursor = (obj) ? "pointer" : "default";
         }
     };
-    let onMouseUp = (ev, canvas) => {
+    const onMouseUp = (ev, canvas) => {
         if (!isMouseDown)
             return;
         isMouseDown = false;
@@ -58,7 +58,7 @@ define(["require", "exports", "./main", "./vector2", "./document", "./types"], f
             document_1.ObjectSelectionController.selectObject((obj) ? obj : Main.ambient);
         }
     };
-    let onDocumentClick = (e) => {
+    const onDocumentClick = (e) => {
         const target = e.target;
         const buttonId = target.getAttribute("button-id");
         switch (target.getAttribute("button-kind")) {
@@ -74,7 +74,7 @@ define(["require", "exports", "./main", "./vector2", "./document", "./types"], f
                 const objectPair = objectCreationArray.find(el => { return el[1].element.getAttribute("button-id") == buttonId; });
                 const objectKind = objectPair[0];
                 const objectButton = objectPair[1];
-                objectButton.onClick(objectKind, Main.canvasRenderer, Main.ambient, objectButton.createObjectConfig());
+                objectButton.onClick(objectKind, Main.ambient, objectButton.createObjectConfig());
                 break;
             case types_1.DocumentButtonKind.PropertyButton:
                 const propertyKind = e.target.getAttribute("property-kind");
@@ -83,10 +83,17 @@ define(["require", "exports", "./main", "./vector2", "./document", "./types"], f
                 return;
         }
     };
+    const onWheel = (e) => {
+        if (e.deltaY < 0)
+            camera.nextZoom();
+        else
+            camera.previousZoom();
+    };
     canvas.addEventListener("mousedown", ev => { onInputStart(new vector2_1.default(ev.offsetX, -ev.offsetY)); });
     canvas.addEventListener("touchstart", ev => { onInputStart(getOffsetVector2(ev)); });
     canvas.addEventListener("mousemove", ev => { onMove(new vector2_1.default(ev.offsetX, -ev.offsetY), canvas); });
     canvas.addEventListener("touchmove", ev => { onMove(getOffsetVector2(ev), canvas); });
+    canvas.addEventListener("wheel", ev => { onWheel(ev); });
     document.addEventListener("mouseup", ev => { onMouseUp(ev, canvas); });
     document.addEventListener("click", onDocumentClick);
 });

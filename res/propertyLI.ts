@@ -12,7 +12,7 @@ export default abstract class PropertyLI<T>{
     private readonly domUnitLabel: HTMLLabelElement;
     protected lastValue: string;
 
-    constructor(private property: PhysicsProperty<T>, title: string, propertyUnit: string, private regExp: RegExp, initialValue: T){
+    constructor(private property: PhysicsProperty<T>, name: string, propertyUnit: string, private regExp: RegExp, initialValue: T, title: string){
         this.li = document.createElement("li");
         this.input = document.createElement("input");
         this.domNameLabel = document.createElement("label");
@@ -20,8 +20,8 @@ export default abstract class PropertyLI<T>{
         const descriptionButton = document.createElement("button");
         const descriptionIcon = document.createElement("img");
 
-        descriptionIcon.src = "./assets/images/description.png";
-        this.domNameLabel.innerHTML = title;
+        descriptionIcon.src = "./assets/images/descriptionicon.svg";
+        this.domNameLabel.innerHTML = name;
         this.domUnitLabel.innerHTML = propertyUnit;
         
         
@@ -31,8 +31,9 @@ export default abstract class PropertyLI<T>{
         this.li.appendChild(this.input);
         this.li.appendChild(this.domUnitLabel);
 
-        this.input.setAttribute("id", `${title}-property-input`);
-        this.domNameLabel.setAttribute("for", `${title}-property-input`);
+        this.input.setAttribute("id", `${name}-property-input`);
+        this.domNameLabel.setAttribute("for", `${name}-property-input`);
+        this.domNameLabel.setAttribute("title", title);
         descriptionButton.setAttribute("class", "button dark-button");
         descriptionButton.setAttribute("title", "Descrição");
         this.input.setAttribute("type", "text");
@@ -106,8 +107,8 @@ export default abstract class PropertyLI<T>{
 }
 
 export class PropertyLIVector2 extends PropertyLI<Vector2>{
-    constructor(property: PhysicsProperty<Vector2>, title: string, propertyUnit: string, initialValue: Vector2){
-        super(property, title, propertyUnit, /\-?\d*\.?\d*/g, initialValue);
+    constructor(property: PhysicsProperty<Vector2>, name: string, propertyUnit: string, initialValue: Vector2, title: string){
+        super(property, name, propertyUnit, /\-?\d*\.?\d*/g, initialValue, title);
     }
 
     protected formatValue(value: Vector2): string{
@@ -125,8 +126,8 @@ export class PropertyLIVector2 extends PropertyLI<Vector2>{
 }
 
 export class PropertyLINumber extends PropertyLI<number>{
-    constructor(property: PhysicsProperty<number>, title: string, propertyUnit: string, initialValue: number){
-        super(property, title, propertyUnit, /\-?\d*\.?\d*/i, initialValue);
+    constructor(property: PhysicsProperty<number>, name: string, propertyUnit: string, initialValue: number, title: string){
+        super(property, name, propertyUnit, /\-?\d*\.?\d*/i, initialValue, title);
     }
 
     protected formatValue(value: number): string{

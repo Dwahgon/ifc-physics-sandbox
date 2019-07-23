@@ -1,3 +1,9 @@
+console.log("Loading types");
+
+import PhysicsProperty from './physicsProperties';
+import { Camera } from './rendering';
+import Vector2 from './vector2';
+
 export enum ButtonColor{
     Dark = "dark-button",
     White = "white-button",
@@ -22,4 +28,26 @@ export enum PhysicsPropertyType{
 
 export enum PhysicsObjectType{
     Solid = 0
+}
+
+export interface Selectable {
+    isFollowable: boolean;
+    name: string;
+    appendPropertyListItems?(ul: HTMLUListElement, enabled: boolean): void;
+    getProperty(type: PhysicsPropertyType): PhysicsProperty<any>[] | PhysicsProperty<any> | undefined;
+    destroy?(): void;
+}
+
+export interface PhysicsObjectConfig{
+    position: Vector2;
+    size: Vector2;
+}
+
+export interface Simulatable{
+    simulate(step: number): void;
+    reset(): void;
+}
+
+export interface Renderable{
+    draw(cam: Camera, con: CanvasRenderingContext2D): void;
 }

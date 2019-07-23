@@ -1,8 +1,7 @@
 console.log("Loading simulator");
 
-import { ambient } from './main';
-import { DocumentButton, miscButtons, ObjectSelectionController, ObjectCreationController } from './document';
-
+import { DocumentButton, miscButtons, ObjectCreationController, ObjectSelectionController } from './document';
+import { Simulatable } from './types';
 
 export default class Simulator {
     private static playSrc: string = "./assets/images/play.png";
@@ -13,6 +12,7 @@ export default class Simulator {
     private domInput: HTMLInputElement;
     private playButton: DocumentButton;
     private resetButton: DocumentButton;
+    private simulatables: Simulatable[];
 
     constructor(){
         this._time = 0;
@@ -28,6 +28,7 @@ export default class Simulator {
         this.domInput.value = this._time.toFixed(2);
         this.playButton = miscButtons.get("play-button")!;
         this.resetButton = miscButtons.get("reset-button")!;
+        this.simulatables = [];
 
         this.resetButton.enabled = false;
 
@@ -75,6 +76,41 @@ export default class Simulator {
             this.resetButton.enabled = false
     }
 
+    add(simulatable: Simulatable): void{
+        this.simulatables.push(simulatable);
+    }
+
+    remove(simulatable: Simulatable): void{
+        const index = this.simulatables.indexOf(simulatable);
+        if(index > -1) 
+            this.simulatables.splice(index, 1);
+        
+    }
+    
+    start(): void{
+        this.isPlaying = true;
+        this.changeButtonImage(Simulator.pauseSrc);
+        this.simulate();
+    }
+    
+    stop(): void{
+        this.isPlaying = false;
+        this.changeButtonImage(Simulator.playSrc);
+    }
+    
+    reset(): void{
+        if(this.isPlaying || this.time == 0)
+        return;
+        
+        this.time = 0;
+        this.simulatables.forEach(simulatable => simulatable.reset());
+    }
+    
+    fastForwardTo(time: number){
+        this.reset();
+        this.passTime(time);
+    }
+    
     private changeButtonImage(src: string): void{
         let img = this.playButton.element.querySelector("img");
         if(!img)
@@ -83,32 +119,9 @@ export default class Simulator {
         img.src = src;
     }
 
-    start(): void{
-        this.isPlaying = true;
-        this.changeButtonImage(Simulator.pauseSrc);
-        this.simulate();
-    }
-
-    stop(): void{
-        this.isPlaying = false;
-        this.changeButtonImage(Simulator.playSrc);
-    }
-
-    reset(): void{
-        if(this.isPlaying || this.time == 0)
-            return;
-
-        this.time = 0;
-        ambient.objects.forEach(object => object.reset())
-    }
-    
-    fastForwardTo(time: number){
-        this.reset();
-        this.passTime(time);
-    }
-
     private passTime(step: number){
-        ambient.objects.forEach(object => object.simulate(step))
+        this.simulatables.forEach(simulatable => simulatable.simulate(step));
+
         this.time += step;
     }
 

@@ -27,7 +27,7 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
             properties.forEach(property => this.objectProperties.push(property));
         }
         simulate(step) {
-            this.objectProperties.forEach(property => property.simulateStep(step));
+            this.objectProperties.forEach(property => property.simulate(step));
         }
         reset() {
             this.objectProperties.forEach(property => property.reset());
@@ -37,7 +37,7 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
          * @param position
          */
         isPositionInsideObject(position) {
-            let objPos = this.getProperty(types_1.PhysicsPropertyType.ObjectPosition).value;
+            const objPos = this.getProperty(types_1.PhysicsPropertyType.ObjectPosition).value;
             let objSize = this.getProperty(types_1.PhysicsPropertyType.ObjectSize).value;
             objSize = vector2_1.default.div(objSize, 2);
             return position.x >= objPos.x - objSize.x &&
@@ -53,10 +53,10 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
                     return this.objectProperties.find(physicsProperty => { return physicsProperty.kind == type; });
             }
         }
-        static createPhysicsObject(type, canvasRenderer, ambient, properties) {
+        static createPhysicsObject(type, ambient, properties) {
             switch (type) {
                 case types_1.PhysicsObjectType.Solid:
-                    const obj = new PhysicsObject(type, "Sólido", new rendering_1.Sprite(canvasRenderer, "./assets/images/solid.png", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient);
+                    const obj = new PhysicsObject(type, "Sólido", new rendering_1.Sprite("./assets/images/solid.svg", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient);
                     obj.addProperties(new PhysicsProperties.ObjectPosition(properties ? properties.position : vector2_1.default.zero, obj));
                     obj.addProperties(new PhysicsProperties.ObjectSize(properties ? properties.size : vector2_1.default.zero, obj));
                     obj.addProperties(new PhysicsProperties.ObjectArea(obj));
@@ -65,10 +65,6 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
                     obj.addProperties(new PhysicsProperties.ObjectDisplacement(obj));
                     return obj;
             }
-        }
-        /* Selectable */
-        getName() {
-            return this.name;
         }
         appendPropertyListItems() {
             this.objectProperties.forEach(property => {
@@ -83,7 +79,6 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
             return true;
         }
         destroy() {
-            this.sprite.stopDrawing();
             const index = this.ambient.objects.indexOf(this);
             this.ambient.objects.splice(index, 1);
         }
@@ -95,14 +90,14 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
                 properties: properties
             });
         }
-        static fromJSON(json, canvasRenderer, ambient) {
+        static fromJSON(json, ambient) {
             if (typeof json === "string") {
                 return JSON.parse(json, function (key, value) {
-                    return key === "" ? PhysicsObject.fromJSON(value, canvasRenderer, ambient) : value;
+                    return key === "" ? PhysicsObject.fromJSON(value, ambient) : value;
                 });
             }
             else {
-                const physicsObj = this.createPhysicsObject(json.kind, canvasRenderer, ambient);
+                const physicsObj = this.createPhysicsObject(json.kind, ambient);
                 json.properties.forEach(prop => {
                     physicsObj.getProperty(prop.kind).initialValue = prop.iValue;
                 });

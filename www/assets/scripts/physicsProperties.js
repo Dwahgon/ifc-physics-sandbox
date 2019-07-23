@@ -1,7 +1,7 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./genericCalulator", "./types", "./vector2", "./propertyLI"], function (require, exports, genericCalulator_1, types_1, vector2_1, propertyLI_1) {
+define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "./vector2"], function (require, exports, genericCalulator_1, propertyLI_1, types_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_1 = __importDefault(vector2_1);
@@ -34,7 +34,7 @@ define(["require", "exports", "./genericCalulator", "./types", "./vector2", "./p
             this.propertyLI.setValue(this.value);
             this.onValueChangedCallbacks.forEach(callback => callback());
         }
-        simulateStep(step) {
+        simulate(step) {
         }
         reset() {
             this.value = this.initialValue;
@@ -50,7 +50,7 @@ define(["require", "exports", "./genericCalulator", "./types", "./vector2", "./p
     class ObjectPosition extends PhysicsProperty {
         constructor(initialPosition, object) {
             super(types_1.PhysicsPropertyType.ObjectPosition, true, object, initialPosition, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "pos<sub>(x, y)</sub>", "m, m", initialPosition);
+            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "pos<sub>(x, y)</sub>", "m, m", initialPosition, "Vetor posição");
             this.updateSpritePosition();
         }
         updateSpritePosition() {
@@ -75,7 +75,7 @@ define(["require", "exports", "./genericCalulator", "./types", "./vector2", "./p
     class ObjectSize extends PhysicsProperty {
         constructor(initialSize, object) {
             super(types_1.PhysicsPropertyType.ObjectSize, true, object, initialSize, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "tam<sub>(x, y)</sub>", "m, m", initialSize);
+            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "tam<sub>(x, y)</sub>", "m, m", initialSize, "Tamanho");
             this.updateSpriteSize();
         }
         updateSpriteSize() {
@@ -104,7 +104,7 @@ define(["require", "exports", "./genericCalulator", "./types", "./vector2", "./p
     class ObjectArea extends PhysicsProperty {
         constructor(object) {
             super(types_1.PhysicsPropertyType.ObjectArea, false, object, 0, 0, genericCalulator_1.NumberCalculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLINumber(this, "área", "m<sup>2</sup>", 0);
+            this.propertyLI = new propertyLI_1.PropertyLINumber(this, "área", "m<sup>2</sup>", 0, "área");
             const objectSize = object.getProperty(types_1.PhysicsPropertyType.ObjectSize);
             const sizeVector2 = (objectSize) ? objectSize.initialValue : vector2_1.default.zero;
             this.initialValue = sizeVector2.x * sizeVector2.y;
@@ -114,9 +114,9 @@ define(["require", "exports", "./genericCalulator", "./types", "./vector2", "./p
     class ObjectVelocity extends PhysicsProperty {
         constructor(object) {
             super(types_1.PhysicsPropertyType.ObjectVelocity, true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "velocidade", "<sup>m</sup>&frasl;<sub>s</sub>, <sup>m</sup>&frasl;<sub>s</sub>", vector2_1.default.zero);
+            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "vel", "<sup>m</sup>&frasl;<sub>s</sub>, <sup>m</sup>&frasl;<sub>s</sub>", vector2_1.default.zero, "Vetor velocidade");
         }
-        simulateStep(step) {
+        simulate(step) {
             const displacement = vector2_1.default.mult(this.value, step);
             const objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
             const objectDisplacement = this.object.getProperty(types_1.PhysicsPropertyType.ObjectDisplacement);
@@ -132,16 +132,16 @@ define(["require", "exports", "./genericCalulator", "./types", "./vector2", "./p
     class ObjectDisplacement extends PhysicsProperty {
         constructor(object) {
             super(types_1.PhysicsPropertyType.ObjectDisplacement, false, object, 0, 0, genericCalulator_1.NumberCalculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLINumber(this, "deslocamento", "m", 0);
+            this.propertyLI = new propertyLI_1.PropertyLINumber(this, "des", "m", 0, "Deslocamento");
         }
     }
     exports.ObjectDisplacement = ObjectDisplacement;
     class ObjectAcceleration extends PhysicsProperty {
         constructor(object) {
             super(types_1.PhysicsPropertyType.ObjectAcceleration, true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>, <sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue);
+            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>, <sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue, "Vetor aceleração");
         }
-        simulateStep(step) {
+        simulate(step) {
             const objectVel = this.object.getProperty(types_1.PhysicsPropertyType.ObjectVelocity);
             const velDisplacement = vector2_1.default.mult(this.value, step);
             if (objectVel)

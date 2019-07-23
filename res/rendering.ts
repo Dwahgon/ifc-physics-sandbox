@@ -1,24 +1,20 @@
 console.log("Loading rendering");
 
+import { miscButtons, MiscToggleImageButton, ObjectSelectionController } from './document';
 import { PhysicsObject } from './physicsObjects';
 import { ObjectPosition } from './physicsProperties';
-import { PhysicsPropertyType } from './types';
+import { PhysicsPropertyType, Renderable } from './types';
 import Vector2 from './vector2';
-import { miscButtons, ObjectSelectionController, MiscToggleImageButton } from './document';
-
-export interface Renderable{
-    draw(cam: Camera, con: CanvasRenderingContext2D): void;
-}
 
 export class CanvasRenderer{
     private isRunning: boolean;
     private renderables: Renderable[];
     public readonly camera: Camera;
 
-    constructor(public readonly context: CanvasRenderingContext2D, cameraPos: Vector2, cameraZoom: number){
+    constructor(public readonly context: CanvasRenderingContext2D, cameraPos: Vector2, cameraZoom: number, cameraMinZoom: number, cameraMaxZoom:number){
         this.isRunning = false;
         this.renderables = [];
-        this.camera = new Camera(this, cameraPos, cameraZoom);
+        this.camera = new Camera(this, cameraPos, cameraZoom, cameraMinZoom, cameraMaxZoom, 5);
     }
 
     start(){
@@ -58,14 +54,39 @@ export class CanvasRenderer{
 
 export class Camera {
     private targetObjectPosition: ObjectPosition | null;
+    private _zoom: number;
 
-    constructor(private canvasRenderer: CanvasRenderer, private _pos: Vector2, public zoom: number) {
+    constructor(private canvasRenderer: CanvasRenderer, private _pos: Vector2, private defaultZoom: number, private minZoom: number, private maxZoom: number, private zoomStep: number) {
         this.targetObjectPosition = null;
         
-        miscButtons.get("centralize-camera")!.onClick = this.focusOrigin.bind(this);
+        this._zoom = this.defaultZoom;
 
-        let canvas = this.canvasRenderer.context.canvas;
-        canvas.addEventListener("wheel", this.onWheelEvent.bind(this))
+        miscButtons.get("centralize-camera")!.onClick = this.focusOrigin.bind(this);
+    }
+
+    get zoom(){
+        return this._zoom;
+    }
+
+    set zoom(n: number){
+        this._zoom = n;
+
+        if (this._zoom < this.minZoom)
+            this._zoom = this.minZoom;
+        else if (this._zoom > this.maxZoom)
+            this._zoom = this.maxZoom;
+    }
+
+    nextZoom(): void{
+        this.zoom += this.zoomStep;
+    }
+
+    previousZoom(): void{
+        this.zoom -= this.zoomStep;
+    }
+
+    resetZoom(): void{
+        this.zoom = this.defaultZoom;
     }
 
     getWorldPosFromCanvas(canvasPos: Vector2): Vector2 {
@@ -133,22 +154,13 @@ export class Camera {
         if(ObjectSelectionController.selectedObject == this.objectBeingFollowed)
             followButton.toggled = !isFollowing;
     }
-
-    private onWheelEvent(ev: WheelEvent): void{
-        this.zoom += ev.deltaY / -20;
-
-        if (this.zoom < 0.1)
-            this.zoom = 0.1;
-        else if (this.zoom > 200)
-            this.zoom = 200;
-    }
 }
 
 export class Sprite implements Renderable{
     public drawSize: Vector2;
     private image: HTMLImageElement;
 
-    constructor(private renderer: CanvasRenderer, imageSrc: string, public copyPosition: Vector2, public copySize: Vector2, public drawPosition: Vector2, drawSize: Vector2) {
+    constructor(imageSrc: string, public copyPosition: Vector2, public copySize: Vector2, public drawPosition: Vector2, drawSize: Vector2) {
         const imgElement = document.createElement('img');
         imgElement.src = imageSrc;
         this.image = imgElement;
@@ -160,28 +172,20 @@ export class Sprite implements Renderable{
         return Vector2.mult(this.drawSize, zoom);
     }
 
-    draw(): void{
+    draw(cam: Camera, context: CanvasRenderingContext2D): void{
+        const posInCanvas = Vector2.sub(cam.getCanvasPosFromWorld(this.drawPosition), Vector2.div(this.getZoomedSize(cam.zoom), 2));
+
         // @ts-ignore
-        this.renderer.context.drawImage(this.image, 
+        context.drawImage(this.image, 
             ...this.copyPosition.toArray(), 
             ...this.copySize.toArray(), 
-            ...this.getPositionInCanvas().toArray(), 
-            ...this.getZoomedSize(this.renderer.camera.zoom).toArray()
+            ...posInCanvas.toArray(), 
+            ...this.getZoomedSize(cam.zoom).toArray()
         );
-    }
-
-    stopDrawing(): void{
-        this.renderer.remove(this);
-    }
-
-    getPositionInCanvas(): Vector2{
-        const camera = this.renderer.camera;
-        
-        return Vector2.sub(camera.getCanvasPosFromWorld(this.drawPosition), Vector2.div(this.getZoomedSize(camera.zoom), 2));
     }
 }
 
-export class Grid implements Renderable{
+export class CartesianPlane implements Renderable{
     constructor(public gridSize: number){
     }
 

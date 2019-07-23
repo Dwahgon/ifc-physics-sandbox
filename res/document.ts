@@ -1,19 +1,17 @@
 console.log("Loading document");
 
-import { ambient, canvasRenderer, simulator, setAmbient } from "./main";
-import { PhysicsObject, PhysicsObjectConfig } from "./physicsObjects";
+import Ambient from "./ambient";
+import { ambient, canvasRenderer, simulator } from "./main";
+import { PhysicsObject } from "./physicsObjects";
 import PhysicsProperty from "./physicsProperties";
 import { propertyDescriptions } from './propertyDescriptions';
-import Selectable from './selectable';
-import { ButtonColor, DocumentButtonKind, PhysicsObjectType, PhysicsPropertyType } from './types';
+import { ButtonColor, DocumentButtonKind, PhysicsObjectConfig, PhysicsObjectType, PhysicsPropertyType, Selectable } from './types';
 import Vector2 from './vector2';
-import { CanvasRenderer } from "./rendering";
-import Ambient from "./ambient";
 
 export class DocumentButton {
     public readonly element: HTMLButtonElement;
 
-    constructor(parent: Element, public readonly id: string, public readonly kind: DocumentButtonKind, protected _enabled: boolean, public onClick: Function | null, private buttonColor: ButtonColor) {
+    constructor(parent: Element, public readonly id: string, public readonly kind: DocumentButtonKind, protected _enabled: boolean, public onClick: Function | null, protected buttonColor: ButtonColor) {
         this.element = document.createElement("button");
 
         parent.appendChild(this.element);
@@ -100,33 +98,28 @@ export class CreateObjectButton extends DocumentButton {
             `create-${name}-button`, 
             DocumentButtonKind.CreateObjectButton, 
             true, 
-            function (t: PhysicsObjectType, cR: CanvasRenderer, a: Ambient, c: PhysicsObjectConfig) { PhysicsObject.createPhysicsObject(t, cR, a, c) }, 
-            ButtonColor.Dark
+            function (t: PhysicsObjectType, a: Ambient, c: PhysicsObjectConfig) { PhysicsObject.createPhysicsObject(t, a, c) }, 
+            ButtonColor.InvisibleBackground
         );
 
-        const parent = this.element.parentElement!;
-        const li = document.createElement("li");
         const thumbImg = document.createElement("img");
-
-        li.setAttribute("title", `Criar um ${name.toLowerCase()}`);
+        this.element.setAttribute("title", `Criar um ${name.toLowerCase()}`);
 
         thumbImg.src = thumbSrc;
 
         this.element.appendChild(thumbImg);
-        parent.appendChild(li);
-        li.appendChild(this.element);
 
         this.setButtonIdToDescendants();
         this.setButtonKindToDescendants();
     }
 
-    get enabled() {
-        return this._enabled;
-    }
+    // get enabled() {
+    //     return this._enabled;
+    // }
 
-    set enabled(value: boolean) {
-        this.element.setAttribute("class", (!value) ? "dark-button inactive-button" : "dark-button button");
-    }
+    // set enabled(value: boolean) {
+    //     this.element.setAttribute("class", (!value) ? `${this.buttonColor} inactive-button` : `${this.buttonColor} button`);
+    // }
 }
 
 export abstract class PropertyDescriptionUI {
@@ -241,7 +234,7 @@ export const documentElements = new Map<string, Element>();
 documentElements.set("header", document.querySelector("#buttons-header")!);
 documentElements.set("file-buttons", documentElements.get("header")!.querySelector("#header-file-buttons")!);
 documentElements.set("camera-buttons", documentElements.get("header")!.querySelector("#header-camera-buttons")!);
-documentElements.set("property-panel", document.querySelector(".side-panel:first-child > div")!);
+documentElements.set("property-panel", document.querySelector("#property-side-panel")!);
 documentElements.set("object-interactor", document.querySelector("#object-interactor")!);
 documentElements.set("property-list-title", documentElements.get("property-panel")!.querySelector("h1")!);
 documentElements.set("property-list", document.querySelector("#property-list")!);
@@ -254,7 +247,7 @@ documentElements.set("property-description-header", documentElements.get("proper
  * A map that contains all of the buttons that creates objects
  */
 export const objectCreationButtons = new Map<PhysicsObjectType, CreateObjectButton>();
-objectCreationButtons.set(PhysicsObjectType.Solid, new CreateObjectButton("Sólido", "./assets/images/solid.png",
+objectCreationButtons.set(PhysicsObjectType.Solid, new CreateObjectButton("Sólido", "./assets/images/solidicon.svg",
     function () {
         return {
             position: canvasRenderer.camera.getWorldPosFromCanvas(
@@ -272,13 +265,13 @@ objectCreationButtons.set(PhysicsObjectType.Solid, new CreateObjectButton("Sóli
 export const miscButtons = new Map<string, DocumentButton>();
 miscButtons.set("play-button", new MiscImageButton(documentElements.get("simulation-controller-buttons")!, "play-button", "./assets/images/play.png", ButtonColor.Dark, "Iniciar simulação"));
 miscButtons.set("reset-button", new MiscTextButton(documentElements.get("simulation-controller-buttons")!, "reset-button", "t=0", ButtonColor.Dark, "Definir tempo igual a 0"));
-miscButtons.set("destroy-button", new MiscImageButton(documentElements.get("object-interactor")!, "destroy-button", "./assets/images/delete.png", ButtonColor.Dark, "Destruir objecto"));
-miscButtons.set("follow-button", new MiscToggleImageButton(documentElements.get("object-interactor")!, "follow-button", "./assets/images/follow.png", "./assets/images/cancelfollow.png", ButtonColor.Dark, "Focar/seguir objeto", "Parar de focar/seguir objeto"));
-miscButtons.set("centralize-camera", new MiscImageButton(documentElements.get("camera-buttons")!, "centralize-camera", "./assets/images/cameracenter.png", ButtonColor.InvisibleBackground, "Posicionar câmera na origem"));
-miscButtons.set("close-property-description", new MiscImageButton(documentElements.get("property-description-header")!, "close-property-description", "./assets/images/closeicon.png", ButtonColor.White));
-miscButtons.set("new-button", new MiscImageButton(documentElements.get("file-buttons")!, "new-button", "./assets/images/newfile.png", ButtonColor.InvisibleBackground, "Novo ambiente"));
-miscButtons.set("save-button", new MiscImageButton(documentElements.get("file-buttons")!, "save-button", "./assets/images/save.png", ButtonColor.InvisibleBackground, "Salvar ambiente"));
-miscButtons.set("load-button", new MiscImageButton(documentElements.get("file-buttons")!, "load-button", "./assets/images/load.png", ButtonColor.InvisibleBackground, "Abrir ambiente"));
+miscButtons.set("destroy-button", new MiscImageButton(documentElements.get("object-interactor")!, "destroy-button", "./assets/images/destroyicon.svg", ButtonColor.Dark, "Destruir objecto"));
+miscButtons.set("follow-button", new MiscToggleImageButton(documentElements.get("object-interactor")!, "follow-button", "./assets/images/followicon.svg", "./assets/images/cancelfollowicon.svg", ButtonColor.Dark, "Focar/seguir objeto", "Parar de focar/seguir objeto"));
+miscButtons.set("centralize-camera", new MiscImageButton(documentElements.get("camera-buttons")!, "centralize-camera", "./assets/images/centertooriginicon.svg", ButtonColor.InvisibleBackground, "Posicionar câmera na origem"));
+miscButtons.set("close-property-description", new MiscImageButton(documentElements.get("property-description-header")!, "close-property-description", "./assets/images/closeicon.svg", ButtonColor.White));
+miscButtons.set("new-button", new MiscImageButton(documentElements.get("file-buttons")!, "new-button", "./assets/images/newfileicon.svg", ButtonColor.InvisibleBackground, "Novo ambiente"));
+miscButtons.set("save-button", new MiscImageButton(documentElements.get("file-buttons")!, "save-button", "./assets/images/saveicon.svg", ButtonColor.InvisibleBackground, "Salvar ambiente"));
+miscButtons.set("load-button", new MiscImageButton(documentElements.get("file-buttons")!, "load-button", "./assets/images/loadicon.svg", ButtonColor.InvisibleBackground, "Abrir ambiente"));
 
 //Configuration
 miscButtons.get("destroy-button")!.onClick = function () {
