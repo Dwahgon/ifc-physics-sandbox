@@ -99,6 +99,13 @@ define(["require", "exports", "./buttons", "./document", "./modals", "./types", 
         simulate(step) {
             const x = this.valueGetterX.getValue(this.targetX);
             const y = this.valueGetterY.getValue(this.targetY);
+            const v2 = new vector2_1.default(x, y);
+            //Remove last inserted point if the resulting line continues straight
+            if (this.points.length > 3) {
+                const currentIndex = this.points.length - 1;
+                if (vector2_1.default.areColinear(this.points[currentIndex], this.points[currentIndex - 1], this.points[currentIndex - 2]))
+                    this.points.splice(currentIndex - 1);
+            }
             this.points.push(new vector2_1.default(x, y));
         }
         reset() {
@@ -113,12 +120,12 @@ define(["require", "exports", "./buttons", "./document", "./modals", "./types", 
                     const canvasStart = cam.getCanvasPosFromWorld(pointStart);
                     if (pointFinish) {
                         const canvasFinish = cam.getCanvasPosFromWorld(pointFinish);
-                        this.drawLine(con, canvasStart, canvasFinish, cam.zoom / 100 * 3, "black");
-                        this.drawLine(con, canvasStart, canvasFinish, cam.zoom / 100 * 2, "orange");
+                        this.drawLine(con, canvasStart, canvasFinish, 5, "black");
+                        this.drawLine(con, canvasStart, canvasFinish, 3, "orange");
                     }
                 }
-                this.drawCircle(con, cam.getCanvasPosFromWorld(this.points[0]), cam.zoom / 100 * 3, cam.zoom / 100 * 2, "orange", "black");
-                this.drawCircle(con, cam.getCanvasPosFromWorld(this.points[this.points.length - 1]), cam.zoom / 100 * 3, cam.zoom / 100 * 2, "orange", "black");
+                this.drawCircle(con, cam.getCanvasPosFromWorld(this.points[0]), 4, 2, "orange", "black");
+                this.drawCircle(con, cam.getCanvasPosFromWorld(this.points[this.points.length - 1]), 4, 2, "orange", "black");
             }
         }
         drawLine(con, canvasStart, canvasFinish, lineWidth, lineStyle) {
@@ -222,6 +229,10 @@ define(["require", "exports", "./buttons", "./document", "./modals", "./types", 
     SimulatorValueGetter.initialize();
     fillPropertySelect(xAxisPropertySelect);
     fillPropertySelect(yAxisPropertySelect);
-    xAxisPropertySelect.selectedIndex = 0;
-    yAxisPropertySelect.selectedIndex = valueGetters.findIndex(vG => { return vG.name == "Velocidade (módulo)"; });
+    graphConfigModal.onOpen = () => {
+        xAxisPropertySelect.value = "Tempo";
+        yAxisPropertySelect.value = "Velocidade (módulo)";
+        xAxisPropertySelect.dispatchEvent(new Event("change", { bubbles: true }));
+        yAxisPropertySelect.dispatchEvent(new Event("change", { bubbles: true }));
+    };
 });
