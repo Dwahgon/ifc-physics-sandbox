@@ -1,15 +1,19 @@
-/*
-    Class Definitions
-*/
 define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    console.log("Loaded modal");
+    /*
+        Class Definitions
+    */
     class Modal {
         constructor(element) {
             this.element = element;
+            this.onOpen = null;
         }
         setVisible(value) {
             this.element.style.display = value ? "flex" : "none";
+            if (value && this.onOpen)
+                this.onOpen();
         }
     }
     exports.Modal = Modal;

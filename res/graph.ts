@@ -116,6 +116,14 @@ export class Graph implements Renderable, Simulatable {
     simulate(step: number): void {
         const x = this.valueGetterX.getValue(this.targetX);
         const y = this.valueGetterY.getValue(this.targetY);
+        const v2 = new Vector2(x, y);
+
+        //Remove last inserted point if the resulting line continues straight
+        if(this.points.length > 3){
+            const currentIndex = this.points.length - 1;
+            if(Vector2.areColinear(this.points[currentIndex], this.points[currentIndex - 1], this.points[currentIndex - 2]))
+                this.points.splice(currentIndex - 1);
+        }
 
         this.points.push(new Vector2(x, y));
     }
@@ -125,7 +133,6 @@ export class Graph implements Renderable, Simulatable {
     }
     draw(cam: Camera, con: CanvasRenderingContext2D): void {
         if (this.points.length > 0) {
-
             for (let index = 0; index < this.points.length; index++) {
                 const pointStart = this.points[index];
                 const pointFinish = this.points[index + 1];
@@ -133,13 +140,13 @@ export class Graph implements Renderable, Simulatable {
 
                 if (pointFinish) {
                     const canvasFinish = cam.getCanvasPosFromWorld(pointFinish);
-                    this.drawLine(con, canvasStart, canvasFinish, cam.zoom / 100 * 3, "black");
-                    this.drawLine(con, canvasStart, canvasFinish, cam.zoom / 100 * 2, "orange");
+                    this.drawLine(con, canvasStart, canvasFinish,  5, "black");
+                    this.drawLine(con, canvasStart, canvasFinish,  3, "orange");
                 }
             }
 
-            this.drawCircle(con, cam.getCanvasPosFromWorld(this.points[0]), cam.zoom / 100 * 3, cam.zoom / 100 * 2, "orange", "black");
-            this.drawCircle(con, cam.getCanvasPosFromWorld(this.points[this.points.length - 1]), cam.zoom / 100 * 3, cam.zoom / 100 * 2, "orange", "black");
+            this.drawCircle(con, cam.getCanvasPosFromWorld(this.points[0]), 4, 2, "orange", "black");
+            this.drawCircle(con, cam.getCanvasPosFromWorld(this.points[this.points.length - 1]), 4, 2, "orange", "black");
         }
     }
     private drawLine(con: CanvasRenderingContext2D, canvasStart: Vector2, canvasFinish: Vector2, lineWidth: number, lineStyle: string) {
@@ -262,6 +269,9 @@ Buttons.getButtonById("create-graph-button")!.onClick = () => {
         }
     )
 
+    Document.GraphPanel.onClose = () => {
+        import("./main").then(main => main.simulator.remove(graph));
+    }
     Document.GraphPanel.renderGraph(graph);
 };
 
@@ -273,5 +283,9 @@ PhysicsObjectValueGetter.initialize();
 SimulatorValueGetter.initialize();
 fillPropertySelect(xAxisPropertySelect);
 fillPropertySelect(yAxisPropertySelect);
-xAxisPropertySelect.selectedIndex = 0;
-yAxisPropertySelect.selectedIndex = valueGetters.findIndex(vG => { return vG.name == "Velocidade (módulo)" });
+graphConfigModal.onOpen = () => {
+    xAxisPropertySelect.value = "Tempo";
+    yAxisPropertySelect.value = "Velocidade (módulo)";
+    xAxisPropertySelect.dispatchEvent(new Event("change", { bubbles: true }));
+    yAxisPropertySelect.dispatchEvent(new Event("change", { bubbles: true }));
+};

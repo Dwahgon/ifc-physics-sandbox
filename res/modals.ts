@@ -1,13 +1,21 @@
+console.log("Loaded modal");
+
 /*
     Class Definitions
 */
 
 export class Modal {
+    public onOpen: Function | null;
+
     constructor(public readonly element: HTMLElement) {
+        this.onOpen = null;
     }
 
     setVisible(value: boolean) {
         this.element.style.display = value ? "flex" : "none";
+        
+        if(value && this.onOpen)
+            this.onOpen();
     }
 }
 

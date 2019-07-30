@@ -58,4 +58,8 @@ export default class Vector2{
     static equals(a: Vector2, b: Vector2): boolean{
         return a.x == b.x && a.y == b.y;
     }
+
+    static areColinear(a: Vector2, b: Vector2, c: Vector2): boolean{
+        return (a.x * b.y + a.y * c.x + b.x * c.y) - (b.y * c.x + a.x * c.y + a.y * b.x) == 0;
+    }
 }

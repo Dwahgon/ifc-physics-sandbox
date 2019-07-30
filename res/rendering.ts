@@ -81,7 +81,7 @@ export class Camera {
         canvas.addEventListener("mousemove", ev => { this.onMove(new Vector2(ev.offsetX, -ev.offsetY), canvas); });
         canvas.addEventListener("touchmove", ev => { this.onMove(this.getTouchPosition(ev), canvas); });
         canvas.addEventListener("wheel", ev => { this.onWheel(ev) })
-        document.addEventListener("mouseup", ev => { this.onMouseUp(canvas) });
+        document.addEventListener("mouseup", () => { this.onMouseUp(canvas) });
     }
 
     get zoom() {

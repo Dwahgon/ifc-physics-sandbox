@@ -32,6 +32,7 @@ export abstract class PropertyDescriptionUI {
 }
 
 export abstract class GraphPanel {
+    public static onClose: Function | null;
     private static panel: HTMLDivElement;
     private static canvasRenderer: CanvasRenderer;
     private static graph: Graph | null;
@@ -51,8 +52,14 @@ export abstract class GraphPanel {
     static setElementVisible(v: boolean) {
         this.panel.style.display = v ? "flex" : "none";
 
-        if (!v)
+        if (!v){
             this.stopRenderingGraph();
+            
+            if(this.onClose){
+                this.onClose();
+                this.onClose = null;
+            }
+        }
     }
 
     static renderGraph(graph: Graph) {
@@ -64,8 +71,10 @@ export abstract class GraphPanel {
     }
 
     static stopRenderingGraph() {
-        if (this.graph)
+        if (this.graph){
             this.canvasRenderer.remove(this.graph);
+            this.graph = null;
+        }
 
         this.canvasRenderer.stop();
     }
@@ -177,5 +186,4 @@ documentElements.set("simulation-controller-buttons", document.querySelector("#s
 documentElements.set("object-list", document.querySelector("#object-list")!);
 documentElements.set("graph-config-form", document.querySelector("#graph-config-form")!);
 documentElements.set("graph-panel", document.querySelector("#graph-panel")!);
-
 GraphPanel.initialize();
