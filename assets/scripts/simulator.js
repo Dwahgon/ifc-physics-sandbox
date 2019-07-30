@@ -3,7 +3,10 @@ define(["require", "exports", "./document"], function (require, exports, documen
     Object.defineProperty(exports, "__esModule", { value: true });
     console.log("Loading simulator");
     class Simulator {
-        constructor() {
+        constructor(playButton, resetButton, destroyButton) {
+            this.playButton = playButton;
+            this.resetButton = resetButton;
+            this.destroyButton = destroyButton;
             this._time = 0;
             this._isPlaying = false;
             const bottomBar = document.querySelector("#mid-menu>div:last-child");
@@ -12,8 +15,6 @@ define(["require", "exports", "./document"], function (require, exports, documen
                 throw "time input, play button or reset button not found";
             this.domInput = queryInput;
             this.domInput.value = this._time.toFixed(2);
-            this.playButton = document_1.miscButtons.get("play-button");
-            this.resetButton = document_1.miscButtons.get("reset-button");
             this.simulatables = [];
             this.resetButton.enabled = false;
             this.domInput.addEventListener("change", () => {
@@ -38,7 +39,7 @@ define(["require", "exports", "./document"], function (require, exports, documen
             document_1.ObjectSelectionController.propertiesEnabled = value == 0;
             document_1.ObjectCreationController.objectCreatable = value == 0;
             this.resetButton.enabled = value > 0 && !this._isPlaying;
-            document_1.miscButtons.get("destroy-button").enabled = value == 0 && document_1.ObjectSelectionController.selectedObject != null && document_1.ObjectSelectionController.selectedObject.isFollowable;
+            this.destroyButton.enabled = value == 0 && document_1.ObjectSelectionController.selectedObject != null && document_1.ObjectSelectionController.selectedObject.isFollowable;
         }
         get isPlaying() {
             return this._isPlaying;
@@ -59,12 +60,14 @@ define(["require", "exports", "./document"], function (require, exports, documen
         }
         start() {
             this.isPlaying = true;
-            this.changeButtonImage(Simulator.pauseSrc);
+            this.playButton.swapToAltImg();
+            this.playButton.swapToAltTitle();
             this.simulate();
         }
         stop() {
             this.isPlaying = false;
-            this.changeButtonImage(Simulator.playSrc);
+            this.playButton.swapToDefaultImg();
+            this.playButton.swapToDefaultTitle();
         }
         reset() {
             if (this.isPlaying || this.time == 0)
@@ -76,15 +79,9 @@ define(["require", "exports", "./document"], function (require, exports, documen
             this.reset();
             this.passTime(time);
         }
-        changeButtonImage(src) {
-            let img = this.playButton.element.querySelector("img");
-            if (!img)
-                throw "img not found in play button";
-            img.src = src;
-        }
         passTime(step) {
-            this.simulatables.forEach(simulatable => simulatable.simulate(step));
             this.time += step;
+            this.simulatables.forEach(simulatable => simulatable.simulate(step));
         }
         simulate() {
             this.passTime(0.016);
@@ -92,7 +89,5 @@ define(["require", "exports", "./document"], function (require, exports, documen
                 window.requestAnimationFrame(this.simulate.bind(this));
         }
     }
-    Simulator.playSrc = "./assets/images/play.png";
-    Simulator.pauseSrc = "./assets/images/pause.png";
     exports.default = Simulator;
 });

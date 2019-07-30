@@ -8,12 +8,6 @@ define(["require", "exports"], function (require, exports) {
         ButtonColor["White"] = "white-button";
         ButtonColor["InvisibleBackground"] = "invisible-bg-button";
     })(ButtonColor = exports.ButtonColor || (exports.ButtonColor = {}));
-    var DocumentButtonKind;
-    (function (DocumentButtonKind) {
-        DocumentButtonKind["MiscButton"] = "misc-button";
-        DocumentButtonKind["CreateObjectButton"] = "create-object-button";
-        DocumentButtonKind["PropertyButton"] = "property-button";
-    })(DocumentButtonKind = exports.DocumentButtonKind || (exports.DocumentButtonKind = {}));
     var PhysicsPropertyType;
     (function (PhysicsPropertyType) {
         PhysicsPropertyType[PhysicsPropertyType["All"] = 0] = "All";

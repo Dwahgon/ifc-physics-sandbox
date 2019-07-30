@@ -16,7 +16,7 @@
 }
 
 
-/* Default Button*/
+/* Button Classes */
 
 .dark-button,
 .white-button {
@@ -32,22 +32,11 @@
 }
 
 .invisible-bg-button {
-    background-color: #00000000;
     background-color: rgba(0, 0, 0, 0);
     border: none;
 }
 
-.button,
-.inactive-button {
-    box-sizing: border-box;
-    display: grid;
-    padding: 10px;
-    border-radius: 4px;
-    outline: none;
-    font-family: inherit;
-}
-
-.button {
+.active-button {
     cursor: pointer;
     color: #ffffff;
     transition: background-color .25s, transform .05s;
@@ -59,26 +48,82 @@
     cursor: default;
 }
 
-.button:hover {
-    background-color: #3d3d3d;
-}
-
-.button:active {
-    transform: scale(0.95);
-}
-
-.button>img,
-.inactive-button>img {
-    width: 100%;
-    height: 100%;
-}
-
 .inactive-button>img {
     opacity: .25;
 }
 
+.active-button:hover {
+    background-color: #3d3d3d;
+}
 
-/*App layout*/
+.active-button:active {
+    transform: scale(0.95);
+}
+
+.panel {
+    border: 1px solid #2f2f2f;
+    background-color: #646464;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel>.panel-header {
+    height: 50px;
+    width: 100%;
+    padding: 5px;
+    padding-left: 10px;
+    background-color: #282828;
+    display: flex;
+    justify-content: flex-start;
+    min-width: fit-content;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.panel>.panel-header>h1 {
+    margin: 0;
+    color: #ffffff;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    text-shadow: 2px 2px 4px #000000;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+.panel>.panel-header>button {
+    height: 40px;
+    width: 40px;
+    padding: 5px;
+    margin: 0 0 0 auto;
+}
+
+.panel>.panel-content {
+    padding: 3px;
+}
+
+.modal {
+    position: fixed;
+    background-color: #000000aa;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    display: none;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal>.panel {
+    width: 500px;
+}
+
+
+/*
+    Default element values
+*/
 
 * {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -92,7 +137,7 @@ body {
     color: #ffffff;
 }
 
-body>header {
+header {
     width: 100vw;
     height: var(--header-height);
     padding: 2px;
@@ -109,31 +154,36 @@ header>div {
     display: flex;
 }
 
-header>div>.button {
+body>header>div>button {
     height: 100%;
     width: calc(var(--header-height) - 4px);
     padding: 5px;
 }
+
+button {
+    box-sizing: border-box;
+    display: grid;
+    padding: 10px;
+    border-radius: 4px;
+    outline: none;
+    font-family: inherit;
+}
+
+button>img {
+    width: 100%;
+    height: 100%;
+}
+
+
+/*
+    Main
+*/
 
 #main-interface {
     width: 100vw;
     height: calc(100vh - var(--header-height));
     display: flex;
 }
-
-
-/*Panels*/
-
-.side-panel {
-    display: table-cell;
-    vertical-align: middle;
-    padding: 10px;
-    background-color: #3f3f3f;
-    box-sizing: border-box;
-}
-
-
-/*Mid Panel*/
 
 #mid-menu {
     height: 100%;
@@ -151,6 +201,13 @@ header>div>.button {
     display: flex;
     box-sizing: border-box;
     position: relative;
+}
+
+#mid-menu>div:first-child>.panel {
+    max-height: calc(100% - 10px);
+    z-index: 1;
+    position: absolute;
+    margin: 5px;
 }
 
 #mid-menu>div:last-child {
@@ -207,57 +264,13 @@ header>div>.button {
 }
 
 
-/*Side panels*/
-
-.side-panel>div {
-    width: 100%;
-    height: 100%;
-    padding: 0 10px;
-    border: 1px solid #2f2f2f;
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-    border-radius: 4px;
-    background-color: #646464;
-}
-
-.side-panel>div>h1 {
-    height: 50px;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 0px solid rgb(47, 47, 47);
-    border-bottom-width: 1px;
-    box-sizing: border-box;
-    overflow: hidden;
-    font: 1.2vw Arial, Helvetica, sans-serif;
-    text-shadow: 2px 2px 4px #000000;
-    word-wrap: break-word;
-    color: #ffffff;
-}
-
-.side-panel>div>ul,
-.side-panel>ul {
-    box-sizing: border-box;
-    height: 90%;
-    margin: 10px 0;
-    overflow: auto;
-    padding: 0px;
-    flex: 1;
-}
-
-.side-panel>div>ul>li {
-    width: 100%;
-}
-
-
 /*Object Buttons*/
 
 #object-list {
     padding: 2px;
     width: var(--header-height);
     background-color: #282828;
+    box-sizing: border-box;
 }
 
 #object-list>button {
@@ -269,48 +282,17 @@ header>div>.button {
 
 #property-side-panel {
     width: var(--property-panel-width);
-    max-height: calc(100% - 10px);
-    z-index: 1;
-    position: absolute;
-    right: 5px;
-    top: 5px;
-    border: 1px solid #2f2f2f;
-    padding: 0 5px 5px;
+    right: 0;
+    box-sizing: border-box;
+}
+
+#property-side-panel>.panel-content {
     display: flex;
     flex-direction: column;
-    box-sizing: border-box;
-    border-radius: 4px;
-    background-color: #646464;
-}
-
-#property-side-panel>h1 {
-    height: 50px;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 0px solid rgb(47, 47, 47);
-    border-bottom-width: 1px;
-    box-sizing: border-box;
-    overflow: hidden;
-    font-size: 1.5vw;
-    text-shadow: 2px 2px 4px #000000;
-    word-wrap: break-word;
-    color: #ffffff;
-}
-
-#property-side-panel>ul {
-    box-sizing: border-box;
-    height: 90%;
-    margin: 0;
-    padding: 0;
-    overflow: auto;
-    flex: 1;
 }
 
 #object-interactor {
     min-height: 32px;
-    margin: 10px 0px;
     display: flex;
     justify-content: left;
     flex-wrap: wrap;
@@ -321,6 +303,23 @@ header>div>.button {
     height: 32px;
     padding: 4px;
     margin: 0px 2px;
+}
+
+#object-interactor>button:first-child {
+    margin-left: 0;
+}
+
+#object-interactor>button:last-child {
+    margin-right: 0;
+}
+
+#property-list {
+    margin: 3px 0 0;
+    box-sizing: border-box;
+    height: 90%;
+    padding: 0;
+    overflow: auto;
+    flex: 1;
 }
 
 #property-list>li {
@@ -392,56 +391,53 @@ header>div>.button {
 
 /* Property Description */
 
-#property-description-interface {
-    position: fixed;
-    background-color: #000000aa;
-    width: 100vw;
-    height: 100vh;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    display: none;
-    flex-direction: row;
+#property-description-modal>.panel {
+    box-sizing: border-box;
+    max-height: 80%;
+}
+
+#property-description-modal>.panel>.panel-content {
+    overflow: auto;
+}
+
+#property-description-modal article {
+    font-size: 1rem;
+    text-align: justify;
+    text-shadow: 1px 1px #000000;
+}
+
+#property-description-modal article h1 {
+    text-align: center;
+}
+
+
+/* Graph configuration */
+
+#graph-config-form {
+    font-size: 1rem;
+    text-shadow: 1px 1px #000000;
+}
+
+#graph-config-form>div {
+    margin: 10px 0;
+}
+
+
+/* Graph panel */
+
+#graph-panel {
+    width: 30vw;
+    height: 30vw;
+}
+
+#graph-panel .panel-content {
+    display: flex;
     justify-content: center;
     align-items: center;
+    flex-grow: 1;
 }
 
-#property-description-interface>div {
-    width: 30vw;
-    height: 35vw;
-    border-radius: 4px;
-    background-color: #3f3f3f;
-    border: 1px solid #2f2f2f;
-    box-sizing: border-box;
-}
-
-#property-description-interface>div>header {
-    height: 10%;
-    width: 100%;
-    padding: .5vw;
-    background-color: #282828;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-}
-
-#property-description-interface>div>header>button {
-    height: 100%;
-    width: calc(35vw * .1 - 1vw);
-    padding: .5vw;
-}
-
-#property-description-interface>div>article {
-    width: 100%;
-    height: 90%;
-    padding: 0 10px;
-    overflow: auto;
-    box-sizing: border-box;
-    overflow-x: hidden;
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-#property-description-interface>div>article>h1 {
-    text-align: center;
+#graph-panel canvas {
+    background-color: #ffffff;
+    flex-grow: 0;
 }

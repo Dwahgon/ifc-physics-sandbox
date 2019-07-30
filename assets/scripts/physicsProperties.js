@@ -104,7 +104,7 @@ define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "
     class ObjectArea extends PhysicsProperty {
         constructor(object) {
             super(types_1.PhysicsPropertyType.ObjectArea, false, object, 0, 0, genericCalulator_1.NumberCalculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLINumber(this, "área", "m<sup>2</sup>", 0, "área");
+            this.propertyLI = new propertyLI_1.PropertyLINumber(this, "área", "m<sup>2</sup>", 0, "Área");
             const objectSize = object.getProperty(types_1.PhysicsPropertyType.ObjectSize);
             const sizeVector2 = (objectSize) ? objectSize.initialValue : vector2_1.default.zero;
             this.initialValue = sizeVector2.x * sizeVector2.y;

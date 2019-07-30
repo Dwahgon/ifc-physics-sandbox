@@ -1,17 +1,26 @@
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./document", "./types", "./vector2"], function (require, exports, document_1, types_1, vector2_1) {
+define(["require", "exports", "./buttons", "./document", "./types", "./vector2"], function (require, exports, Buttons, document_1, types_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    Buttons = __importStar(Buttons);
     vector2_1 = __importDefault(vector2_1);
     console.log("Loading rendering");
     class CanvasRenderer {
-        constructor(context, cameraPos, cameraZoom, cameraMinZoom, cameraMaxZoom) {
+        constructor(context, cameraPos = vector2_1.default.zero, cameraZoom = 100, cameraMinZoom = 10, cameraMaxZoom = 500) {
             this.context = context;
             this.isRunning = false;
             this.renderables = [];
             this.camera = new Camera(this, cameraPos, cameraZoom, cameraMinZoom, cameraMaxZoom, 5);
+            this.add({ draw(cam, ctx) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); } });
         }
         start() {
             this.isRunning = true;
@@ -33,8 +42,9 @@ define(["require", "exports", "./document", "./types", "./vector2"], function (r
             const con = this.context;
             const canvas = this.context.canvas;
             const canvasParent = canvas.parentElement;
-            canvas.height = canvasParent.offsetHeight;
-            canvas.width = canvasParent.offsetWidth;
+            const style = window.getComputedStyle(canvasParent, null);
+            canvas.height = parseInt(style.getPropertyValue("height"));
+            canvas.width = parseInt(style.getPropertyValue("width"));
             this.renderables.forEach(rn => rn.draw(cam, con));
             if (this.isRunning)
                 window.requestAnimationFrame(this.render.bind(this));
@@ -51,7 +61,17 @@ define(["require", "exports", "./document", "./types", "./vector2"], function (r
             this.zoomStep = zoomStep;
             this.targetObjectPosition = null;
             this._zoom = this.defaultZoom;
-            document_1.miscButtons.get("centralize-camera").onClick = this.focusOrigin.bind(this);
+            const canvas = canvasRenderer.context.canvas;
+            this._isMouseDown = false;
+            this._mouseMoved = false;
+            this.clickedPos = vector2_1.default.zero;
+            this.cameraPosOnMouseDown = vector2_1.default.zero;
+            canvas.addEventListener("mousedown", ev => { this.onInputStart(new vector2_1.default(ev.offsetX, -ev.offsetY)); });
+            canvas.addEventListener("touchstart", ev => { this.onInputStart(this.getTouchPosition(ev)); });
+            canvas.addEventListener("mousemove", ev => { this.onMove(new vector2_1.default(ev.offsetX, -ev.offsetY), canvas); });
+            canvas.addEventListener("touchmove", ev => { this.onMove(this.getTouchPosition(ev), canvas); });
+            canvas.addEventListener("wheel", ev => { this.onWheel(ev); });
+            document.addEventListener("mouseup", ev => { this.onMouseUp(canvas); });
         }
         get zoom() {
             return this._zoom;
@@ -62,6 +82,28 @@ define(["require", "exports", "./document", "./types", "./vector2"], function (r
                 this._zoom = this.minZoom;
             else if (this._zoom > this.maxZoom)
                 this._zoom = this.maxZoom;
+        }
+        get pos() {
+            if (this.targetObjectPosition) {
+                return vector2_1.default.mult(this.targetObjectPosition.value, this.zoom);
+            }
+            return this._pos;
+        }
+        set pos(value) {
+            if (this.targetObjectPosition)
+                this.unfollowObject();
+            this._pos = value;
+        }
+        get objectBeingFollowed() {
+            if (this.targetObjectPosition)
+                return this.targetObjectPosition.object;
+            return null;
+        }
+        get isMouseDown() {
+            return this._isMouseDown;
+        }
+        get mouseMoved() {
+            return this._mouseMoved;
         }
         nextZoom() {
             this.zoom += this.zoomStep;
@@ -84,22 +126,6 @@ define(["require", "exports", "./document", "./types", "./vector2"], function (r
             const posY = (canvas.height / 2) - worldPos.y * this.zoom + this.pos.y;
             return new vector2_1.default(posX, posY);
         }
-        get pos() {
-            if (this.targetObjectPosition) {
-                return vector2_1.default.mult(this.targetObjectPosition.value, this.zoom);
-            }
-            return this._pos;
-        }
-        set pos(value) {
-            if (this.targetObjectPosition)
-                this.unfollowObject();
-            this._pos = value;
-        }
-        get objectBeingFollowed() {
-            if (this.targetObjectPosition)
-                return this.targetObjectPosition.object;
-            return null;
-        }
         followObject(object) {
             if (!object.isFollowable)
                 throw "Attemting to follow an unfollowable object";
@@ -113,10 +139,51 @@ define(["require", "exports", "./document", "./types", "./vector2"], function (r
         focusOrigin() {
             this.pos = vector2_1.default.zero;
         }
+        getTouchPosition(ev) {
+            const touchTarget = ev.targetTouches[0].target;
+            const rect = touchTarget.getBoundingClientRect();
+            const x = ev.targetTouches[0].pageX - rect.left;
+            const y = ev.targetTouches[0].pageY - rect.top;
+            return new vector2_1.default(x, -y);
+        }
         changeButtonText(isFollowing) {
-            const followButton = document_1.miscButtons.get("follow-button");
-            if (document_1.ObjectSelectionController.selectedObject == this.objectBeingFollowed)
-                followButton.toggled = !isFollowing;
+            const followButton = Buttons.getButtonById("follow-button");
+            if (document_1.ObjectSelectionController.selectedObject == this.objectBeingFollowed && !isFollowing) {
+                followButton.swapToAltImg();
+                followButton.swapToAltTitle();
+            }
+            else {
+                followButton.swapToDefaultImg();
+                followButton.swapToDefaultTitle();
+            }
+        }
+        onInputStart(cursorCoordinates) {
+            this._isMouseDown = true;
+            this._mouseMoved = false;
+            this.clickedPos = cursorCoordinates;
+            this.cameraPosOnMouseDown = this.pos;
+        }
+        onMove(cursorCoordinates, canvas) {
+            if (this.isMouseDown) {
+                this.pos = vector2_1.default.sum(this.cameraPosOnMouseDown, vector2_1.default.sub(this.clickedPos, cursorCoordinates));
+                canvas.style.cursor = "move";
+                if (!vector2_1.default.equals(this.cameraPosOnMouseDown, this.pos)) {
+                    this._mouseMoved = true;
+                    this.unfollowObject();
+                }
+            }
+        }
+        onMouseUp(canvas) {
+            if (!this.isMouseDown)
+                return;
+            this._isMouseDown = false;
+            canvas.style.cursor = "default";
+        }
+        onWheel(e) {
+            if (e.deltaY < 0)
+                this.nextZoom();
+            else
+                this.previousZoom();
         }
     }
     exports.Camera = Camera;
@@ -141,8 +208,11 @@ define(["require", "exports", "./document", "./types", "./vector2"], function (r
     }
     exports.Sprite = Sprite;
     class CartesianPlane {
-        constructor(gridSize) {
+        constructor(gridSize, xAxisColor = "red", yAxisColor = "green", originColor = "blue") {
             this.gridSize = gridSize;
+            this.xAxisColor = xAxisColor;
+            this.yAxisColor = yAxisColor;
+            this.originColor = originColor;
         }
         draw(cam, ctx) {
             let canvas = ctx.canvas;
@@ -154,39 +224,52 @@ define(["require", "exports", "./document", "./types", "./vector2"], function (r
             ctx.font = "italic 30px CMU Serif";
             for (let i = startX; i < finishPos.x; i += this.gridSize) {
                 let x = (canvas.width / 2) + i * cam.zoom - cam.pos.x;
-                const style = (i == 0) ? "green" : "gray";
-                ctx.strokeStyle = style;
-                ctx.fillStyle = style;
-                ctx.lineWidth = i == 0 ? 3 : 1;
                 if (i == 0) {
+                    this.drawYAxis(ctx, x);
                     axisLocation.x = x;
-                    ctx.fillText("y", x + 10, 25);
                 }
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvas.height);
-                ctx.stroke();
+                else
+                    this.drawVerticalLine(ctx, x);
             }
             for (let i = startY; i > finishPos.y; i -= this.gridSize) {
                 let y = (canvas.height / 2) - i * cam.zoom + cam.pos.y;
-                const style = (i == 0) ? "red" : "gray";
-                ctx.strokeStyle = style;
-                ctx.fillStyle = style;
-                ctx.lineWidth = i == 0 ? 3 : 1;
                 if (i == 0) {
+                    this.drawXAxis(ctx, y);
                     axisLocation.y = y;
-                    ctx.fillText("x", canvas.width - 25, y - 10);
                 }
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
+                else
+                    this.drawHorizontalLine(ctx, y);
             }
-            if (axisLocation.x > 0 && axisLocation.y > 0) {
-                ctx.fillStyle = "blue";
-                ctx.fillRect(axisLocation.x - 3, axisLocation.y - 3, 6, 6);
-                ctx.fillText("O", axisLocation.x - 35, axisLocation.y - 10);
-            }
+            if (axisLocation.x > 0 && axisLocation.y > 0)
+                this.drawOrigin(ctx, axisLocation.x, axisLocation.y);
+        }
+        drawLine(ctx, startX, startY, finishX, finishY, style, lineWidth) {
+            ctx.strokeStyle = style;
+            ctx.fillStyle = style;
+            ctx.lineWidth = lineWidth;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(finishX, finishY);
+            ctx.stroke();
+        }
+        drawHorizontalLine(ctx, y) {
+            this.drawLine(ctx, 0, y, ctx.canvas.width, y, "gray", 1);
+        }
+        drawVerticalLine(ctx, x) {
+            this.drawLine(ctx, x, 0, x, ctx.canvas.height, "gray", 1);
+        }
+        drawXAxis(ctx, y) {
+            this.drawLine(ctx, 0, y, ctx.canvas.width, y, this.xAxisColor, 3);
+            ctx.fillText("x", ctx.canvas.width - 25, y - 10);
+        }
+        drawYAxis(ctx, x) {
+            this.drawLine(ctx, x, 0, x, ctx.canvas.height, this.yAxisColor, 3);
+            ctx.fillText("y", x + 10, 25);
+        }
+        drawOrigin(ctx, x, y) {
+            ctx.fillStyle = this.originColor;
+            ctx.fillRect(x - 3, y - 3, 6, 6);
+            ctx.fillText("O", x - 35, y - 10);
         }
     }
     exports.CartesianPlane = CartesianPlane;

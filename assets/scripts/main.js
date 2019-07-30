@@ -8,22 +8,23 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-define(["require", "exports", "./ambient", "./rendering", "./simulator", "./vector2", "./document"], function (require, exports, ambient_1, rendering_1, simulator_1, vector2_1, document_1) {
+define(["require", "exports", "./ambient", "./buttons", "./document", "./rendering", "./simulator", "./vector2"], function (require, exports, ambient_1, Buttons, document_1, rendering_1, simulator_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     ambient_1 = __importDefault(ambient_1);
+    Buttons = __importStar(Buttons);
     simulator_1 = __importDefault(simulator_1);
     vector2_1 = __importDefault(vector2_1);
     console.log("Loading main");
     let can = document.createElement('canvas');
     let ctx = can.getContext('2d');
-    can.width = 500;
-    can.height = 500;
     document.body.querySelector("#mid-menu>div").appendChild(can);
     exports.canvasRenderer = new rendering_1.CanvasRenderer(ctx, vector2_1.default.zero, 100, 5, 500);
     exports.ambient = new ambient_1.default();
-    exports.simulator = new simulator_1.default();
+    exports.simulator = new simulator_1.default(Buttons.getButtonById("play-button"), Buttons.getButtonById("reset-button"), Buttons.getButtonById("destroy-button"));
     new Promise((resolve_1, reject_1) => { require(["./input"], resolve_1, reject_1); }).then(__importStar);
+    new Promise((resolve_2, reject_2) => { require(["./buttonClickFunctions"], resolve_2, reject_2); }).then(__importStar);
+    new Promise((resolve_3, reject_3) => { require(["./graph"], resolve_3, reject_3); }).then(__importStar);
     exports.setAmbient = function (a) {
         exports.canvasRenderer.remove(exports.ambient);
         exports.simulator.remove(exports.ambient);
@@ -34,7 +35,6 @@ define(["require", "exports", "./ambient", "./rendering", "./simulator", "./vect
     };
     document_1.ObjectSelectionController.selectObject(exports.ambient);
     exports.simulator.add(exports.ambient);
-    exports.canvasRenderer.add({ draw() { ctx.clearRect(0, 0, can.width, can.height); } });
     exports.canvasRenderer.add(new rendering_1.CartesianPlane(1));
     exports.canvasRenderer.add(exports.ambient);
     exports.canvasRenderer.start();

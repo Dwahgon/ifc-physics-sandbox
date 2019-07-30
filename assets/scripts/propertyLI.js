@@ -1,7 +1,7 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./vector2", "./document", "./types"], function (require, exports, vector2_1, document_1, types_1) {
+define(["require", "exports", "./vector2", "./document", "./buttons", "./types"], function (require, exports, vector2_1, document_1, buttons_1, types_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_1 = __importDefault(vector2_1);
@@ -14,12 +14,17 @@ define(["require", "exports", "./vector2", "./document", "./types"], function (r
             this.input = document.createElement("input");
             this.domNameLabel = document.createElement("label");
             this.domUnitLabel = document.createElement("label");
-            const descriptionButton = document.createElement("button");
-            const descriptionIcon = document.createElement("img");
-            descriptionIcon.src = "./assets/images/descriptionicon.svg";
+            const descriptionButton = buttons_1.Button.createButtonElement({
+                buttonName: `open-${property.kind}-description-button`,
+                buttonColor: types_1.ButtonColor.Dark,
+                enabled: true,
+                title: `Descrição do(a) ${title.toLowerCase()}`,
+                imgSrc: "./assets/images/descriptionicon.svg",
+                func: "openPropertyDescription",
+                args: this.property.kind.toString()
+            });
             this.domNameLabel.innerHTML = name;
             this.domUnitLabel.innerHTML = propertyUnit;
-            descriptionButton.appendChild(descriptionIcon);
             this.li.appendChild(descriptionButton);
             this.li.appendChild(this.domNameLabel);
             this.li.appendChild(this.input);
@@ -27,15 +32,7 @@ define(["require", "exports", "./vector2", "./document", "./types"], function (r
             this.input.setAttribute("id", `${name}-property-input`);
             this.domNameLabel.setAttribute("for", `${name}-property-input`);
             this.domNameLabel.setAttribute("title", title);
-            descriptionButton.setAttribute("class", "button dark-button");
-            descriptionButton.setAttribute("title", "Descrição");
             this.input.setAttribute("type", "text");
-            descriptionButton.setAttribute("property-kind", this.property.kind.toString());
-            descriptionButton.setAttribute("button-kind", types_1.DocumentButtonKind.PropertyButton);
-            descriptionButton.querySelectorAll("*").forEach(el => {
-                el.setAttribute("button-kind", types_1.DocumentButtonKind.PropertyButton);
-                el.setAttribute("property-kind", this.property.kind.toString());
-            });
             this.lastValue = "";
             this.enabled = this.property.changeable;
             this.setValue(initialValue);
