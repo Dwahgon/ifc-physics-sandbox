@@ -1,8 +1,7 @@
 console.log("Loading ambient");
 
-import { miscButtons } from './document';
-import { AmbientJSON, downloadJSON, PhysicsObjectJSON } from './fileController';
-import { ambient, canvasRenderer, setAmbient, simulator } from './main';
+import { AmbientJSON, PhysicsObjectJSON } from './fileController';
+import { canvasRenderer } from './main';
 import { PhysicsObject } from './physicsObjects';
 import { Camera } from './rendering';
 import { Renderable, Selectable, Simulatable } from './types';
@@ -78,36 +77,3 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
         this.objects.forEach(object => object.reset());
     }
 }
-
-miscButtons.get("new-button")!.onClick = function () {
-    const isOKClicked = confirm("Você tem certeza que quer criar um novo ambiente? As alterações não salvas serão perdidas!");
-    if (isOKClicked) {
-        setAmbient(new Ambient());
-        simulator.reset();
-        canvasRenderer.camera.focusOrigin();
-    }
-};
-
-miscButtons.get("save-button")!.onClick = function () {
-    downloadJSON(JSON.stringify(ambient.toJSON()), "meuAmbiente.pha", "pha");
-}
-
-miscButtons.get("load-button")!.onClick = function () {
-    const input = document.createElement("input");
-    input.type = "file";
-
-    input.addEventListener("change", () => {
-        if (input.files) {
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.readAsText(file, "utf-8");
-
-            reader.onload = ev => {
-                const result = <string>(<FileReader>ev.target!).result;
-                setAmbient(Ambient.fromJSON(result));
-            };
-        }
-    })
-
-    input.click();
-};

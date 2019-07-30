@@ -1,20 +1,16 @@
 console.log("Loading simulator");
 
-import { DocumentButton, miscButtons, ObjectCreationController, ObjectSelectionController } from './document';
+import { ObjectCreationController, ObjectSelectionController } from './document';
 import { Simulatable } from './types';
+import { Button } from './buttons';
 
 export default class Simulator {
-    private static playSrc: string = "./assets/images/play.png";
-    private static pauseSrc: string = "./assets/images/pause.png";
-
     private _time: number;
     private _isPlaying: boolean;
     private domInput: HTMLInputElement;
-    private playButton: DocumentButton;
-    private resetButton: DocumentButton;
     private simulatables: Simulatable[];
 
-    constructor(){
+    constructor(private readonly playButton: Button, private readonly resetButton: Button, private readonly destroyButton: Button){
         this._time = 0;
         this._isPlaying = false;
         
@@ -26,8 +22,6 @@ export default class Simulator {
         
         this.domInput = <HTMLInputElement>queryInput;
         this.domInput.value = this._time.toFixed(2);
-        this.playButton = miscButtons.get("play-button")!;
-        this.resetButton = miscButtons.get("reset-button")!;
         this.simulatables = [];
 
         this.resetButton.enabled = false;
@@ -61,7 +55,7 @@ export default class Simulator {
         ObjectCreationController.objectCreatable = value == 0;
 
         this.resetButton.enabled = value > 0 && !this._isPlaying;
-        miscButtons.get("destroy-button")!.enabled = value == 0 && ObjectSelectionController.selectedObject != null && ObjectSelectionController.selectedObject.isFollowable;
+        this.destroyButton.enabled = value == 0 && ObjectSelectionController.selectedObject != null && ObjectSelectionController.selectedObject.isFollowable;
     }
 
     get isPlaying(){
@@ -89,13 +83,15 @@ export default class Simulator {
     
     start(): void{
         this.isPlaying = true;
-        this.changeButtonImage(Simulator.pauseSrc);
+        this.playButton.swapToAltImg();
+        this.playButton.swapToAltTitle();
         this.simulate();
     }
     
     stop(): void{
         this.isPlaying = false;
-        this.changeButtonImage(Simulator.playSrc);
+        this.playButton.swapToDefaultImg();
+        this.playButton.swapToDefaultTitle();
     }
     
     reset(): void{
@@ -110,19 +106,10 @@ export default class Simulator {
         this.reset();
         this.passTime(time);
     }
-    
-    private changeButtonImage(src: string): void{
-        let img = this.playButton.element.querySelector("img");
-        if(!img)
-            throw "img not found in play button"
-        
-        img.src = src;
-    }
 
     private passTime(step: number){
-        this.simulatables.forEach(simulatable => simulatable.simulate(step));
-
         this.time += step;
+        this.simulatables.forEach(simulatable => simulatable.simulate(step));
     }
 
     private simulate(): void{

@@ -17,35 +17,63 @@
 <body>
     <header id="buttons-header">
         <div id="header-file-buttons">
-
+            <button id="new-file-button" class="invisible-bg-button active-button"><img
+                    src="assets/images/newfileicon.svg"></button>
+            <button id="save-file-button" class="invisible-bg-button active-button"><img
+                    src="assets/images/savefileicon.svg"></button>
+            <button id="load-file-button" class="invisible-bg-button active-button"><img
+                    src="assets/images/loadfileicon.svg"></button>
         </div>
-        <div id="header-camera-buttons">
-
+        <div id="header-camera-buttons" button-kind="normal">
+            <button id="center-camera-button" class="invisible-bg-button active-button"><img
+                    src="assets/images/centertooriginicon.svg"></button>
+        </div>
+        <div id="header-graph-buttons">
+            <button id="open-graph-modal-button" class="invisible-bg-button active-button" title="Criar gráfico" func="openModal" args="graph-config-modal">
+                <img src="assets/images/graphicon.svg">
+            </button>
         </div>
     </header>
 
     <div id="main-interface">
-        <div id="object-list" class="side-panel">
+        <div id="object-list">
+            <button id="create-solid-button" class="invisible-bg-button active-button" title="Criar um sólido" func="createObject" args="0"><img src="assets/images/solidicon.svg"></button>
         </div>
 
         <div id="mid-menu">
             <div>
-                <div id="property-side-panel">
-                    <h1>
-                        <span>Propriedades do ambiente</span>
-                    </h1>
-
-                    <div id="object-interactor">
+                <div id="graph-panel" class="panel" style="display: none">
+                    <div class="panel-header">
+                        <button id="close-graph-panel-button" class="invisible-bg-button active-button" func="hideElement" args="graph-panel"><img src='assets/images/closeicon.svg'></button>
+                    </div>
+                    <div class="panel-content">
 
                     </div>
-
-                    <ul id="property-list">
-                    </ul>
+                </div>
+                <div id="property-side-panel" class="panel">
+                    <div class="panel-header">
+                        <h1>
+                            Propriedades do ambiente
+                        </h1>
+                    </div>
+                    <div class="panel-content">
+                        <div id="object-interactor">
+                            <button id="destroy-button" class="dark-button inactive-button" title="Destruir objeto"><img
+                                    src="assets/images/destroyicon.svg"></button>
+                            <button id="follow-button" class=" dark-button inactive-button" title="Seguir/Focar objeto" alt-img="assets/images/cancelfollowicon.svg" alt-title="Parar de seguir/focar objeto"><img
+                                    src="assets/images/followicon.svg"></button>
+                        </div>
+                        <ul id="property-list" style="display: none"></ul>
+                    </div>
                 </div>
             </div>
+
             <div>
                 <div id="simulation-controller">
                     <div id="simulation-controller-buttons">
+                        <button id="play-button" class="dark-button active-button" title="Iniciar simulação" alt-title="Pausar simulação" alt-img="assets/images/pause.png"><img
+                                src="assets/images/play.png"></button>
+                        <button id="reset-button" class="dark-button inactive-button" title="Resetar simulação">t=0</button>
                     </div>
 
                     <div>
@@ -55,19 +83,49 @@
                 </div>
             </div>
         </div>
-
     </div>
 
-    <div id="property-description-interface" hidden>
-        <div>
-            <header></header>
-            <article>
-
-            </article>
+    <div id="property-description-modal" class="modal">
+        <div class="panel">
+            <div class="panel-header">
+                <button id="close-property-description-modal-button" class="invisible-bg-button active-button" func="closeModal" args="property-description-modal"><img src='assets/images/closeicon.svg'></button>
+            </div>
+            <div id="property-description-content" class="panel-content">
+                <article></article>
+            </div>
         </div>
     </div>
 
-
+    <div id="graph-config-modal" class="modal">
+        <div class="panel">
+            <div class="panel-header">
+                <h1>Configurar gráfico</h1>
+                <button id="close-graph-config-modal-button" class="invisible-bg-button active-button" func="closeModal" args="graph-config-modal"><img src='assets/images/closeicon.svg'></button>
+            </div>
+            <div class="panel-content">
+                <form id="graph-config-form">
+                    <div>
+                        <label>Eixo x:</label>
+                        <select id="x-axis-property" class="property-selector" name="x-axis-property">
+                        </select>
+                        <label>do</label>
+                        <select id="x-axis-property-holder" name="x-axis-property-holder">
+                        </select>
+                    </div>
+                    <div>
+                        <label>Eixo y:</label>
+                        <select id="y-axis-property" class="property-selector" name="y-axis-property">
+                        </select>
+                        <label>do</label>
+                        <select id="y-axis-property-holder" name="y-axis-property-holder">
+                        </select>
+                    </div>
+                    <button type="button" id="create-graph-button" class="dark-button active-button">Criar
+                        gráfico</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

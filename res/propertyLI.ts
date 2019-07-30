@@ -3,7 +3,8 @@ console.log("Loading propertyLI");
 import PhysicsProperty from './physicsProperties';
 import Vector2 from './vector2';
 import { documentElements } from './document';
-import { DocumentButtonKind } from './types';
+import { Button } from './buttons';
+import { ButtonColor } from './types';
 
 export default abstract class PropertyLI<T>{
     public readonly li: HTMLLIElement;
@@ -17,15 +18,19 @@ export default abstract class PropertyLI<T>{
         this.input = document.createElement("input");
         this.domNameLabel = document.createElement("label");
         this.domUnitLabel = document.createElement("label");
-        const descriptionButton = document.createElement("button");
-        const descriptionIcon = document.createElement("img");
+        const descriptionButton = Button.createButtonElement({
+            buttonName: `open-${property.kind}-description-button`, 
+            buttonColor: ButtonColor.Dark, 
+            enabled: true,
+            title: `Descrição do(a) ${title.toLowerCase()}`,
+            imgSrc: "./assets/images/descriptionicon.svg",
+            func: "openPropertyDescription",
+            args: this.property.kind.toString()
+        });
 
-        descriptionIcon.src = "./assets/images/descriptionicon.svg";
         this.domNameLabel.innerHTML = name;
         this.domUnitLabel.innerHTML = propertyUnit;
         
-        
-        descriptionButton.appendChild(descriptionIcon);
         this.li.appendChild(descriptionButton);
         this.li.appendChild(this.domNameLabel);
         this.li.appendChild(this.input);
@@ -34,15 +39,7 @@ export default abstract class PropertyLI<T>{
         this.input.setAttribute("id", `${name}-property-input`);
         this.domNameLabel.setAttribute("for", `${name}-property-input`);
         this.domNameLabel.setAttribute("title", title);
-        descriptionButton.setAttribute("class", "button dark-button");
-        descriptionButton.setAttribute("title", "Descrição");
         this.input.setAttribute("type", "text");
-        descriptionButton.setAttribute("property-kind", this.property.kind.toString());
-        descriptionButton.setAttribute("button-kind", DocumentButtonKind.PropertyButton);
-        descriptionButton.querySelectorAll("*").forEach(el => {
-            el.setAttribute("button-kind", DocumentButtonKind.PropertyButton);
-            el.setAttribute("property-kind", this.property.kind.toString());
-        });
         
         this.lastValue = "";
         this.enabled = this.property.changeable;

@@ -1,4 +1,4 @@
-define(["require", "exports", "./document", "./fileController", "./main", "./physicsObjects"], function (require, exports, document_1, fileController_1, main_1, physicsObjects_1) {
+define(["require", "exports", "./main", "./physicsObjects"], function (require, exports, main_1, physicsObjects_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     console.log("Loading ambient");
@@ -57,31 +57,4 @@ define(["require", "exports", "./document", "./fileController", "./main", "./phy
         }
     }
     exports.default = Ambient;
-    document_1.miscButtons.get("new-button").onClick = function () {
-        const isOKClicked = confirm("Você tem certeza que quer criar um novo ambiente? As alterações não salvas serão perdidas!");
-        if (isOKClicked) {
-            main_1.setAmbient(new Ambient());
-            main_1.simulator.reset();
-            main_1.canvasRenderer.camera.focusOrigin();
-        }
-    };
-    document_1.miscButtons.get("save-button").onClick = function () {
-        fileController_1.downloadJSON(JSON.stringify(main_1.ambient.toJSON()), "meuAmbiente.pha", "pha");
-    };
-    document_1.miscButtons.get("load-button").onClick = function () {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.addEventListener("change", () => {
-            if (input.files) {
-                const file = input.files[0];
-                const reader = new FileReader();
-                reader.readAsText(file, "utf-8");
-                reader.onload = ev => {
-                    const result = ev.target.result;
-                    main_1.setAmbient(Ambient.fromJSON(result));
-                };
-            }
-        });
-        input.click();
-    };
 });
