@@ -81,8 +81,12 @@ define(["require", "exports", "./vector2", "./document", "./buttons", "./types"]
     }
     exports.default = PropertyLI;
     class PropertyLIVector2 extends PropertyLI {
-        constructor(property, name, propertyUnit, initialValue, title) {
-            super(property, name, propertyUnit, /\-?\d*\.?\d*/g, initialValue, title);
+        constructor(property, name, propertyUnit, initialValue, title, showModulus, modulusUnit) {
+            super(property, name, `${propertyUnit}, ${propertyUnit}`, /\-?\d*\.?\d*/g, initialValue, title);
+            this.propertyUnit = propertyUnit;
+            this.showModulus = showModulus;
+            this.modulusUnit = modulusUnit;
+            this.updateInputTitle(initialValue);
         }
         formatValue(value) {
             return `(${value.x.toFixed(2)}, ${value.y.toFixed(2)})`;
@@ -92,7 +96,13 @@ define(["require", "exports", "./vector2", "./document", "./buttons", "./types"]
                 this.resetToLastString();
                 return undefined;
             }
-            return new vector2_1.default(Number(match[0]), Number(match[1]));
+            const vector2 = new vector2_1.default(Number(match[0]), Number(match[1]));
+            this.updateInputTitle(vector2);
+            return vector2;
+        }
+        updateInputTitle(newValue) {
+            if (this.showModulus)
+                this.input.title = `Módulo: ${vector2_1.default.distance(vector2_1.default.zero, newValue)} ${this.modulusUnit}`;
         }
     }
     exports.PropertyLIVector2 = PropertyLIVector2;

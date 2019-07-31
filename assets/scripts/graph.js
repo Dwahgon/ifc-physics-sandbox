@@ -101,12 +101,12 @@ define(["require", "exports", "./buttons", "./document", "./modals", "./types", 
             const y = this.valueGetterY.getValue(this.targetY);
             const v2 = new vector2_1.default(x, y);
             //Remove last inserted point if the resulting line continues straight
-            if (this.points.length > 3) {
+            if (this.points.length > 1) {
                 const currentIndex = this.points.length - 1;
-                if (vector2_1.default.areColinear(this.points[currentIndex], this.points[currentIndex - 1], this.points[currentIndex - 2]))
-                    this.points.splice(currentIndex - 1);
+                if (vector2_1.default.areColinear(v2, this.points[currentIndex], this.points[currentIndex - 1]))
+                    this.points.splice(currentIndex);
             }
-            this.points.push(new vector2_1.default(x, y));
+            this.points.push(v2);
         }
         reset() {
             this.points = [];
@@ -220,6 +220,9 @@ define(["require", "exports", "./buttons", "./document", "./modals", "./types", 
             main.simulator.add(graph);
             main.simulator.start();
         });
+        Document.GraphPanel.onClose = () => {
+            new Promise((resolve_4, reject_4) => { require(["./main"], resolve_4, reject_4); }).then(__importStar).then(main => main.simulator.remove(graph));
+        };
         Document.GraphPanel.renderGraph(graph);
     };
     /*

@@ -62,7 +62,7 @@
 
 .panel {
     border: 1px solid #2f2f2f;
-    background-color: #646464;
+    background-color: rgb(63, 63, 63);
     border-radius: 4px;
     display: flex;
     flex-direction: column;
@@ -425,16 +425,12 @@ button>img {
 
 /* Graph panel */
 
-#graph-panel {
-    width: 30vw;
-    height: 30vw;
-}
-
 #graph-panel .panel-content {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-grow: 1;
+    height: 20vw;
+    width: 20vw;
 }
 
 #graph-panel canvas {

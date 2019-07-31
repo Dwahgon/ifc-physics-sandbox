@@ -56,14 +56,8 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
         static createPhysicsObject(type, ambient, properties) {
             switch (type) {
                 case types_1.PhysicsObjectType.Solid:
-                    const obj = new PhysicsObject(type, "Sólido", new rendering_1.Sprite("./assets/images/solid.svg", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient);
-                    obj.addProperties(new PhysicsProperties.ObjectPosition(properties ? properties.position : vector2_1.default.zero, obj));
-                    obj.addProperties(new PhysicsProperties.ObjectSize(properties ? properties.size : vector2_1.default.zero, obj));
-                    obj.addProperties(new PhysicsProperties.ObjectArea(obj));
-                    obj.addProperties(new PhysicsProperties.ObjectAcceleration(obj));
-                    obj.addProperties(new PhysicsProperties.ObjectVelocity(obj));
-                    obj.addProperties(new PhysicsProperties.ObjectDisplacement(obj));
-                    return obj;
+                    const solids = ambient.objects.filter(obj => { return obj.kind == type; });
+                    return new Solid(`Sólido ${solids.length + 1}`, ambient, properties);
             }
         }
         appendPropertyListItems() {
@@ -106,4 +100,15 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
         }
     }
     exports.PhysicsObject = PhysicsObject;
+    class Solid extends PhysicsObject {
+        constructor(name, ambient, properties) {
+            super(types_1.PhysicsObjectType.Solid, name, new rendering_1.Sprite("./assets/images/solid.svg", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient);
+            this.addProperties(new PhysicsProperties.ObjectPosition(properties ? properties.position : vector2_1.default.zero, this));
+            this.addProperties(new PhysicsProperties.ObjectSize(properties ? properties.size : vector2_1.default.zero, this));
+            this.addProperties(new PhysicsProperties.ObjectArea(this));
+            this.addProperties(new PhysicsProperties.ObjectAcceleration(this));
+            this.addProperties(new PhysicsProperties.ObjectVelocity(this));
+            this.addProperties(new PhysicsProperties.ObjectDisplacement(this));
+        }
+    }
 });

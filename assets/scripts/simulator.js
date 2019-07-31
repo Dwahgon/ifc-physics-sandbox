@@ -16,7 +16,6 @@ define(["require", "exports", "./document"], function (require, exports, documen
             this.domInput = queryInput;
             this.domInput.value = this._time.toFixed(2);
             this.simulatables = [];
-            this.resetButton.enabled = false;
             this.domInput.addEventListener("change", () => {
                 if (this.isPlaying)
                     return;
@@ -28,7 +27,10 @@ define(["require", "exports", "./document"], function (require, exports, documen
                 else
                     this.stop();
             };
-            this.resetButton.onClick = this.reset.bind(this);
+            this.resetButton.onClick = () => {
+                this.stop();
+                this.reset();
+            };
         }
         get time() {
             return this._time;
@@ -38,7 +40,6 @@ define(["require", "exports", "./document"], function (require, exports, documen
             this.domInput.value = value.toFixed(2);
             document_1.ObjectSelectionController.propertiesEnabled = value == 0;
             document_1.ObjectCreationController.objectCreatable = value == 0;
-            this.resetButton.enabled = value > 0 && !this._isPlaying;
             this.destroyButton.enabled = value == 0 && document_1.ObjectSelectionController.selectedObject != null && document_1.ObjectSelectionController.selectedObject.isFollowable;
         }
         get isPlaying() {
@@ -47,8 +48,6 @@ define(["require", "exports", "./document"], function (require, exports, documen
         set isPlaying(value) {
             this._isPlaying = value;
             this.domInput.disabled = value;
-            if (!value && this.time > 0)
-                this.resetButton.enabled = false;
         }
         add(simulatable) {
             this.simulatables.push(simulatable);
@@ -70,7 +69,7 @@ define(["require", "exports", "./document"], function (require, exports, documen
             this.playButton.swapToDefaultTitle();
         }
         reset() {
-            if (this.isPlaying || this.time == 0)
+            if (this.time == 0)
                 return;
             this.time = 0;
             this.simulatables.forEach(simulatable => simulatable.reset());
@@ -84,9 +83,10 @@ define(["require", "exports", "./document"], function (require, exports, documen
             this.simulatables.forEach(simulatable => simulatable.simulate(step));
         }
         simulate() {
+            if (!this.isPlaying)
+                return;
             this.passTime(0.016);
-            if (this.isPlaying)
-                window.requestAnimationFrame(this.simulate.bind(this));
+            window.requestAnimationFrame(this.simulate.bind(this));
         }
     }
     exports.default = Simulator;

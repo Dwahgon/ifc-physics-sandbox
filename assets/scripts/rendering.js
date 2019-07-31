@@ -71,7 +71,7 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
             canvas.addEventListener("mousemove", ev => { this.onMove(new vector2_1.default(ev.offsetX, -ev.offsetY), canvas); });
             canvas.addEventListener("touchmove", ev => { this.onMove(this.getTouchPosition(ev), canvas); });
             canvas.addEventListener("wheel", ev => { this.onWheel(ev); });
-            document.addEventListener("mouseup", ev => { this.onMouseUp(canvas); });
+            document.addEventListener("mouseup", () => { this.onMouseUp(canvas); });
         }
         get zoom() {
             return this._zoom;
@@ -208,11 +208,13 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
     }
     exports.Sprite = Sprite;
     class CartesianPlane {
-        constructor(gridSize, xAxisColor = "red", yAxisColor = "green", originColor = "blue") {
+        constructor(gridSize, xAxisColor = "red", yAxisColor = "green", originColor = "blue", xAxisName, yAxisName) {
             this.gridSize = gridSize;
             this.xAxisColor = xAxisColor;
             this.yAxisColor = yAxisColor;
             this.originColor = originColor;
+            this.xAxisName = xAxisName;
+            this.yAxisName = yAxisName;
         }
         draw(cam, ctx) {
             let canvas = ctx.canvas;
@@ -260,16 +262,40 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
         }
         drawXAxis(ctx, y) {
             this.drawLine(ctx, 0, y, ctx.canvas.width, y, this.xAxisColor, 3);
-            ctx.fillText("x", ctx.canvas.width - 25, y - 10);
+            const textY = y < ctx.canvas.height / 2 ? y + 30 : y - 10;
+            ctx.fillText("x", ctx.canvas.width - 25, textY);
+            if (this.xAxisName)
+                this.drawXAxisLabel(ctx, y, this.xAxisName);
         }
         drawYAxis(ctx, x) {
             this.drawLine(ctx, x, 0, x, ctx.canvas.height, this.yAxisColor, 3);
-            ctx.fillText("y", x + 10, 25);
+            const textX = x < ctx.canvas.width / 2 ? x + 10 : x - 30;
+            ctx.fillText("y", textX, 25);
+            if (this.yAxisName)
+                this.drawYAxisLabel(ctx, x, this.yAxisName);
+        }
+        drawYAxisLabel(ctx, x, text) {
+            ctx.save();
+            ctx.font = "italic 15px CMU Serif";
+            ctx.translate(x - 5, ctx.canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText(text, 0, 0);
+            ctx.restore();
+        }
+        drawXAxisLabel(ctx, y, text) {
+            ctx.save();
+            ctx.font = "italic 15px CMU Serif";
+            ctx.fillText(text, ctx.canvas.width / 2, y + 15);
+            ctx.restore();
         }
         drawOrigin(ctx, x, y) {
             ctx.fillStyle = this.originColor;
-            ctx.fillRect(x - 3, y - 3, 6, 6);
-            ctx.fillText("O", x - 35, y - 10);
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, 2 * Math.PI);
+            ctx.fill();
+            const textX = x < ctx.canvas.width / 2 ? x + 5 : x - 35;
+            const textY = y < ctx.canvas.height / 2 ? y + 30 : y - 10;
+            ctx.fillText("O", textX, textY);
         }
     }
     exports.CartesianPlane = CartesianPlane;

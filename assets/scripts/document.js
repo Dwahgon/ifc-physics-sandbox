@@ -5,10 +5,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "./rendering", "./types"], function (require, exports, Buttons, main_1, propertyDescriptions_1, rendering_1, types_1) {
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "./rendering", "./types", "./vector2"], function (require, exports, Buttons, main_1, propertyDescriptions_1, rendering_1, types_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Buttons = __importStar(Buttons);
+    vector2_1 = __importDefault(vector2_1);
     console.log("Loading document");
     class PropertyDescriptionUI {
         static setElementVisible(isVisible) {
@@ -36,22 +40,33 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
             canvas.height = 10;
             this.panel.querySelector(".panel-content").appendChild(canvas);
             this.canvasRenderer = new rendering_1.CanvasRenderer(canvas.getContext("2d"));
-            this.canvasRenderer.add(new rendering_1.CartesianPlane(1));
+            this.canvasRenderer.camera.pos = new vector2_1.default(150, 150);
+            this.cartesianPlane = new rendering_1.CartesianPlane(1);
+            this.canvasRenderer.add(this.cartesianPlane);
         }
         static setElementVisible(v) {
             this.panel.style.display = v ? "flex" : "none";
-            if (!v)
+            if (!v) {
                 this.stopRenderingGraph();
+                if (this.onClose) {
+                    this.onClose();
+                    this.onClose = null;
+                }
+            }
         }
         static renderGraph(graph) {
             this.stopRenderingGraph();
             this.canvasRenderer.add(graph);
             this.graph = graph;
+            this.cartesianPlane.xAxisName = graph.valueGetterX.name;
+            this.cartesianPlane.yAxisName = graph.valueGetterY.name;
             this.canvasRenderer.start();
         }
         static stopRenderingGraph() {
-            if (this.graph)
+            if (this.graph) {
                 this.canvasRenderer.remove(this.graph);
+                this.graph = null;
+            }
             this.canvasRenderer.stop();
         }
     }
