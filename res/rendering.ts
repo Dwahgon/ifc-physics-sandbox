@@ -263,7 +263,7 @@ export class Sprite implements Renderable {
 }
 
 export class CartesianPlane implements Renderable {
-    constructor(public gridSize: number, private xAxisColor: string = "red", private yAxisColor: string = "green", private originColor: string = "blue") {
+    constructor(public gridSize: number, private xAxisColor: string = "red", private yAxisColor: string = "green", private originColor: string = "blue", public xAxisName?: string, public yAxisName?: string) {
     }
 
     draw(cam: Camera, ctx: CanvasRenderingContext2D) {
@@ -325,18 +325,49 @@ export class CartesianPlane implements Renderable {
 
     private drawXAxis(ctx: CanvasRenderingContext2D, y: number) {
         this.drawLine(ctx, 0, y, ctx.canvas.width, y, this.xAxisColor, 3);
-        ctx.fillText("x", ctx.canvas.width - 25, y - 10);
+
+        const textY = y < ctx.canvas.height / 2 ? y + 30 : y - 10;
+        ctx.fillText("x", ctx.canvas.width - 25, textY);
+        if(this.xAxisName)
+            this.drawXAxisLabel(ctx, y, this.xAxisName);
     }
 
     private drawYAxis(ctx: CanvasRenderingContext2D, x: number) {
         this.drawLine(ctx, x, 0, x, ctx.canvas.height, this.yAxisColor, 3);
-        ctx.fillText("y", x + 10, 25);
+
+        const textX = x < ctx.canvas.width / 2 ? x + 10 :  x - 30;
+        ctx.fillText("y", textX, 25);
+        if(this.yAxisName)
+            this.drawYAxisLabel(ctx, x, this.yAxisName);
+    }
+
+    private drawYAxisLabel(ctx: CanvasRenderingContext2D, x: number, text: string){
+        ctx.save();
+        ctx.font = "italic 15px CMU Serif"
+
+        ctx.translate(x - 5, ctx.canvas.height / 2);
+        ctx.rotate(-Math.PI/2);
+        ctx.fillText(text, 0, 0);
+
+        ctx.restore();
+    }
+
+    private drawXAxisLabel(ctx: CanvasRenderingContext2D, y: number, text: string){
+        ctx.save();
+        ctx.font = "italic 15px CMU Serif"
+        ctx.fillText(text, ctx.canvas.width/2, y + 15);
+        ctx.restore();
     }
 
     private drawOrigin(ctx: CanvasRenderingContext2D, x: number, y: number) {
         ctx.fillStyle = this.originColor;
-        ctx.fillRect(x - 3, y - 3, 6, 6);
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, 2 * Math.PI);
+        ctx.fill();
 
-        ctx.fillText("O", x - 35, y - 10);
+        const textX = x < ctx.canvas.width / 2 ? x + 5 :  x - 35;
+        const textY = y < ctx.canvas.height / 2 ? y + 30 : y - 10;
+        ctx.fillText("O", textX, textY);
     }
 }

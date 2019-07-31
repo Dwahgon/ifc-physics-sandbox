@@ -10,7 +10,7 @@ import Vector2 from './vector2';
 export class PhysicsObject implements Selectable, Simulatable{
     private objectProperties: PhysicsProperty<any>[];
 
-    private constructor(public readonly kind: PhysicsObjectType, public name: string, public readonly sprite: Sprite, protected ambient: Ambient){
+    constructor(public readonly kind: PhysicsObjectType, public name: string, public readonly sprite: Sprite, protected ambient: Ambient){
         this.objectProperties = [];
         this.ambient.addObject(this);
     }
@@ -55,27 +55,8 @@ export class PhysicsObject implements Selectable, Simulatable{
     public static createPhysicsObject(type: PhysicsObjectType, ambient: Ambient, properties?: PhysicsObjectConfig): PhysicsObject{
         switch(type){
             case PhysicsObjectType.Solid:
-                const obj = new PhysicsObject(
-                    type,
-                    "Sólido", 
-                    new Sprite(
-                        "./assets/images/solid.svg", 
-                        new Vector2(0, 0), 
-                        new Vector2(512, 512), 
-                        Vector2.zero,
-                        Vector2.zero
-                    ),
-                    ambient
-                );
-
-                obj.addProperties(new PhysicsProperties.ObjectPosition(properties ? properties.position : Vector2.zero, obj));
-                obj.addProperties(new PhysicsProperties.ObjectSize(properties ? properties.size : Vector2.zero, obj));
-                obj.addProperties(new PhysicsProperties.ObjectArea(obj));
-                obj.addProperties(new PhysicsProperties.ObjectAcceleration(obj));
-                obj.addProperties(new PhysicsProperties.ObjectVelocity(obj));
-                obj.addProperties(new PhysicsProperties.ObjectDisplacement(obj));
-                
-                return obj;
+                const solids = ambient.objects.filter(obj => { return obj.kind == type });
+                return new Solid(`Sólido ${solids.length + 1}`, ambient, properties);
         }
     }
     
@@ -124,5 +105,28 @@ export class PhysicsObject implements Selectable, Simulatable{
 
             return physicsObj;
         }
+    }
+}
+
+class Solid extends PhysicsObject{
+    constructor(name: string, ambient: Ambient, properties?: PhysicsObjectConfig){
+        super(
+            PhysicsObjectType.Solid, 
+            name, 
+            new Sprite(
+                "./assets/images/solid.svg", 
+                new Vector2(0, 0), 
+                new Vector2(512, 512), 
+                Vector2.zero,
+                Vector2.zero
+            ), 
+            ambient);
+
+        this.addProperties(new PhysicsProperties.ObjectPosition(properties ? properties.position : Vector2.zero, this));
+        this.addProperties(new PhysicsProperties.ObjectSize(properties ? properties.size : Vector2.zero, this));
+        this.addProperties(new PhysicsProperties.ObjectArea(this));
+        this.addProperties(new PhysicsProperties.ObjectAcceleration(this));
+        this.addProperties(new PhysicsProperties.ObjectVelocity(this));
+        this.addProperties(new PhysicsProperties.ObjectDisplacement(this));
     }
 }

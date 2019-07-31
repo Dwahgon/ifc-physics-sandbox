@@ -65,7 +65,7 @@ export class ObjectPosition extends PhysicsProperty<Vector2>{
         object: PhysicsObject
     ){
         super(PhysicsPropertyType.ObjectPosition, true, object, initialPosition, Vector2.zero, Vector2Calculator.instance);
-        this.propertyLI = new PropertyLIVector2(this, "pos<sub>(x, y)</sub>", "m, m", initialPosition, "Vetor posição");
+        this.propertyLI = new PropertyLIVector2(this, "pos<sub>(x, y)</sub>", "m", initialPosition, "Vetor posição", false);
         this.updateSpritePosition();
     }
 
@@ -98,7 +98,7 @@ export class ObjectSize extends PhysicsProperty<Vector2>{
         object: PhysicsObject
     ){
         super(PhysicsPropertyType.ObjectSize, true, object, initialSize, Vector2.zero, Vector2Calculator.instance);
-        this.propertyLI = new PropertyLIVector2(this, "tam<sub>(x, y)</sub>", "m, m", initialSize, "Tamanho");
+        this.propertyLI = new PropertyLIVector2(this, "tam<sub>(x, y)</sub>", "m", initialSize, "Tamanho", false);
         this.updateSpriteSize();
     }
 
@@ -144,7 +144,7 @@ export class ObjectArea extends PhysicsProperty<number>{
 export class ObjectVelocity extends PhysicsProperty<Vector2>{
     constructor(object: PhysicsObject){
         super(PhysicsPropertyType.ObjectVelocity, true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
-        this.propertyLI = new PropertyLIVector2(this, "vel", "<sup>m</sup>&frasl;<sub>s</sub>, <sup>m</sup>&frasl;<sub>s</sub>", Vector2.zero, "Vetor velocidade");
+        this.propertyLI = new PropertyLIVector2(this, "vel", "<sup>m</sup>&frasl;<sub>s</sub>", Vector2.zero, "Vetor velocidade", true, "m/s");
     }
 
     simulate(step: 0): void{
@@ -173,7 +173,7 @@ export class ObjectDisplacement extends PhysicsProperty<number>{
 export class ObjectAcceleration extends PhysicsProperty<Vector2>{
     constructor(object: PhysicsObject){
         super(PhysicsPropertyType.ObjectAcceleration, true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
-        this.propertyLI = new PropertyLIVector2(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>, <sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue, "Vetor aceleração");
+        this.propertyLI = new PropertyLIVector2(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue, "Vetor aceleração", true, "m/s²");
     }
 
     simulate(step: 0): void{

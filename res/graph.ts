@@ -109,7 +109,7 @@ class SimulatorValueGetter implements ValueGetter {
 export class Graph implements Renderable, Simulatable {
     private points: Vector2[];
 
-    constructor(private readonly targetX: string, private readonly targetY: string, private readonly valueGetterX: ValueGetter, private readonly valueGetterY: ValueGetter, private pointSize: number) {
+    constructor(private readonly targetX: string, private readonly targetY: string, public readonly valueGetterX: ValueGetter, public readonly valueGetterY: ValueGetter, private pointSize: number) {
         this.points = [];
         this.simulate(0);
     }
@@ -119,13 +119,13 @@ export class Graph implements Renderable, Simulatable {
         const v2 = new Vector2(x, y);
 
         //Remove last inserted point if the resulting line continues straight
-        if(this.points.length > 3){
+        if(this.points.length > 1){
             const currentIndex = this.points.length - 1;
-            if(Vector2.areColinear(this.points[currentIndex], this.points[currentIndex - 1], this.points[currentIndex - 2]))
-                this.points.splice(currentIndex - 1);
+            if(Vector2.areColinear(v2, this.points[currentIndex], this.points[currentIndex - 1]))
+                this.points.splice(currentIndex);
         }
 
-        this.points.push(new Vector2(x, y));
+        this.points.push(v2);
     }
     reset(): void {
         this.points = [];

@@ -1,6 +1,6 @@
-import { ButtonColor, ButtonConfig } from "./types";
-
 console.log("Loaded buttons");
+
+import { ButtonConfig } from "./types";
 
 /*
     Class Definitions

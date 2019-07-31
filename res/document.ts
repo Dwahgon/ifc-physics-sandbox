@@ -7,6 +7,7 @@ import PhysicsProperty from "./physicsProperties";
 import { propertyDescriptions } from './propertyDescriptions';
 import { CanvasRenderer, CartesianPlane } from "./rendering";
 import { PhysicsPropertyType, Selectable } from './types';
+import Vector2 from "./vector2";
 
 export abstract class PropertyDescriptionUI {
     private static readonly element: HTMLDivElement = <HTMLDivElement>document.querySelector("#property-description-modal");
@@ -35,6 +36,7 @@ export abstract class GraphPanel {
     public static onClose: Function | null;
     private static panel: HTMLDivElement;
     private static canvasRenderer: CanvasRenderer;
+    private static cartesianPlane: CartesianPlane;
     private static graph: Graph | null;
 
     static initialize() {
@@ -46,7 +48,9 @@ export abstract class GraphPanel {
         this.panel.querySelector(".panel-content")!.appendChild(canvas);
 
         this.canvasRenderer = new CanvasRenderer(canvas.getContext("2d")!);
-        this.canvasRenderer.add(new CartesianPlane(1));
+        this.canvasRenderer.camera.pos = new Vector2(150, 150);
+        this.cartesianPlane = new CartesianPlane(1);
+        this.canvasRenderer.add(this.cartesianPlane);
     }
 
     static setElementVisible(v: boolean) {
@@ -66,6 +70,8 @@ export abstract class GraphPanel {
         this.stopRenderingGraph();
         this.canvasRenderer.add(graph);
         this.graph = graph;
+        this.cartesianPlane.xAxisName = graph.valueGetterX.name;
+        this.cartesianPlane.yAxisName = graph.valueGetterY.name;
 
         this.canvasRenderer.start();
     }

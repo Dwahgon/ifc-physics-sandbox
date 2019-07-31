@@ -50,7 +50,7 @@ define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "
     class ObjectPosition extends PhysicsProperty {
         constructor(initialPosition, object) {
             super(types_1.PhysicsPropertyType.ObjectPosition, true, object, initialPosition, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "pos<sub>(x, y)</sub>", "m, m", initialPosition, "Vetor posição");
+            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "pos<sub>(x, y)</sub>", "m", initialPosition, "Vetor posição", false);
             this.updateSpritePosition();
         }
         updateSpritePosition() {
@@ -75,7 +75,7 @@ define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "
     class ObjectSize extends PhysicsProperty {
         constructor(initialSize, object) {
             super(types_1.PhysicsPropertyType.ObjectSize, true, object, initialSize, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "tam<sub>(x, y)</sub>", "m, m", initialSize, "Tamanho");
+            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "tam<sub>(x, y)</sub>", "m", initialSize, "Tamanho", false);
             this.updateSpriteSize();
         }
         updateSpriteSize() {
@@ -114,7 +114,7 @@ define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "
     class ObjectVelocity extends PhysicsProperty {
         constructor(object) {
             super(types_1.PhysicsPropertyType.ObjectVelocity, true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "vel", "<sup>m</sup>&frasl;<sub>s</sub>, <sup>m</sup>&frasl;<sub>s</sub>", vector2_1.default.zero, "Vetor velocidade");
+            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "vel", "<sup>m</sup>&frasl;<sub>s</sub>", vector2_1.default.zero, "Vetor velocidade", true, "m/s");
         }
         simulate(step) {
             const displacement = vector2_1.default.mult(this.value, step);
@@ -139,7 +139,7 @@ define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "
     class ObjectAcceleration extends PhysicsProperty {
         constructor(object) {
             super(types_1.PhysicsPropertyType.ObjectAcceleration, true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>, <sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue, "Vetor aceleração");
+            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue, "Vetor aceleração", true, "m/s²");
         }
         simulate(step) {
             const objectVel = this.object.getProperty(types_1.PhysicsPropertyType.ObjectVelocity);

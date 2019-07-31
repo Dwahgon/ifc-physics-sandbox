@@ -104,8 +104,9 @@ export default abstract class PropertyLI<T>{
 }
 
 export class PropertyLIVector2 extends PropertyLI<Vector2>{
-    constructor(property: PhysicsProperty<Vector2>, name: string, propertyUnit: string, initialValue: Vector2, title: string){
-        super(property, name, propertyUnit, /\-?\d*\.?\d*/g, initialValue, title);
+    constructor(property: PhysicsProperty<Vector2>, name: string, private propertyUnit: string, initialValue: Vector2, title: string, private showModulus: boolean, private modulusUnit?: string){
+        super(property, name, `${propertyUnit}, ${propertyUnit}`, /\-?\d*\.?\d*/g, initialValue, title);
+        this.updateInputTitle(initialValue);
     }
 
     protected formatValue(value: Vector2): string{
@@ -118,7 +119,16 @@ export class PropertyLIVector2 extends PropertyLI<Vector2>{
             return undefined;
         }
 
-        return new Vector2(Number(match[0]), Number(match[1]));
+        const vector2 = new Vector2(Number(match[0]), Number(match[1]));
+
+        this.updateInputTitle(vector2);
+
+        return vector2;
+    }
+
+    private updateInputTitle(newValue: Vector2){
+        if(this.showModulus)
+            this.input.title = `Módulo: ${Vector2.distance(Vector2.zero, newValue)} ${this.modulusUnit}`;
     }
 }
 

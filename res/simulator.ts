@@ -24,8 +24,6 @@ export default class Simulator {
         this.domInput.value = this._time.toFixed(2);
         this.simulatables = [];
 
-        this.resetButton.enabled = false;
-
         this.domInput.addEventListener("change", () => {
             if(this.isPlaying)
                 return;
@@ -40,7 +38,10 @@ export default class Simulator {
                 this.stop();
         };
 
-        this.resetButton.onClick = this.reset.bind(this);
+        this.resetButton.onClick = () => {
+            this.stop();
+            this.reset();
+        };
     }
 
     get time(): number{
@@ -54,7 +55,6 @@ export default class Simulator {
         ObjectSelectionController.propertiesEnabled = value == 0;
         ObjectCreationController.objectCreatable = value == 0;
 
-        this.resetButton.enabled = value > 0 && !this._isPlaying;
         this.destroyButton.enabled = value == 0 && ObjectSelectionController.selectedObject != null && ObjectSelectionController.selectedObject.isFollowable;
     }
 
@@ -65,9 +65,6 @@ export default class Simulator {
     set isPlaying(value: boolean){
         this._isPlaying = value;
         this.domInput.disabled = value;
-
-        if(!value && this.time > 0)
-            this.resetButton.enabled = false
     }
 
     add(simulatable: Simulatable): void{
@@ -95,7 +92,7 @@ export default class Simulator {
     }
     
     reset(): void{
-        if(this.isPlaying || this.time == 0)
+        if(this.time == 0)
         return;
         
         this.time = 0;
@@ -113,9 +110,10 @@ export default class Simulator {
     }
 
     private simulate(): void{
+        if(!this.isPlaying)
+            return;
+        
         this.passTime(0.016);
-
-        if(this.isPlaying)
-            window.requestAnimationFrame(this.simulate.bind(this));
+        window.requestAnimationFrame(this.simulate.bind(this));
     }
 }
