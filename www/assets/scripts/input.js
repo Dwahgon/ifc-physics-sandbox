@@ -24,9 +24,9 @@ define(["require", "exports", "./main", "./vector2", "./document"], function (re
     };
     const onMouseUp = (ev) => {
         if (!camera.mouseMoved) {
-            let clickedPos = new vector2_1.default(ev.offsetX, ev.offsetY);
-            let obj = Main.ambient.getObjectOnPosition(clickedPos, true);
-            document_1.ObjectSelectionController.selectObject((obj) ? obj : Main.ambient);
+            const clickedPos = new vector2_1.default(ev.offsetX, ev.offsetY);
+            const obj = Main.ambient.getObjectOnPosition(clickedPos, true);
+            document_1.ObjectSelectionController.selectObject(obj ? obj : Main.ambient);
         }
     };
     canvas.addEventListener("mousemove", ev => { onMove(new vector2_1.default(ev.offsetX, -ev.offsetY), canvas); });

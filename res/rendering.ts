@@ -3,7 +3,7 @@ console.log("Loading rendering");
 import * as Buttons from "./buttons";
 import { ObjectSelectionController } from './document';
 import { ObjectPosition } from './physicsProperties';
-import { PhysicsPropertyType, Renderable, Selectable } from './types';
+import { PhysicsPropertyType, Renderable, Selectable, CartesianPlaneStyle } from './types';
 import Vector2 from './vector2';
 
 export class CanvasRenderer {
@@ -21,24 +21,29 @@ export class CanvasRenderer {
 
     start() {
         this.isRunning = true;
-        this.render();
+        this.render(0);
     }
 
     stop() {
         this.isRunning = false;
     }
 
-    add(fn: Renderable) {
-        this.renderables.push(fn);
+    add(renderable: Renderable) {
+        this.renderables.push(renderable);
+        if(renderable.onCanvasAdded)
+            renderable.onCanvasAdded(this);
     }
 
-    remove(fn: Renderable) {
-        const index = this.renderables.indexOf(fn);
+    remove(renderable: Renderable) {
+        const index = this.renderables.indexOf(renderable);
         if (index > -1)
             this.renderables.splice(index, 1);
+        
+        if(renderable.onCanvasRemoved)
+            renderable.onCanvasRemoved(this);
     }
 
-    render() {
+    render(step: DOMHighResTimeStamp) {
         const cam = this.camera;
         const con = this.context;
         const canvas = this.context.canvas;
@@ -48,7 +53,7 @@ export class CanvasRenderer {
         canvas.height = parseInt(style.getPropertyValue("height"));
         canvas.width = parseInt(style.getPropertyValue("width"));
 
-        this.renderables.forEach(rn => rn.draw(cam, con));
+        this.renderables.forEach(rn => rn.draw(cam, con, step));
 
         if (this.isRunning)
             window.requestAnimationFrame(this.render.bind(this));
@@ -263,45 +268,105 @@ export class Sprite implements Renderable {
 }
 
 export class CartesianPlane implements Renderable {
-    constructor(public gridSize: number, private xAxisColor: string = "red", private yAxisColor: string = "green", private originColor: string = "blue", public xAxisName?: string, public yAxisName?: string) {
+    public static readonly ENVIRONMENT_STYLE: CartesianPlaneStyle = {
+        xAxisStyle: "red",
+        yAxisStyle: "green",
+        gridStyle: "grey",
+        originStyle: "blue",
+        axisLineThickness: 3,
+        gridThickness: 1,
+    
+        axisMarkerFont: "italic 30px CMU Serif",
+        axisNameFont: "italic 15px CMU Serif",
+        showMeasurements: false
+    };
+    public static readonly BASIC_STYLE: CartesianPlaneStyle = {
+        xAxisStyle: "black",
+        yAxisStyle: "black",
+        gridStyle: "lightgrey",
+        originStyle: "black",
+        measurementStyle: "grey",
+        axisLineThickness: 1,
+        gridThickness: 1,
+    
+        axisMarkerFont: "italic 30px CMU Serif",
+        axisNameFont: "italic 15px CMU Serif",
+        measurementFont: "italic 12px CMU Serif",
+
+        showMeasurements: true
+    };
+
+
+    constructor(public gridSize: number, private readonly style: CartesianPlaneStyle = CartesianPlane.BASIC_STYLE, public xAxisName?: string, public yAxisName?: string) {
     }
 
     draw(cam: Camera, ctx: CanvasRenderingContext2D) {
-        let canvas = ctx.canvas;
+        const canvas = ctx.canvas;
 
-        let startPos = cam.getWorldPosFromCanvas(new Vector2(0, 0));
-        let finishPos = cam.getWorldPosFromCanvas(new Vector2(canvas.width, canvas.height));
+        const startPos = cam.getWorldPosFromCanvas(new Vector2(0, 0));
+        const finishPos = cam.getWorldPosFromCanvas(new Vector2(canvas.width, canvas.height));
 
-        let startX = Math.ceil(startPos.x / this.gridSize) * this.gridSize;
-        let startY = Math.floor(startPos.y / this.gridSize) * this.gridSize;
+        const startX = Math.ceil(startPos.x / this.gridSize) * this.gridSize;
+        const startY = Math.floor(startPos.y / this.gridSize) * this.gridSize;
 
-        let axisLocation = new Vector2(0, 0);
-
-        ctx.font = "italic 30px CMU Serif";
+        const originPosOnCanvas = cam.getCanvasPosFromWorld(Vector2.zero);
 
         for (let i = startX; i < finishPos.x; i += this.gridSize) {
-            let x = (canvas.width / 2) + i * cam.zoom - cam.pos.x;
+            const x = (canvas.width / 2) + i * cam.zoom - cam.pos.x;
 
-            if (i == 0) {
-                this.drawYAxis(ctx, x);
-                axisLocation.x = x;
-            }
-            else
+            if(i != 0){
                 this.drawVerticalLine(ctx, x);
+
+                if(this.style.showMeasurements)
+                    this.drawText(ctx, i.toString(), this.style.measurementFont!, this.style.measurementStyle!, x + 5, originPosOnCanvas.y - 5, false);
+            }
         }
 
         for (let i = startY; i > finishPos.y; i -= this.gridSize) {
-            let y = (canvas.height / 2) - i * cam.zoom + cam.pos.y;
+            const y = (canvas.height / 2) - i * cam.zoom + cam.pos.y;
 
-            if (i == 0) {
-                this.drawXAxis(ctx, y);
-                axisLocation.y = y;
-            } else
+            if(i != 0){
                 this.drawHorizontalLine(ctx, y);
+
+                if(this.style.showMeasurements)
+                    this.drawText(ctx, i.toString(), this.style.measurementFont!, this.style.measurementStyle!, originPosOnCanvas.x + 5, y - 5, false);
+            }
         }
 
-        if (axisLocation.x > 0 && axisLocation.y > 0)
-            this.drawOrigin(ctx, axisLocation.x, axisLocation.y);
+        if(originPosOnCanvas.y > 0){
+            const y = originPosOnCanvas.y;
+
+            this.drawXAxis(ctx, y);
+            this.drawXAxisMarker(ctx, ctx.canvas.width - 25, y < ctx.canvas.height / 2 ? y + 30 : y - 10);
+            if(this.xAxisName)
+                this.drawXAxisLabel(ctx, y, this.xAxisName);
+        }
+
+        if(originPosOnCanvas.x > 0){
+            const x = originPosOnCanvas.x;
+
+            this.drawYAxis(ctx, x);
+            this.drawYAxisMarker(ctx, x < ctx.canvas.width / 2 ? x + 10 : x - 30, 25);
+            if(this.yAxisName)
+                this.drawYAxisLabel(ctx, x, this.yAxisName);
+        }
+
+        if (originPosOnCanvas.x > 0 && originPosOnCanvas.y > 0)
+            this.drawOrigin(ctx, originPosOnCanvas.x, originPosOnCanvas.y);
+    }
+
+    private drawText(ctx: CanvasRenderingContext2D, text: string, font: string, color: string, x: number, y: number, strokeText: boolean, strokeStyle?: string, strokeWidth?: number){
+        ctx.save();
+        
+        ctx.lineWidth = strokeWidth ? strokeWidth : ctx.lineWidth;
+        ctx.strokeStyle = strokeStyle ? strokeStyle : ctx.strokeStyle;
+        ctx.font = font;
+        ctx.fillStyle = color;
+        
+        if(strokeText) ctx.strokeText(text, x, y);
+        ctx.fillText(text, x, y);
+
+        ctx.restore();
     }
 
     private drawLine(ctx: CanvasRenderingContext2D, startX: number, startY: number, finishX: number, finishY: number, style: string, lineWidth: number) {
@@ -315,52 +380,61 @@ export class CartesianPlane implements Renderable {
         ctx.stroke();
     }
 
+    //Draw grid lines
+
     private drawHorizontalLine(ctx: CanvasRenderingContext2D, y: number) {
-        this.drawLine(ctx, 0, y, ctx.canvas.width, y, "gray", 1);
+        this.drawLine(ctx, 0, y, ctx.canvas.width, y, this.style.gridStyle, this.style.gridThickness);
     }
 
     private drawVerticalLine(ctx: CanvasRenderingContext2D, x: number) {
-        this.drawLine(ctx, x, 0, x, ctx.canvas.height, "gray", 1);
+        this.drawLine(ctx, x, 0, x, ctx.canvas.height, this.style.gridStyle, this.style.gridThickness);
     }
 
-    private drawXAxis(ctx: CanvasRenderingContext2D, y: number) {
-        this.drawLine(ctx, 0, y, ctx.canvas.width, y, this.xAxisColor, 3);
+    //Draw axises
 
-        const textY = y < ctx.canvas.height / 2 ? y + 30 : y - 10;
-        ctx.fillText("x", ctx.canvas.width - 25, textY);
-        if(this.xAxisName)
-            this.drawXAxisLabel(ctx, y, this.xAxisName);
+    private drawXAxis(ctx: CanvasRenderingContext2D, y: number) {
+        this.drawLine(ctx, 0, y, ctx.canvas.width, y, this.style.xAxisStyle, this.style.axisLineThickness);
     }
 
     private drawYAxis(ctx: CanvasRenderingContext2D, x: number) {
-        this.drawLine(ctx, x, 0, x, ctx.canvas.height, this.yAxisColor, 3);
+        this.drawLine(ctx, x, 0, x, ctx.canvas.height, this.style.yAxisStyle, this.style.axisLineThickness);
+    }
 
-        const textX = x < ctx.canvas.width / 2 ? x + 10 :  x - 30;
-        ctx.fillText("y", textX, 25);
-        if(this.yAxisName)
-            this.drawYAxisLabel(ctx, x, this.yAxisName);
+    //Draw axis marker
+
+    private drawXAxisMarker(ctx: CanvasRenderingContext2D, x: number, y: number){
+        this.drawText(ctx, "x", this.style.axisMarkerFont, this.style.xAxisStyle, x, y, true, "white", 4);
+    }
+
+    private drawYAxisMarker(ctx: CanvasRenderingContext2D, x: number, y: number){
+        this.drawText(ctx, "y", this.style.axisMarkerFont, this.style.yAxisStyle, x, y, true, "white", 4);
+    }
+
+    //Draw axis label
+
+    private drawXAxisLabel(ctx: CanvasRenderingContext2D, y: number, text: string){
+        ctx.font = this.style.axisNameFont;
+        const textX = (ctx.canvas.width / 2) - (ctx.measureText(text).width / 2);
+        const textY = y + 15;
+        
+        this.drawText(ctx, text, this.style.axisNameFont, this.style.xAxisStyle, textX, textY, true, "white", 3);
     }
 
     private drawYAxisLabel(ctx: CanvasRenderingContext2D, x: number, text: string){
         ctx.save();
-        ctx.font = "italic 15px CMU Serif"
 
-        ctx.translate(x - 5, ctx.canvas.height / 2);
+        ctx.font = this.style.axisNameFont;
+        ctx.translate(x - 7, (ctx.canvas.height / 2) + (ctx.measureText(text).width / 2));
         ctx.rotate(-Math.PI/2);
-        ctx.fillText(text, 0, 0);
+        this.drawText(ctx, text, this.style.axisNameFont, this.style.yAxisStyle, 0, 0, true, "white", 3);
 
         ctx.restore();
     }
 
-    private drawXAxisLabel(ctx: CanvasRenderingContext2D, y: number, text: string){
-        ctx.save();
-        ctx.font = "italic 15px CMU Serif"
-        ctx.fillText(text, ctx.canvas.width/2, y + 15);
-        ctx.restore();
-    }
+    //Draw origin
 
     private drawOrigin(ctx: CanvasRenderingContext2D, x: number, y: number) {
-        ctx.fillStyle = this.originColor;
+        ctx.fillStyle = this.style.originStyle;
         
         ctx.beginPath();
         ctx.arc(x, y, 3, 0, 2 * Math.PI);
@@ -368,6 +442,30 @@ export class CartesianPlane implements Renderable {
 
         const textX = x < ctx.canvas.width / 2 ? x + 5 :  x - 35;
         const textY = y < ctx.canvas.height / 2 ? y + 30 : y - 10;
-        ctx.fillText("O", textX, textY);
+        this.drawText(ctx, "O", this.style.axisMarkerFont, this.style.originStyle, textX, textY, true, "white", 4);
+    }
+}
+
+export class FPSCounter implements Renderable{
+    private lastFrameTimestamp: number;
+    private fps: number;
+    private nextUpdate: number;
+    
+    constructor(private readonly delay: number){
+        this.lastFrameTimestamp = 0;
+        this.nextUpdate = 0;
+        this.fps = 0;
+    }
+
+    draw(cam: Camera, con: CanvasRenderingContext2D, step: number): void {
+        if(step > this.nextUpdate){
+            this.fps = 1000/(step - this.lastFrameTimestamp);
+            this.nextUpdate = step + this.delay;
+        }
+
+        con.font = "12px Arial";
+        con.fillStyle = "black";
+        con.fillText(`${this.fps.toFixed(2)} FPS`, 5, con.canvas.height - 5);
+        this.lastFrameTimestamp = step;
     }
 }

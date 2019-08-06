@@ -119,11 +119,12 @@ export class PropertyLIVector2 extends PropertyLI<Vector2>{
             return undefined;
         }
 
-        const vector2 = new Vector2(Number(match[0]), Number(match[1]));
+        return new Vector2(Number(match[0]), Number(match[1]));
+    }
 
-        this.updateInputTitle(vector2);
-
-        return vector2;
+    setValue(value: Vector2){
+        super.setValue(value);
+        this.updateInputTitle(value);
     }
 
     private updateInputTitle(newValue: Vector2){

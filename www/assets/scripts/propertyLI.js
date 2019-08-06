@@ -96,9 +96,11 @@ define(["require", "exports", "./vector2", "./document", "./buttons", "./types"]
                 this.resetToLastString();
                 return undefined;
             }
-            const vector2 = new vector2_1.default(Number(match[0]), Number(match[1]));
-            this.updateInputTitle(vector2);
-            return vector2;
+            return new vector2_1.default(Number(match[0]), Number(match[1]));
+        }
+        setValue(value) {
+            super.setValue(value);
+            this.updateInputTitle(value);
         }
         updateInputTitle(newValue) {
             if (this.showModulus)

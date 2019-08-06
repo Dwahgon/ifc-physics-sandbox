@@ -35,12 +35,14 @@ export abstract class PropertyDescriptionUI {
 export abstract class GraphPanel {
     public static onClose: Function | null;
     private static panel: HTMLDivElement;
+    private static title: HTMLHeadingElement;
     private static canvasRenderer: CanvasRenderer;
     private static cartesianPlane: CartesianPlane;
     private static graph: Graph | null;
 
     static initialize() {
         this.panel = <HTMLDivElement>documentElements.get("graph-panel")!;
+        this.title = this.panel.querySelector("h1")!;
 
         const canvas = document.createElement("canvas");
         canvas.width = 10;
@@ -53,13 +55,14 @@ export abstract class GraphPanel {
         this.canvasRenderer.add(this.cartesianPlane);
     }
 
-    static setElementVisible(v: boolean) {
+    static setElementVisible(v: boolean, title: string = "Gráfico") {
         this.panel.style.display = v ? "flex" : "none";
+        this.title.innerHTML = title;
 
-        if (!v){
+        if (!v) {
             this.stopRenderingGraph();
-            
-            if(this.onClose){
+
+            if (this.onClose) {
                 this.onClose();
                 this.onClose = null;
             }
@@ -77,7 +80,7 @@ export abstract class GraphPanel {
     }
 
     static stopRenderingGraph() {
-        if (this.graph){
+        if (this.graph) {
             this.canvasRenderer.remove(this.graph);
             this.graph = null;
         }

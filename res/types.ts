@@ -1,7 +1,7 @@
 console.log("Loading types");
 
 import PhysicsProperty from './physicsProperties';
-import { Camera } from './rendering';
+import { Camera, CanvasRenderer } from './rendering';
 import Vector2 from './vector2';
 
 export enum ButtonColor {
@@ -43,7 +43,9 @@ export interface Simulatable {
 }
 
 export interface Renderable {
-    draw(cam: Camera, con: CanvasRenderingContext2D): void;
+    draw(cam: Camera, con: CanvasRenderingContext2D, step?: DOMHighResTimeStamp): void;
+    onCanvasAdded?(canvasRenderer: CanvasRenderer): void;
+    onCanvasRemoved?(canvasRenderer: CanvasRenderer): void;
 }
 
 export interface ButtonConfig {
@@ -62,4 +64,21 @@ export interface ValueGetter {
     name: string;
     getTargetNames(): string[];
     getValue(target: string): number;
+}
+
+export interface CartesianPlaneStyle {
+    xAxisStyle: string;
+    yAxisStyle: string;
+    gridStyle: string;
+    originStyle: string;
+    measurementStyle?: string;
+
+    axisLineThickness: number;
+    gridThickness: number;
+    
+    axisMarkerFont: string;
+    axisNameFont: string;
+    measurementFont?: string;
+
+    showMeasurements: boolean;
 }

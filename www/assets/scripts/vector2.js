@@ -48,8 +48,8 @@ define(["require", "exports"], function (require, exports) {
         static equals(a, b) {
             return a.x == b.x && a.y == b.y;
         }
-        static areColinear(a, b, c) {
-            return (a.x * b.y + a.y * c.x + b.x * c.y) - (b.y * c.x + a.x * c.y + a.y * b.x) == 0;
+        static getVectorDeterminant(a, b, c) {
+            return (a.x * b.y + a.y * c.x + b.x * c.y) - (b.y * c.x + a.x * c.y + a.y * b.x);
         }
     }
     exports.default = Vector2;

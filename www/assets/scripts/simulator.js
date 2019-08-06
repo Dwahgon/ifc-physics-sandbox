@@ -76,7 +76,14 @@ define(["require", "exports", "./document"], function (require, exports, documen
         }
         fastForwardTo(time) {
             this.reset();
-            this.passTime(time);
+            const step = 0.01;
+            let timePassed = 0;
+            while (timePassed + step < time) {
+                this.passTime(step);
+                timePassed += step;
+            }
+            if (this.time < time)
+                this.passTime(time - this.time);
         }
         passTime(step) {
             this.time += step;

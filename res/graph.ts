@@ -4,7 +4,7 @@ import * as Document from "./document";
 import * as Modal from "./modals";
 import { PhysicsObject } from "./physicsObjects";
 import PhysicsProperty from "./physicsProperties";
-import { Camera } from "./rendering";
+import { Camera, CanvasRenderer } from "./rendering";
 import Simulator from "./simulator";
 import { PhysicsPropertyType, Renderable, Simulatable, ValueGetter } from "./types";
 import Vector2 from "./vector2";
@@ -108,24 +108,29 @@ class SimulatorValueGetter implements ValueGetter {
 
 export class Graph implements Renderable, Simulatable {
     private points: Vector2[];
+    private onMouseMoved: ((ev: MouseEvent) => void) | null;
 
     constructor(private readonly targetX: string, private readonly targetY: string, public readonly valueGetterX: ValueGetter, public readonly valueGetterY: ValueGetter, private pointSize: number) {
         this.points = [];
+        this.onMouseMoved = null;
+
         this.simulate(0);
     }
+    
     simulate(step: number): void {
         const x = this.valueGetterX.getValue(this.targetX);
         const y = this.valueGetterY.getValue(this.targetY);
-        const v2 = new Vector2(x, y);
+        const newPoint = new Vector2(x, y);
 
         //Remove last inserted point if the resulting line continues straight
-        if(this.points.length > 1){
-            const currentIndex = this.points.length - 1;
-            if(Vector2.areColinear(v2, this.points[currentIndex], this.points[currentIndex - 1]))
-                this.points.splice(currentIndex);
+        if (this.points.length > 1) {
+            const lastIndex = this.points.length - 1;
+            const vectorDeterminant = Vector2.getVectorDeterminant(this.points[lastIndex - 1], this.points[lastIndex], newPoint);
+            if (vectorDeterminant < 0.00001 && vectorDeterminant > -0.00001)
+                this.points.splice(lastIndex);
         }
 
-        this.points.push(v2);
+        this.points.push(newPoint);
     }
     reset(): void {
         this.points = [];
@@ -140,8 +145,8 @@ export class Graph implements Renderable, Simulatable {
 
                 if (pointFinish) {
                     const canvasFinish = cam.getCanvasPosFromWorld(pointFinish);
-                    this.drawLine(con, canvasStart, canvasFinish,  5, "black");
-                    this.drawLine(con, canvasStart, canvasFinish,  3, "orange");
+                    this.drawLine(con, canvasStart, canvasFinish, 5, "black");
+                    this.drawLine(con, canvasStart, canvasFinish, 3, "orange");
                 }
             }
 
@@ -149,6 +154,7 @@ export class Graph implements Renderable, Simulatable {
             this.drawCircle(con, cam.getCanvasPosFromWorld(this.points[this.points.length - 1]), 4, 2, "orange", "black");
         }
     }
+
     private drawLine(con: CanvasRenderingContext2D, canvasStart: Vector2, canvasFinish: Vector2, lineWidth: number, lineStyle: string) {
         con.lineWidth = lineWidth;
         con.strokeStyle = lineStyle;
@@ -260,7 +266,7 @@ Buttons.getButtonById("create-graph-button")!.onClick = () => {
 
     graphConfigModal.setVisible(false);
 
-    Document.GraphPanel.setElementVisible(true);
+    Document.GraphPanel.setElementVisible(true, `Gráfico ${vGY.name} x ${vGX.name}`);
 
     import("./main").then(
         main => {
@@ -269,9 +275,8 @@ Buttons.getButtonById("create-graph-button")!.onClick = () => {
         }
     )
 
-    Document.GraphPanel.onClose = () => {
-        import("./main").then(main => main.simulator.remove(graph));
-    }
+    Document.GraphPanel.onClose = () => import("./main").then(main => main.simulator.remove(graph));
+
     Document.GraphPanel.renderGraph(graph);
 };
 

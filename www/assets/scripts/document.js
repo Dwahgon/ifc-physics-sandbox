@@ -35,6 +35,7 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
     class GraphPanel {
         static initialize() {
             this.panel = exports.documentElements.get("graph-panel");
+            this.title = this.panel.querySelector("h1");
             const canvas = document.createElement("canvas");
             canvas.width = 10;
             canvas.height = 10;
@@ -44,8 +45,9 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
             this.cartesianPlane = new rendering_1.CartesianPlane(1);
             this.canvasRenderer.add(this.cartesianPlane);
         }
-        static setElementVisible(v) {
+        static setElementVisible(v, title = "Gráfico") {
             this.panel.style.display = v ? "flex" : "none";
+            this.title.innerHTML = title;
             if (!v) {
                 this.stopRenderingGraph();
                 if (this.onClose) {

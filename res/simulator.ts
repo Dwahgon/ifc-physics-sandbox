@@ -101,7 +101,17 @@ export default class Simulator {
     
     fastForwardTo(time: number){
         this.reset();
-        this.passTime(time);
+
+        const step = 0.01;
+        let timePassed = 0;
+
+        while(timePassed + step < time){
+            this.passTime(step);
+            timePassed += step;
+        }
+
+        if (this.time < time)
+            this.passTime(time - this.time);
     }
 
     private passTime(step: number){
