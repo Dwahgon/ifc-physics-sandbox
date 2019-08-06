@@ -3,6 +3,7 @@
     --header-height: 36px;
     --simulation-controller-height: 100px;
     --property-li-height: 30px;
+    --graph-panel-width: 20vw;
 }
 
 @font-face {
@@ -425,12 +426,17 @@ button>img {
 
 /* Graph panel */
 
+#graph-panel {
+    width: var(--graph-panel-width);
+    height: calc(var(--graph-panel-width) + 50px);
+}
+
 #graph-panel .panel-content {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 20vw;
-    width: 20vw;
+    height: calc(var(--graph-panel-width) - 6px);
+    width: calc(var(--graph-panel-width) - 6px);
 }
 
 #graph-panel canvas {

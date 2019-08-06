@@ -94,19 +94,21 @@ define(["require", "exports", "./buttons", "./document", "./modals", "./types", 
             this.valueGetterY = valueGetterY;
             this.pointSize = pointSize;
             this.points = [];
+            this.onMouseMoved = null;
             this.simulate(0);
         }
         simulate(step) {
             const x = this.valueGetterX.getValue(this.targetX);
             const y = this.valueGetterY.getValue(this.targetY);
-            const v2 = new vector2_1.default(x, y);
+            const newPoint = new vector2_1.default(x, y);
             //Remove last inserted point if the resulting line continues straight
             if (this.points.length > 1) {
-                const currentIndex = this.points.length - 1;
-                if (vector2_1.default.areColinear(v2, this.points[currentIndex], this.points[currentIndex - 1]))
-                    this.points.splice(currentIndex);
+                const lastIndex = this.points.length - 1;
+                const vectorDeterminant = vector2_1.default.getVectorDeterminant(this.points[lastIndex - 1], this.points[lastIndex], newPoint);
+                if (vectorDeterminant < 0.00001 && vectorDeterminant > -0.00001)
+                    this.points.splice(lastIndex);
             }
-            this.points.push(v2);
+            this.points.push(newPoint);
         }
         reset() {
             this.points = [];
@@ -215,14 +217,12 @@ define(["require", "exports", "./buttons", "./document", "./modals", "./types", 
         const targetY = formData.get("y-axis-property-holder");
         const graph = new Graph(targetX, targetY, vGX, vGY, 4);
         graphConfigModal.setVisible(false);
-        Document.GraphPanel.setElementVisible(true);
+        Document.GraphPanel.setElementVisible(true, `Gráfico ${vGY.name} x ${vGX.name}`);
         new Promise((resolve_3, reject_3) => { require(["./main"], resolve_3, reject_3); }).then(__importStar).then(main => {
             main.simulator.add(graph);
             main.simulator.start();
         });
-        Document.GraphPanel.onClose = () => {
-            new Promise((resolve_4, reject_4) => { require(["./main"], resolve_4, reject_4); }).then(__importStar).then(main => main.simulator.remove(graph));
-        };
+        Document.GraphPanel.onClose = () => new Promise((resolve_4, reject_4) => { require(["./main"], resolve_4, reject_4); }).then(__importStar).then(main => main.simulator.remove(graph));
         Document.GraphPanel.renderGraph(graph);
     };
     /*

@@ -24,20 +24,24 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
         }
         start() {
             this.isRunning = true;
-            this.render();
+            this.render(0);
         }
         stop() {
             this.isRunning = false;
         }
-        add(fn) {
-            this.renderables.push(fn);
+        add(renderable) {
+            this.renderables.push(renderable);
+            if (renderable.onCanvasAdded)
+                renderable.onCanvasAdded(this);
         }
-        remove(fn) {
-            const index = this.renderables.indexOf(fn);
+        remove(renderable) {
+            const index = this.renderables.indexOf(renderable);
             if (index > -1)
                 this.renderables.splice(index, 1);
+            if (renderable.onCanvasRemoved)
+                renderable.onCanvasRemoved(this);
         }
-        render() {
+        render(step) {
             const cam = this.camera;
             const con = this.context;
             const canvas = this.context.canvas;
@@ -45,7 +49,7 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
             const style = window.getComputedStyle(canvasParent, null);
             canvas.height = parseInt(style.getPropertyValue("height"));
             canvas.width = parseInt(style.getPropertyValue("width"));
-            this.renderables.forEach(rn => rn.draw(cam, con));
+            this.renderables.forEach(rn => rn.draw(cam, con, step));
             if (this.isRunning)
                 window.requestAnimationFrame(this.render.bind(this));
         }
@@ -208,42 +212,62 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
     }
     exports.Sprite = Sprite;
     class CartesianPlane {
-        constructor(gridSize, xAxisColor = "red", yAxisColor = "green", originColor = "blue", xAxisName, yAxisName) {
+        constructor(gridSize, style = CartesianPlane.BASIC_STYLE, xAxisName, yAxisName) {
             this.gridSize = gridSize;
-            this.xAxisColor = xAxisColor;
-            this.yAxisColor = yAxisColor;
-            this.originColor = originColor;
+            this.style = style;
             this.xAxisName = xAxisName;
             this.yAxisName = yAxisName;
         }
         draw(cam, ctx) {
-            let canvas = ctx.canvas;
-            let startPos = cam.getWorldPosFromCanvas(new vector2_1.default(0, 0));
-            let finishPos = cam.getWorldPosFromCanvas(new vector2_1.default(canvas.width, canvas.height));
-            let startX = Math.ceil(startPos.x / this.gridSize) * this.gridSize;
-            let startY = Math.floor(startPos.y / this.gridSize) * this.gridSize;
-            let axisLocation = new vector2_1.default(0, 0);
-            ctx.font = "italic 30px CMU Serif";
+            const canvas = ctx.canvas;
+            const startPos = cam.getWorldPosFromCanvas(new vector2_1.default(0, 0));
+            const finishPos = cam.getWorldPosFromCanvas(new vector2_1.default(canvas.width, canvas.height));
+            const startX = Math.ceil(startPos.x / this.gridSize) * this.gridSize;
+            const startY = Math.floor(startPos.y / this.gridSize) * this.gridSize;
+            const originPosOnCanvas = cam.getCanvasPosFromWorld(vector2_1.default.zero);
             for (let i = startX; i < finishPos.x; i += this.gridSize) {
-                let x = (canvas.width / 2) + i * cam.zoom - cam.pos.x;
-                if (i == 0) {
-                    this.drawYAxis(ctx, x);
-                    axisLocation.x = x;
-                }
-                else
+                const x = (canvas.width / 2) + i * cam.zoom - cam.pos.x;
+                if (i != 0) {
                     this.drawVerticalLine(ctx, x);
+                    if (this.style.showMeasurements)
+                        this.drawText(ctx, i.toString(), this.style.measurementFont, this.style.measurementStyle, x + 5, originPosOnCanvas.y - 5, false);
+                }
             }
             for (let i = startY; i > finishPos.y; i -= this.gridSize) {
-                let y = (canvas.height / 2) - i * cam.zoom + cam.pos.y;
-                if (i == 0) {
-                    this.drawXAxis(ctx, y);
-                    axisLocation.y = y;
-                }
-                else
+                const y = (canvas.height / 2) - i * cam.zoom + cam.pos.y;
+                if (i != 0) {
                     this.drawHorizontalLine(ctx, y);
+                    if (this.style.showMeasurements)
+                        this.drawText(ctx, i.toString(), this.style.measurementFont, this.style.measurementStyle, originPosOnCanvas.x + 5, y - 5, false);
+                }
             }
-            if (axisLocation.x > 0 && axisLocation.y > 0)
-                this.drawOrigin(ctx, axisLocation.x, axisLocation.y);
+            if (originPosOnCanvas.y > 0) {
+                const y = originPosOnCanvas.y;
+                this.drawXAxis(ctx, y);
+                this.drawXAxisMarker(ctx, ctx.canvas.width - 25, y < ctx.canvas.height / 2 ? y + 30 : y - 10);
+                if (this.xAxisName)
+                    this.drawXAxisLabel(ctx, y, this.xAxisName);
+            }
+            if (originPosOnCanvas.x > 0) {
+                const x = originPosOnCanvas.x;
+                this.drawYAxis(ctx, x);
+                this.drawYAxisMarker(ctx, x < ctx.canvas.width / 2 ? x + 10 : x - 30, 25);
+                if (this.yAxisName)
+                    this.drawYAxisLabel(ctx, x, this.yAxisName);
+            }
+            if (originPosOnCanvas.x > 0 && originPosOnCanvas.y > 0)
+                this.drawOrigin(ctx, originPosOnCanvas.x, originPosOnCanvas.y);
+        }
+        drawText(ctx, text, font, color, x, y, strokeText, strokeStyle, strokeWidth) {
+            ctx.save();
+            ctx.lineWidth = strokeWidth ? strokeWidth : ctx.lineWidth;
+            ctx.strokeStyle = strokeStyle ? strokeStyle : ctx.strokeStyle;
+            ctx.font = font;
+            ctx.fillStyle = color;
+            if (strokeText)
+                ctx.strokeText(text, x, y);
+            ctx.fillText(text, x, y);
+            ctx.restore();
         }
         drawLine(ctx, startX, startY, finishX, finishY, style, lineWidth) {
             ctx.strokeStyle = style;
@@ -254,49 +278,95 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
             ctx.lineTo(finishX, finishY);
             ctx.stroke();
         }
+        //Draw grid lines
         drawHorizontalLine(ctx, y) {
-            this.drawLine(ctx, 0, y, ctx.canvas.width, y, "gray", 1);
+            this.drawLine(ctx, 0, y, ctx.canvas.width, y, this.style.gridStyle, this.style.gridThickness);
         }
         drawVerticalLine(ctx, x) {
-            this.drawLine(ctx, x, 0, x, ctx.canvas.height, "gray", 1);
+            this.drawLine(ctx, x, 0, x, ctx.canvas.height, this.style.gridStyle, this.style.gridThickness);
         }
+        //Draw axises
         drawXAxis(ctx, y) {
-            this.drawLine(ctx, 0, y, ctx.canvas.width, y, this.xAxisColor, 3);
-            const textY = y < ctx.canvas.height / 2 ? y + 30 : y - 10;
-            ctx.fillText("x", ctx.canvas.width - 25, textY);
-            if (this.xAxisName)
-                this.drawXAxisLabel(ctx, y, this.xAxisName);
+            this.drawLine(ctx, 0, y, ctx.canvas.width, y, this.style.xAxisStyle, this.style.axisLineThickness);
         }
         drawYAxis(ctx, x) {
-            this.drawLine(ctx, x, 0, x, ctx.canvas.height, this.yAxisColor, 3);
-            const textX = x < ctx.canvas.width / 2 ? x + 10 : x - 30;
-            ctx.fillText("y", textX, 25);
-            if (this.yAxisName)
-                this.drawYAxisLabel(ctx, x, this.yAxisName);
+            this.drawLine(ctx, x, 0, x, ctx.canvas.height, this.style.yAxisStyle, this.style.axisLineThickness);
+        }
+        //Draw axis marker
+        drawXAxisMarker(ctx, x, y) {
+            this.drawText(ctx, "x", this.style.axisMarkerFont, this.style.xAxisStyle, x, y, true, "white", 4);
+        }
+        drawYAxisMarker(ctx, x, y) {
+            this.drawText(ctx, "y", this.style.axisMarkerFont, this.style.yAxisStyle, x, y, true, "white", 4);
+        }
+        //Draw axis label
+        drawXAxisLabel(ctx, y, text) {
+            ctx.font = this.style.axisNameFont;
+            const textX = (ctx.canvas.width / 2) - (ctx.measureText(text).width / 2);
+            const textY = y + 15;
+            this.drawText(ctx, text, this.style.axisNameFont, this.style.xAxisStyle, textX, textY, true, "white", 3);
         }
         drawYAxisLabel(ctx, x, text) {
             ctx.save();
-            ctx.font = "italic 15px CMU Serif";
-            ctx.translate(x - 5, ctx.canvas.height / 2);
+            ctx.font = this.style.axisNameFont;
+            ctx.translate(x - 7, (ctx.canvas.height / 2) + (ctx.measureText(text).width / 2));
             ctx.rotate(-Math.PI / 2);
-            ctx.fillText(text, 0, 0);
+            this.drawText(ctx, text, this.style.axisNameFont, this.style.yAxisStyle, 0, 0, true, "white", 3);
             ctx.restore();
         }
-        drawXAxisLabel(ctx, y, text) {
-            ctx.save();
-            ctx.font = "italic 15px CMU Serif";
-            ctx.fillText(text, ctx.canvas.width / 2, y + 15);
-            ctx.restore();
-        }
+        //Draw origin
         drawOrigin(ctx, x, y) {
-            ctx.fillStyle = this.originColor;
+            ctx.fillStyle = this.style.originStyle;
             ctx.beginPath();
             ctx.arc(x, y, 3, 0, 2 * Math.PI);
             ctx.fill();
             const textX = x < ctx.canvas.width / 2 ? x + 5 : x - 35;
             const textY = y < ctx.canvas.height / 2 ? y + 30 : y - 10;
-            ctx.fillText("O", textX, textY);
+            this.drawText(ctx, "O", this.style.axisMarkerFont, this.style.originStyle, textX, textY, true, "white", 4);
         }
     }
+    CartesianPlane.ENVIRONMENT_STYLE = {
+        xAxisStyle: "red",
+        yAxisStyle: "green",
+        gridStyle: "grey",
+        originStyle: "blue",
+        axisLineThickness: 3,
+        gridThickness: 1,
+        axisMarkerFont: "italic 30px CMU Serif",
+        axisNameFont: "italic 15px CMU Serif",
+        showMeasurements: false
+    };
+    CartesianPlane.BASIC_STYLE = {
+        xAxisStyle: "black",
+        yAxisStyle: "black",
+        gridStyle: "lightgrey",
+        originStyle: "black",
+        measurementStyle: "grey",
+        axisLineThickness: 1,
+        gridThickness: 1,
+        axisMarkerFont: "italic 30px CMU Serif",
+        axisNameFont: "italic 15px CMU Serif",
+        measurementFont: "italic 12px CMU Serif",
+        showMeasurements: true
+    };
     exports.CartesianPlane = CartesianPlane;
+    class FPSCounter {
+        constructor(delay) {
+            this.delay = delay;
+            this.lastFrameTimestamp = 0;
+            this.nextUpdate = 0;
+            this.fps = 0;
+        }
+        draw(cam, con, step) {
+            if (step > this.nextUpdate) {
+                this.fps = 1000 / (step - this.lastFrameTimestamp);
+                this.nextUpdate = step + this.delay;
+            }
+            con.font = "12px Arial";
+            con.fillStyle = "black";
+            con.fillText(`${this.fps.toFixed(2)} FPS`, 5, con.canvas.height - 5);
+            this.lastFrameTimestamp = step;
+        }
+    }
+    exports.FPSCounter = FPSCounter;
 });
