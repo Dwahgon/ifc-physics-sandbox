@@ -40,8 +40,8 @@ export abstract class GraphPanel {
     private static cartesianPlane: CartesianPlane;
     private static graph: Graph | null;
 
-    static initialize() {
-        this.panel = <HTMLDivElement>documentElements.get("graph-panel")!;
+    static initialize(element: HTMLDivElement) {
+        this.panel = element!;
         this.title = this.panel.querySelector("h1")!;
 
         const canvas = document.createElement("canvas");
@@ -179,11 +179,29 @@ export abstract class ObjectSelectionController {
     }
 }
 
+export abstract class Alert {
+    public static readonly WARNING: string = "alert-warning";
+    public static readonly ERROR: string = "alert-error";
+    
+    private static element: HTMLDivElement;
+
+    static initialize(element: HTMLDivElement) {
+        this.element = element;
+    }
+    
+    static throwAlert(text: string, style: string){
+        this.element.classList.replace(this.element.classList[1], style);
+        this.element.querySelector("p")!.innerHTML = text;
+        this.element.style.display = "flex";
+    }
+}
+
 /**
  * A map that contains various Elements in the application HTML document.
  */
 export const documentElements = new Map<string, Element>();
 documentElements.set("header", document.querySelector("#buttons-header")!);
+documentElements.set("main-interface", document.querySelector("#main-interface")!);
 documentElements.set("file-buttons", documentElements.get("header")!.querySelector("#header-file-buttons")!);
 documentElements.set("camera-buttons", documentElements.get("header")!.querySelector("#header-camera-buttons")!);
 documentElements.set("graph-buttons", documentElements.get("header")!.querySelector("#header-graph-buttons")!);
@@ -195,4 +213,6 @@ documentElements.set("simulation-controller-buttons", document.querySelector("#s
 documentElements.set("object-list", document.querySelector("#object-list")!);
 documentElements.set("graph-config-form", document.querySelector("#graph-config-form")!);
 documentElements.set("graph-panel", document.querySelector("#graph-panel")!);
-GraphPanel.initialize();
+documentElements.set("alert", document.querySelector("#alert")!);
+GraphPanel.initialize(<HTMLDivElement>document.querySelector("#graph-panel")!);
+Alert.initialize(<HTMLDivElement>documentElements.get("alert")!);

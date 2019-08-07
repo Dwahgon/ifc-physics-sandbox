@@ -2,7 +2,7 @@ console.log("Loaded buttonClickFunctions");
 
 import Ambient from "./ambient";
 import * as Buttons from "./buttons";
-import { ObjectSelectionController, PropertyDescriptionUI } from "./document";
+import { ObjectSelectionController, PropertyDescriptionUI, Alert } from "./document";
 import { downloadJSON } from "./fileController";
 import * as Main from "./main";
 import * as Modals from "./modals";
@@ -60,7 +60,12 @@ Buttons.getButtonById("load-file-button")!.onClick = function () {
 
             reader.onload = ev => {
                 const result = <string>(<FileReader>ev.target!).result;
-                Main.setAmbient(Ambient.fromJSON(result));
+
+                try{
+                    Main.setAmbient(Ambient.fromJSON(result));
+                }catch{
+                    Alert.throwAlert("Não foi possível carregar este arquivo!", Alert.ERROR);
+                }
             };
         }
     })

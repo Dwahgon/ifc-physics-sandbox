@@ -215,6 +215,10 @@ define(["require", "exports", "./buttons", "./document", "./modals", "./types", 
         const vGY = valueGetters.find(vG => { return vG.name == formData.get("y-axis-property"); });
         const targetX = formData.get("x-axis-property-holder");
         const targetY = formData.get("y-axis-property-holder");
+        if (!targetX || !targetY) {
+            Document.Alert.throwAlert("Possuem campos não preenchidos!", Document.Alert.WARNING);
+            return;
+        }
         const graph = new Graph(targetX, targetY, vGX, vGY, 4);
         graphConfigModal.setVisible(false);
         Document.GraphPanel.setElementVisible(true, `Gráfico ${vGY.name} x ${vGX.name}`);

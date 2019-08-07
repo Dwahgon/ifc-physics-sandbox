@@ -1,5 +1,7 @@
 console.log("Loaded modal");
 
+import * as Document from "./document";
+
 /*
     Class Definitions
 */
@@ -13,6 +15,12 @@ export class Modal {
 
     setVisible(value: boolean) {
         this.element.style.display = value ? "flex" : "none";
+
+        const header = <HTMLElement>Document.documentElements.get("header")!;
+        const mainInterface = <HTMLElement>Document.documentElements.get("main-interface")!;
+
+        mainInterface.style.filter =  value ? "blur(3px)" : "none";
+        header.style.filter = value ? "blur(3px)" : "none";
         
         if(value && this.onOpen)
             this.onOpen();

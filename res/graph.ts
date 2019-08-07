@@ -262,6 +262,11 @@ Buttons.getButtonById("create-graph-button")!.onClick = () => {
     const targetX = <string>formData.get("x-axis-property-holder");
     const targetY = <string>formData.get("y-axis-property-holder");
 
+    if(!targetX || !targetY){
+        Document.Alert.throwAlert("Possuem campos não preenchidos!", Document.Alert.WARNING);
+        return;
+    }
+
     const graph = new Graph(targetX, targetY, vGX, vGY, 4);
 
     graphConfigModal.setVisible(false);
