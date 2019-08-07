@@ -58,7 +58,12 @@ define(["require", "exports", "./ambient", "./buttons", "./document", "./fileCon
                 reader.readAsText(file, "utf-8");
                 reader.onload = ev => {
                     const result = ev.target.result;
-                    Main.setAmbient(ambient_1.default.fromJSON(result));
+                    try {
+                        Main.setAmbient(ambient_1.default.fromJSON(result));
+                    }
+                    catch (_a) {
+                        document_1.Alert.throwAlert("Não foi possível carregar este arquivo!", document_1.Alert.ERROR);
+                    }
                 };
             }
         });

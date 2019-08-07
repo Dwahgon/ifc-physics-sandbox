@@ -5,7 +5,7 @@ define(["require", "exports"], function (require, exports) {
         const file = new Blob([data], { type: type });
         if (window.navigator.msSaveOrOpenBlob) // IE10+
             window.navigator.msSaveOrOpenBlob(file, filename);
-        else { // Others
+        else {
             const a = document.createElement("a");
             const url = URL.createObjectURL(file);
             a.href = url;

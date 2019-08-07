@@ -54,7 +54,7 @@
 }
 
 .active-button:hover {
-    background-color: #3d3d3d;
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
 .active-button:active {
@@ -105,7 +105,7 @@
 
 .modal {
     position: fixed;
-    background-color: #000000aa;
+    background-color: rgba(0, 0, 0, 0.7);
     width: 100vw;
     height: 100vh;
     top: 0;
@@ -121,6 +121,51 @@
     width: 500px;
 }
 
+.alert {
+    z-index: 2;
+    position: absolute;
+    top: calc(var(--header-height) + 5px);
+    padding: 0.25em;
+    border-radius: 3px;
+    font-size: 14px;
+    height: 2em;
+    left: 20vw;
+    right: 20vw;
+    display: flex;
+    align-items: center;
+    box-shadow: 0px 1px 10px -3px #000000;
+}
+
+.alert>p{
+    display: inline-block;
+    margin: 0;
+    height: 1em;
+}
+
+.alert>button{
+    font-size: inherit;
+    height: 1.75em;
+    width: 1.75em;
+    margin: 0 0 0 auto;
+    padding: 2px;
+}
+
+.alert>button>img{
+    filter: invert(1);
+    opacity: 0.75;
+}
+
+.alert-error {
+    background-color: #ff7979;
+    border: 1px solid #eb4d4b;
+    color: #000000;
+}
+
+.alert-warning {
+    background-color: #f6e58d;
+    border: 1px solid #f9ca24;
+    color: rgba(0, 0, 0, 0.9);
+}
 
 /*
     Default element values
@@ -163,7 +208,9 @@ body>header>div>button {
 
 button {
     box-sizing: border-box;
-    display: grid;
+    display: -moz-inline-grid;
+    display: -ms-inline-grid;
+    display: inline-grid;
     padding: 10px;
     border-radius: 4px;
     outline: none;
@@ -290,6 +337,7 @@ button>img {
 #property-side-panel>.panel-content {
     display: flex;
     flex-direction: column;
+    overflow: auto;
 }
 
 #object-interactor {
@@ -320,7 +368,6 @@ button>img {
     height: 90%;
     padding: 0;
     overflow: auto;
-    flex: 1;
 }
 
 #property-list>li {
@@ -421,6 +468,10 @@ button>img {
 
 #graph-config-form>div {
     margin: 10px 0;
+}
+
+#graph-config-form select {
+    width: 150px;
 }
 
 

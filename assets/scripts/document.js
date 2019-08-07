@@ -33,8 +33,8 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
     PropertyDescriptionUI.element = document.querySelector("#property-description-modal");
     exports.PropertyDescriptionUI = PropertyDescriptionUI;
     class GraphPanel {
-        static initialize() {
-            this.panel = exports.documentElements.get("graph-panel");
+        static initialize(element) {
+            this.panel = element;
             this.title = this.panel.querySelector("h1");
             const canvas = document.createElement("canvas");
             canvas.width = 10;
@@ -143,11 +143,25 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
     ObjectSelectionController._selectedObject = null;
     ObjectSelectionController._propertiesEnabled = true;
     exports.ObjectSelectionController = ObjectSelectionController;
+    class Alert {
+        static initialize(element) {
+            this.element = element;
+        }
+        static throwAlert(text, style) {
+            this.element.classList.replace(this.element.classList[1], style);
+            this.element.querySelector("p").innerHTML = text;
+            this.element.style.display = "flex";
+        }
+    }
+    Alert.WARNING = "alert-warning";
+    Alert.ERROR = "alert-error";
+    exports.Alert = Alert;
     /**
      * A map that contains various Elements in the application HTML document.
      */
     exports.documentElements = new Map();
     exports.documentElements.set("header", document.querySelector("#buttons-header"));
+    exports.documentElements.set("main-interface", document.querySelector("#main-interface"));
     exports.documentElements.set("file-buttons", exports.documentElements.get("header").querySelector("#header-file-buttons"));
     exports.documentElements.set("camera-buttons", exports.documentElements.get("header").querySelector("#header-camera-buttons"));
     exports.documentElements.set("graph-buttons", exports.documentElements.get("header").querySelector("#header-graph-buttons"));
@@ -159,5 +173,7 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
     exports.documentElements.set("object-list", document.querySelector("#object-list"));
     exports.documentElements.set("graph-config-form", document.querySelector("#graph-config-form"));
     exports.documentElements.set("graph-panel", document.querySelector("#graph-panel"));
-    GraphPanel.initialize();
+    exports.documentElements.set("alert", document.querySelector("#alert"));
+    GraphPanel.initialize(document.querySelector("#graph-panel"));
+    Alert.initialize(exports.documentElements.get("alert"));
 });
