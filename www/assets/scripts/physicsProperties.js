@@ -119,10 +119,6 @@ define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "
         simulate(step) {
             const displacement = vector2_1.default.mult(this.value, step);
             const objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
-            const objectDisplacement = this.object.getProperty(types_1.PhysicsPropertyType.ObjectDisplacement);
-            //add displacement to objectdisplacement
-            if (objectDisplacement)
-                objectDisplacement.value += vector2_1.default.distance(vector2_1.default.zero, displacement);
             //displace object
             if (objectPosition)
                 objectPosition.value = vector2_1.default.sum(displacement, objectPosition.value);
@@ -131,8 +127,12 @@ define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "
     exports.ObjectVelocity = ObjectVelocity;
     class ObjectDisplacement extends PhysicsProperty {
         constructor(object) {
-            super(types_1.PhysicsPropertyType.ObjectDisplacement, false, object, 0, 0, genericCalulator_1.NumberCalculator.instance);
-            this.propertyLI = new propertyLI_1.PropertyLINumber(this, "des", "m", 0, "Deslocamento");
+            super(types_1.PhysicsPropertyType.ObjectDisplacement, false, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
+            this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "des", "m", vector2_1.default.zero, "Deslocamento", true, "m");
+        }
+        simulate(step) {
+            const objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
+            this.value = vector2_1.default.sub(objectPosition.value, objectPosition.initialValue);
         }
     }
     exports.ObjectDisplacement = ObjectDisplacement;

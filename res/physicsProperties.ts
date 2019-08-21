@@ -151,11 +151,6 @@ export class ObjectVelocity extends PhysicsProperty<Vector2>{
         const displacement = Vector2.mult(this.value, step);
         
         const objectPosition = this.object.getProperty(PhysicsPropertyType.ObjectPosition);
-        const objectDisplacement = this.object.getProperty(PhysicsPropertyType.ObjectDisplacement);
-
-        //add displacement to objectdisplacement
-        if(objectDisplacement)
-            (<ObjectDisplacement>objectDisplacement).value += Vector2.distance(Vector2.zero, displacement);
 
         //displace object
         if(objectPosition)
@@ -163,10 +158,16 @@ export class ObjectVelocity extends PhysicsProperty<Vector2>{
     }
 }
 
-export class ObjectDisplacement extends PhysicsProperty<number>{
+export class ObjectDisplacement extends PhysicsProperty<Vector2>{
     constructor(object: PhysicsObject){
-        super(PhysicsPropertyType.ObjectDisplacement, false, object, 0, 0, NumberCalculator.instance);
-        this.propertyLI = new PropertyLINumber(this, "des", "m", 0, "Deslocamento");
+        super(PhysicsPropertyType.ObjectDisplacement, false, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
+        this.propertyLI = new PropertyLIVector2(this, "des", "m", Vector2.zero, "Deslocamento", true, "m");
+    }
+
+    simulate(step: 0): void {
+        const objectPosition = <ObjectPosition>this.object.getProperty(PhysicsPropertyType.ObjectPosition);
+
+        this.value = Vector2.sub(objectPosition.value, objectPosition.initialValue);
     }
 }
 

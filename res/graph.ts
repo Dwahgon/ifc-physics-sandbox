@@ -196,7 +196,9 @@ const valueGetters: ValueGetter[] = [
     new PhysicsObjectValueGetter("Velocidade (eixo X)", PhysicsPropertyType.ObjectVelocity, PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
     new PhysicsObjectValueGetter("Velocidade (eixo Y)", PhysicsPropertyType.ObjectVelocity, PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
     new PhysicsObjectValueGetter("Velocidade (módulo)", PhysicsPropertyType.ObjectVelocity, PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK),
-    new PhysicsObjectValueGetter("Deslocamento", PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.NUMBER_CALLBACK)
+    new PhysicsObjectValueGetter("Deslocamento (eixo X)", PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
+    new PhysicsObjectValueGetter("Deslocamento (eixo Y)", PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
+    new PhysicsObjectValueGetter("Deslocamento (módulo)", PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK)
 ];
 
 const graphConfigModal = Modal.getModalById("graph-config-modal")!;

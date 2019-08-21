@@ -168,7 +168,9 @@ define(["require", "exports", "./buttons", "./document", "./modals", "./types", 
         new PhysicsObjectValueGetter("Velocidade (eixo X)", types_1.PhysicsPropertyType.ObjectVelocity, PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
         new PhysicsObjectValueGetter("Velocidade (eixo Y)", types_1.PhysicsPropertyType.ObjectVelocity, PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
         new PhysicsObjectValueGetter("Velocidade (módulo)", types_1.PhysicsPropertyType.ObjectVelocity, PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK),
-        new PhysicsObjectValueGetter("Deslocamento", types_1.PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.NUMBER_CALLBACK)
+        new PhysicsObjectValueGetter("Deslocamento (eixo X)", types_1.PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
+        new PhysicsObjectValueGetter("Deslocamento (eixo Y)", types_1.PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
+        new PhysicsObjectValueGetter("Deslocamento (módulo)", types_1.PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK)
     ];
     const graphConfigModal = Modal.getModalById("graph-config-modal");
     const graphConfigForm = Document.documentElements.get("graph-config-form");

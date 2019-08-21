@@ -82,6 +82,9 @@ Buttons.getButtonById("center-camera-button")!.onClick = Main.canvasRenderer.cam
 Buttons.predefinedClickEvents.set("closeModal", (args: string) => Modals.getModalById(args)!.setVisible(false));
 Buttons.predefinedClickEvents.set("hideElement", (args: string) => document.getElementById(args)!.style.display = "none");
 Buttons.predefinedClickEvents.set("createObject", (args: string) => {
+    if(Main.simulator.time > 0)
+        return;
+
     PhysicsObject.createPhysicsObject(parseInt(args), Main.ambient, {
         position: Main.canvasRenderer.camera.getWorldPosFromCanvas(
             new Vector2(Main.canvasRenderer.context.canvas.width / 2, Main.canvasRenderer.context.canvas.height / 2)
