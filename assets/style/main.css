@@ -215,6 +215,7 @@ button {
     border-radius: 4px;
     outline: none;
     font-family: inherit;
+    align-items: center;
 }
 
 button>img {

@@ -76,6 +76,8 @@ define(["require", "exports", "./ambient", "./buttons", "./document", "./fileCon
     Buttons.predefinedClickEvents.set("closeModal", (args) => Modals.getModalById(args).setVisible(false));
     Buttons.predefinedClickEvents.set("hideElement", (args) => document.getElementById(args).style.display = "none");
     Buttons.predefinedClickEvents.set("createObject", (args) => {
+        if (Main.simulator.time > 0)
+            return;
         physicsObjects_1.PhysicsObject.createPhysicsObject(parseInt(args), Main.ambient, {
             position: Main.canvasRenderer.camera.getWorldPosFromCanvas(new vector2_1.default(Main.canvasRenderer.context.canvas.width / 2, Main.canvasRenderer.context.canvas.height / 2)),
             size: new vector2_1.default(1, 1)
