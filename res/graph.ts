@@ -4,7 +4,7 @@ import * as Document from "./document";
 import * as Modal from "./modals";
 import { PhysicsObject } from "./physicsObjects";
 import PhysicsProperty from "./physicsProperties";
-import { Camera, CanvasRenderer } from "./rendering";
+import { Camera } from "./rendering";
 import Simulator from "./simulator";
 import { PhysicsPropertyType, Renderable, Simulatable, ValueGetter } from "./types";
 import Vector2 from "./vector2";
@@ -265,7 +265,7 @@ Buttons.getButtonById("create-graph-button")!.onClick = () => {
     const targetY = <string>formData.get("y-axis-property-holder");
 
     if(!targetX || !targetY){
-        Document.Alert.throwAlert("Possuem campos não preenchidos!", Document.Alert.WARNING);
+        Document.Alert.throwAlert("Há campos não preenchidos!", Document.Alert.WARNING);
         return;
     }
 

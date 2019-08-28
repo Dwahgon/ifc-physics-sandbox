@@ -218,7 +218,7 @@ define(["require", "exports", "./buttons", "./document", "./modals", "./types", 
         const targetX = formData.get("x-axis-property-holder");
         const targetY = formData.get("y-axis-property-holder");
         if (!targetX || !targetY) {
-            Document.Alert.throwAlert("Possuem campos não preenchidos!", Document.Alert.WARNING);
+            Document.Alert.throwAlert("Há campos não preenchidos!", Document.Alert.WARNING);
             return;
         }
         const graph = new Graph(targetX, targetY, vGX, vGY, 4);

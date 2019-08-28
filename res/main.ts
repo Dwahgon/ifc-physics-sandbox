@@ -9,7 +9,7 @@ import Vector2 from './vector2';
 
 let can = document.createElement('canvas');
 let ctx = can.getContext('2d');
-document.body.querySelector("#mid-menu>div")!.appendChild(can);
+document.body.querySelector("#canvas-holder")!.appendChild(can);
 
 export const canvasRenderer = new CanvasRenderer(ctx!, Vector2.zero, 100, 5, 500);
 export let ambient = new Ambient();
