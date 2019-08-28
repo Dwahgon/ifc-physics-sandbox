@@ -18,7 +18,7 @@ define(["require", "exports", "./ambient", "./buttons", "./document", "./renderi
     console.log("Loading main");
     let can = document.createElement('canvas');
     let ctx = can.getContext('2d');
-    document.body.querySelector("#mid-menu>div").appendChild(can);
+    document.body.querySelector("#canvas-holder").appendChild(can);
     exports.canvasRenderer = new rendering_1.CanvasRenderer(ctx, vector2_1.default.zero, 100, 5, 500);
     exports.ambient = new ambient_1.default();
     exports.simulator = new simulator_1.default(Buttons.getButtonById("play-button"), Buttons.getButtonById("reset-button"), Buttons.getButtonById("destroy-button"));

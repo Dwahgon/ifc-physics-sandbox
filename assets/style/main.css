@@ -1,7 +1,11 @@
 :root {
     --property-panel-width: 30vw;
     --header-height: 36px;
-    --simulation-controller-height: 100px;
+
+    --simulation-controller-height: 50px;
+    --simulation-controller-width: 300px;
+    --simulation-controller-padding: 5px;
+
     --property-li-height: 30px;
     --graph-panel-width: 20vw;
 }
@@ -216,6 +220,7 @@ button {
     outline: none;
     font-family: inherit;
     align-items: center;
+    justify-content: center;
 }
 
 button>img {
@@ -223,97 +228,129 @@ button>img {
     height: 100%;
 }
 
-
-/*
-    Main
-*/
-
-#main-interface {
+main {
     width: 100vw;
     height: calc(100vh - var(--header-height));
     display: flex;
 }
 
-#mid-menu {
+/*Simulator Visualizer*/
+
+#simulator-visualizer {
     height: 100%;
     width: calc(100vw - var(--header-height));
     vertical-align: middle;
     background-color: #ffffff;
-}
 
-#mid-menu>div {
-    width: 100%;
-}
-
-#mid-menu>div:first-child {
-    height: calc(100% - 100px);
-    display: flex;
-    box-sizing: border-box;
     position: relative;
 }
 
-#mid-menu>div:first-child>.panel {
-    max-height: calc(100% - 10px);
-    z-index: 1;
+
+/* Canvas Holder */
+
+#canvas-holder {
+    width: 100%;
+    height: 100%;
     position: absolute;
-    margin: 5px;
+    
+    right: 0;
+    top: 0;
 }
 
-#mid-menu>div:last-child {
+/* Simulator HUD */
+
+#simulator-hud{
+    position: absolute;
+    width: 100%;
+    padding: 5px;
+    height: 100%;
+    box-sizing: border-box;
+    z-index: 1;
+
+    right: 0;
+    top: 0;
+}
+
+#simulator-hud>div {
+    max-height: calc(100% - 10px);
+    position: absolute;
+    z-index: 1;
+}
+
+/* Simulation Controller Wrapper */
+
+#simulation-controller-wrapper {
     height: var(--simulation-controller-height);
-    padding: 10px;
+    width: var(--simulation-controller-width);
+    padding: var(--simulation-controller-padding);
+
     box-sizing: border-box;
     background-color: rgb(63, 63, 63);
-}
 
-#mid-menu>div:last-child>div {
-    height: 100%;
-    padding: 10px;
-    border: 1px solid rgb(47, 47, 47);
     display: flex;
-    box-sizing: border-box;
+    flex-direction: row;
+    align-items: center;
+
     border-radius: 4px;
-    background-color: rgb(100, 100, 100);
+
+    position: absolute;
+    left: 50%;
+    margin-left: calc( -1 * var(--simulation-controller-width) / 2);
+    bottom: 5px;
 }
 
-#mid-menu>div:last-child>div>div>button {
-    height: auto;
-    width: 58px;
-    margin-right: 10px;
+#simulation-controller-wrapper>div {
+    height: 100%;
+}
+
+#simulation-controller-wrapper>#simulation-controller-buttons{
+    width: auto;
+    margin-right: 15px;
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+}
+
+#simulation-controller-wrapper>#simulation-controller-buttons>button {
+    padding: 5px;
+    height: calc(var(--simulation-controller-height) - 2 * var(--simulation-controller-padding));
+    width: calc(var(--simulation-controller-height) - 2 * var(--simulation-controller-padding));
+    margin-right: 2px;
     vertical-align: middle;
-    font-size: 20px;
+    font-size: 15px;
 }
 
-#mid-menu>div:last-child>div>div {
+#simulation-controller-wrapper>#simulation-time-wrapper {
+    width: inherit;
     display: flex;
     box-sizing: border-box;
-    width: 50%;
-    height: auto;
-    margin-left: auto;
+    align-items: center;
+    justify-content: center;
+    flex: 2;
 }
 
-#mid-menu>div:last-child>div>div>span {
+#simulation-controller-wrapper>#simulation-time-wrapper>label {
     margin: auto 5px auto 0px;
     font-size: 20px;
-}
 
-#mid-menu>div:last-child>div>div>input {
-    height: 100%;
-    width: 100%;
-    border: 1px solid #1A1A1A;
-    border-radius: 4px;
-    background-color: #282828;
-    display: inline-block;
-    box-sizing: border-box;
-    font-size: 1.5vw;
-    font-family: inherit;
-    color: #ffffff;
-    text-align: right;
     flex-grow: 1;
 }
 
+#simulation-controller-wrapper>#simulation-time-wrapper>input {
+    height: 100%;
 
-/*Object Buttons*/
+    box-sizing: border-box;
+
+    flex-grow: 2;
+
+    border: 1px solid #1A1A1A;
+    border-radius: 4px;
+    background-color: #282828;
+    color: rgb(255, 255, 255);
+    text-align: end;
+}
+
+/*Object List*/
 
 #object-list {
     padding: 2px;
@@ -331,7 +368,7 @@ button>img {
 
 #property-side-panel {
     width: var(--property-panel-width);
-    right: 0;
+    right: 5px;
     box-sizing: border-box;
 }
 
