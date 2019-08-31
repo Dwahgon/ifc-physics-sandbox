@@ -20,10 +20,8 @@ define(["require", "exports", "./document"], function (require, exports, Documen
         }
         setVisible(value) {
             this.element.style.display = value ? "flex" : "none";
-            const header = Document.documentElements.get("header");
-            const mainInterface = Document.documentElements.get("main-interface");
-            mainInterface.style.filter = value ? "blur(3px)" : "none";
-            header.style.filter = value ? "blur(3px)" : "none";
+            const application = Document.documentElements.get("application-wrapper");
+            application.style.filter = value ? "blur(3px)" : "none";
             if (value && this.onOpen)
                 this.onOpen();
         }

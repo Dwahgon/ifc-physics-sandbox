@@ -16,11 +16,9 @@ export class Modal {
     setVisible(value: boolean) {
         this.element.style.display = value ? "flex" : "none";
 
-        const header = <HTMLElement>Document.documentElements.get("header")!;
-        const mainInterface = <HTMLElement>Document.documentElements.get("main-interface")!;
+        const application = <HTMLElement>Document.documentElements.get("application-wrapper")!;
 
-        mainInterface.style.filter =  value ? "blur(3px)" : "none";
-        header.style.filter = value ? "blur(3px)" : "none";
+        application.style.filter =  value ? "blur(3px)" : "none";
         
         if(value && this.onOpen)
             this.onOpen();

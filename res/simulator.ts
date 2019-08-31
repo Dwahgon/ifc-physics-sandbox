@@ -14,13 +14,12 @@ export default class Simulator {
         this._time = 0;
         this._isPlaying = false;
         
-        const bottomBar = document.querySelector("#mid-menu>div:last-child");
-        const queryInput = bottomBar!.querySelector("input");
+        const input = document.querySelector("#simulation-time");
 
-        if(!queryInput)
+        if(!input)
             throw "time input, play button or reset button not found";
         
-        this.domInput = <HTMLInputElement>queryInput;
+        this.domInput = <HTMLInputElement>input;
         this.domInput.value = this._time.toFixed(2);
         this.simulatables = [];
 

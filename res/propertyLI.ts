@@ -104,8 +104,8 @@ export default abstract class PropertyLI<T>{
 }
 
 export class PropertyLIVector2 extends PropertyLI<Vector2>{
-    constructor(property: PhysicsProperty<Vector2>, name: string, private propertyUnit: string, initialValue: Vector2, title: string, private showModulus: boolean, private modulusUnit?: string){
-        super(property, name, `${propertyUnit}, ${propertyUnit}`, /\-?\d*\.?\d*/g, initialValue, title);
+    constructor(property: PhysicsProperty<Vector2>, name: string, propertyUnit: string, initialValue: Vector2, title: string, private showModulus: boolean, private modulusUnit?: string){
+        super(property, name, propertyUnit, /\-?\d*\.?\d*/g, initialValue, title);
         this.updateInputTitle(initialValue);
     }
 

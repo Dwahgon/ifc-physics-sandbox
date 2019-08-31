@@ -200,8 +200,9 @@ export abstract class Alert {
  * A map that contains various Elements in the application HTML document.
  */
 export const documentElements = new Map<string, Element>();
+documentElements.set("application-wrapper", document.querySelector("#application-wrapper")!);
 documentElements.set("header", document.querySelector("#buttons-header")!);
-documentElements.set("main-interface", document.querySelector("#main-interface")!);
+documentElements.set("main-interface", document.querySelector("main")!);
 documentElements.set("file-buttons", documentElements.get("header")!.querySelector("#header-file-buttons")!);
 documentElements.set("camera-buttons", documentElements.get("header")!.querySelector("#header-camera-buttons")!);
 documentElements.set("graph-buttons", documentElements.get("header")!.querySelector("#header-graph-buttons")!);

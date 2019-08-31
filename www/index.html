@@ -15,80 +15,84 @@
 </head>
 
 <body>
-    <header id="buttons-header">
-        <div id="header-file-buttons">
-            <button id="new-file-button" class="invisible-bg-button active-button" title="Novo ambiente"><img
-                    src="assets/images/newfileicon.svg"></button>
-            <button id="save-file-button" class="invisible-bg-button active-button" title="Salvar ambiente"><img
-                    src="assets/images/savefileicon.svg"></button>
-            <button id="load-file-button" class="invisible-bg-button active-button" title="Abrir ambiente"><img
-                    src="assets/images/loadfileicon.svg"></button>
-        </div>
-        <div id="header-camera-buttons" button-kind="normal">
-            <button id="center-camera-button" class="invisible-bg-button active-button" title="Focar câmera na origem"><img
-                    src="assets/images/centertooriginicon.svg"></button>
-        </div>
-        <div id="header-graph-buttons">
-            <button id="open-graph-modal-button" class="invisible-bg-button active-button" title="Criar gráfico" func="openModal" args="graph-config-modal">
-                <img src="assets/images/graphicon.svg">
-            </button>
-        </div>
-    </header>
+    <div id="application-wrapper">
+        <header id="buttons-header">
+            <div id="header-file-buttons">
+                <button id="new-file-button" class="invisible-bg-button active-button" title="Novo ambiente"><img
+                        src="assets/images/newfileicon.svg"></button>
+                <button id="save-file-button" class="invisible-bg-button active-button" title="Salvar ambiente"><img
+                        src="assets/images/savefileicon.svg"></button>
+                <button id="load-file-button" class="invisible-bg-button active-button" title="Abrir ambiente"><img
+                        src="assets/images/loadfileicon.svg"></button>
+            </div>
+            <div id="header-camera-buttons" button-kind="normal">
+                <button id="center-camera-button" class="invisible-bg-button active-button" title="Focar câmera na origem"><img
+                        src="assets/images/centertooriginicon.svg"></button>
+            </div>
+            <div id="header-graph-buttons">
+                <button id="open-graph-modal-button" class="invisible-bg-button active-button" title="Criar gráfico" func="openModal" args="graph-config-modal">
+                    <img src="assets/images/graphicon.svg">
+                </button>
+            </div>
+        </header>
 
-    <main>
-        <div id="object-list">
-            <button id="create-solid-button" class="invisible-bg-button active-button" title="Criar um sólido" func="createObject" args="0"><img src="assets/images/solidicon.svg"></button>
-        </div>
+        <main>
+            <div id="object-list">
+                <button id="create-solid-button" class="invisible-bg-button active-button" title="Criar um sólido" func="createObject" args="0"><img src="assets/images/solidicon.svg"></button>
+            </div>
 
-        <div id="simulator-visualizer">
-            <div id="simulator-hud">
-                <div id="graph-panel" class="panel" style="display: none">
-                    <div class="panel-header">
-                        <h1></h1>
-                        <button id="close-graph-panel-button" class="invisible-bg-button active-button" func="hideElement" args="graph-panel"><img src='assets/images/closeicon.svg'></button>
-                    </div>
-
-                    <div class="panel-content"></div>
-                </div>
-                <div id="property-side-panel" class="panel">
-                    <div class="panel-header">
-                        <h1>
-                            Propriedades do ambiente
-                        </h1>
-                    </div>
-                    <div class="panel-content">
-                        <div id="object-interactor">
-                            <button id="destroy-button" class="dark-button inactive-button" title="Destruir objeto"><img
-                                    src="assets/images/destroyicon.svg"></button>
-                            <button id="follow-button" class=" dark-button inactive-button" title="Seguir/Focar objeto" alt-img="assets/images/cancelfollowicon.svg" alt-title="Parar de seguir/focar objeto"><img
-                                    src="assets/images/followicon.svg"></button>
+            <div id="simulator-visualizer">
+                <div id="simulator-hud">
+                    <div id="graph-panel" class="panel" style="display: none">
+                        <div class="panel-header">
+                            <h1></h1>
+                            <button id="close-graph-panel-button" class="invisible-bg-button active-button" func="hideElement" args="graph-panel"><img src='assets/images/closeicon.svg'></button>
                         </div>
-                        <ul id="property-list" style="display: none"></ul>
+
+                        <div class="panel-content"></div>
+                    </div>
+
+                    <div id="property-side-panel" class="panel">
+                        <div class="panel-header">
+                            <h1>
+                                Propriedades do ambiente
+                            </h1>
+                        </div>
+                        <div class="panel-content">
+                            <div id="object-interactor">
+                                <button id="destroy-button" class="dark-button inactive-button" title="Destruir objeto"><img
+                                        src="assets/images/destroyicon.svg"></button>
+                                <button id="follow-button" class=" dark-button inactive-button" title="Seguir/Focar objeto" alt-img="assets/images/cancelfollowicon.svg" alt-title="Parar de seguir/focar objeto"><img
+                                        src="assets/images/followicon.svg"></button>
+                            </div>
+                            <ul id="property-list" style="display: none"></ul>
+                        </div>
+                    </div>
+
+                    <div id="simulation-controller-wrapper">
+                        <div id="simulation-controller-buttons">
+                            <button id="play-button" class="invisible-bg-button active-button" title="Iniciar simulação" alt-title="Pausar simulação" alt-img="assets/images/pause.png" button-name="play-button">
+                                <img src="assets/images/play.png" button-name="play-button">
+                            </button>
+                            <button id="reset-button" class="invisible-bg-button active-button" title="Resetar simulação (Definir t=0)" button-name="reset-button">
+                                t=0
+                            </button>
+                        </div>
+
+                        <div id="simulation-time-wrapper">
+                            <label for="simulation-time">t=</label>
+                            <span><input id="simulation-time" type="text" value="0"></span>
+                        </div>
                     </div>
                 </div>
-                <div id="simulation-controller-wrapper">
-                    <div id="simulation-controller-buttons">
-                        <button id="play-button" class="invisible-bg-button active-button" title="Iniciar simulação" alt-title="Pausar simulação" alt-image="assets/images/playbutton.png" button-name="play-button">
-                            <img src="assets/images/play.png" button-name="play-button">
-                        </button>
-                        <button id="reset-button" class="invisible-bg-button active-button" title="Resetar simulação (Definir t=0)" button-name="reset-button">
-                            t=0
-                        </button>
-                    </div>
-                    
-                    <div id="simulation-time-wrapper">
-                        <label for="simulation-time">t=</label>
-                        <input id="simulation-time" type="text" value="0">
-                    </div>
+
+
+                <div id="canvas-holder">
+
                 </div>
             </div>
-            
-
-            <div id="canvas-holder">
-
-            </div>
-        </div>
-    </main>
+        </main>
+    </div>
 
     <div id="alert" class="alert alert-warning" style="display: none;">
         <p>ola meu compatriota</p>
