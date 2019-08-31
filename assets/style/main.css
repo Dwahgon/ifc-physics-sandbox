@@ -1,13 +1,13 @@
 :root {
     --property-panel-width: 30vw;
     --header-height: 36px;
-
     --simulation-controller-height: 50px;
     --simulation-controller-width: 300px;
     --simulation-controller-padding: 5px;
-
+    --simulation-controller-margin: 5px;
+    --simulation-controller-total-height: 70px;
     --property-li-height: 30px;
-    --graph-panel-width: 20vw;
+    --graph-panel-width: 30vw;
 }
 
 @font-face {
@@ -67,7 +67,7 @@
 
 .panel {
     border: 1px solid #2f2f2f;
-    background-color: rgb(63, 63, 63);
+    background-color: #3f3f3f;
     border-radius: 4px;
     display: flex;
     flex-direction: column;
@@ -77,7 +77,6 @@
     height: 50px;
     width: 100%;
     padding: 5px;
-    padding-left: 10px;
     background-color: #282828;
     display: flex;
     justify-content: flex-start;
@@ -94,13 +93,16 @@
     text-shadow: 2px 2px 4px #000000;
     overflow: hidden;
     font-size: 14px;
+    flex: 1;
 }
 
 .panel>.panel-header>button {
     height: 40px;
     width: 40px;
+    max-width: 40px;
     padding: 5px;
     margin: 0 0 0 auto;
+    flex: 1;
 }
 
 .panel>.panel-content {
@@ -140,13 +142,13 @@
     box-shadow: 0px 1px 10px -3px #000000;
 }
 
-.alert>p{
+.alert>p {
     display: inline-block;
     margin: 0;
     height: 1em;
 }
 
-.alert>button{
+.alert>button {
     font-size: inherit;
     height: 1.75em;
     width: 1.75em;
@@ -154,7 +156,7 @@
     padding: 2px;
 }
 
-.alert>button>img{
+.alert>button>img {
     filter: invert(1);
     opacity: 0.75;
 }
@@ -170,6 +172,7 @@
     border: 1px solid #f9ca24;
     color: rgba(0, 0, 0, 0.9);
 }
+
 
 /*
     Default element values
@@ -204,7 +207,7 @@ header>div {
     display: flex;
 }
 
-body>header>div>button {
+header>div>button {
     height: 100%;
     width: calc(var(--header-height) - 4px);
     padding: 5px;
@@ -234,6 +237,15 @@ main {
     display: flex;
 }
 
+
+/*Application Wrapper*/
+
+#application-wrapper {
+    width: 100%;
+    height: 100%;
+}
+
+
 /*Simulator Visualizer*/
 
 #simulator-visualizer {
@@ -241,7 +253,6 @@ main {
     width: calc(100vw - var(--header-height));
     vertical-align: middle;
     background-color: #ffffff;
-
     position: relative;
 }
 
@@ -252,58 +263,56 @@ main {
     width: 100%;
     height: 100%;
     position: absolute;
-    
     right: 0;
     top: 0;
 }
 
+
 /* Simulator HUD */
 
-#simulator-hud{
+#simulator-hud {
     position: absolute;
+    pointer-events: none;
     width: 100%;
     padding: 5px;
     height: 100%;
     box-sizing: border-box;
     z-index: 1;
-
     right: 0;
     top: 0;
 }
 
 #simulator-hud>div {
-    max-height: calc(100% - 10px);
+    max-height: calc(100% - var(--simulation-controller-total-height));
     position: absolute;
     z-index: 1;
+    pointer-events: all;
 }
+
 
 /* Simulation Controller Wrapper */
 
-#simulation-controller-wrapper {
+#simulator-hud>#simulation-controller-wrapper {
     height: var(--simulation-controller-height);
     width: var(--simulation-controller-width);
     padding: var(--simulation-controller-padding);
-
+    margin: var(--simulation-controller-margin);
     box-sizing: border-box;
-    background-color: rgb(63, 63, 63);
-
+    background-color: #3f3f3f;
     display: flex;
     flex-direction: row;
     align-items: center;
-
     border-radius: 4px;
-
     position: absolute;
-    left: 50%;
-    margin-left: calc( -1 * var(--simulation-controller-width) / 2);
-    bottom: 5px;
+    left: calc( 50% - var(--simulation-controller-width) / 2);
+    bottom: 0;
 }
 
 #simulation-controller-wrapper>div {
     height: 100%;
 }
 
-#simulation-controller-wrapper>#simulation-controller-buttons{
+#simulation-controller-wrapper>#simulation-controller-buttons {
     width: auto;
     margin-right: 15px;
     display: flex;
@@ -330,25 +339,30 @@ main {
 }
 
 #simulation-controller-wrapper>#simulation-time-wrapper>label {
-    margin: auto 5px auto 0px;
+    margin-right: 5px;
     font-size: 20px;
-
-    flex-grow: 1;
 }
 
-#simulation-controller-wrapper>#simulation-time-wrapper>input {
+#simulation-controller-wrapper>#simulation-time-wrapper>span {
     height: 100%;
-
+    flex: 1;
     box-sizing: border-box;
+    display: block;
+}
 
-    flex-grow: 2;
-
+#simulation-controller-wrapper>#simulation-time-wrapper>span>input {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
     border: 1px solid #1A1A1A;
     border-radius: 4px;
+    font-family: inherit;
+    font-size: 20px;
     background-color: #282828;
-    color: rgb(255, 255, 255);
+    color: #ffffff;
     text-align: end;
 }
+
 
 /*Object List*/
 
@@ -411,8 +425,8 @@ main {
 #property-list>li {
     width: 100%;
     height: var(--property-li-height);
-    font-size: calc(var(--property-li-height) / 2.75);
-    border: 1px solid #1a1a1a;
+    font-size: calc(var(--property-li-height) / 3);
+    border: 1px solid #191919;
     margin-bottom: 3px;
     box-sizing: border-box;
     background-color: #282828;

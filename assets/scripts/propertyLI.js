@@ -82,8 +82,7 @@ define(["require", "exports", "./vector2", "./document", "./buttons", "./types"]
     exports.default = PropertyLI;
     class PropertyLIVector2 extends PropertyLI {
         constructor(property, name, propertyUnit, initialValue, title, showModulus, modulusUnit) {
-            super(property, name, `${propertyUnit}, ${propertyUnit}`, /\-?\d*\.?\d*/g, initialValue, title);
-            this.propertyUnit = propertyUnit;
+            super(property, name, propertyUnit, /\-?\d*\.?\d*/g, initialValue, title);
             this.showModulus = showModulus;
             this.modulusUnit = modulusUnit;
             this.updateInputTitle(initialValue);

@@ -160,8 +160,9 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
      * A map that contains various Elements in the application HTML document.
      */
     exports.documentElements = new Map();
+    exports.documentElements.set("application-wrapper", document.querySelector("#application-wrapper"));
     exports.documentElements.set("header", document.querySelector("#buttons-header"));
-    exports.documentElements.set("main-interface", document.querySelector("#main-interface"));
+    exports.documentElements.set("main-interface", document.querySelector("main"));
     exports.documentElements.set("file-buttons", exports.documentElements.get("header").querySelector("#header-file-buttons"));
     exports.documentElements.set("camera-buttons", exports.documentElements.get("header").querySelector("#header-camera-buttons"));
     exports.documentElements.set("graph-buttons", exports.documentElements.get("header").querySelector("#header-graph-buttons"));

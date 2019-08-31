@@ -9,11 +9,10 @@ define(["require", "exports", "./document"], function (require, exports, documen
             this.destroyButton = destroyButton;
             this._time = 0;
             this._isPlaying = false;
-            const bottomBar = document.querySelector("#mid-menu>div:last-child");
-            const queryInput = bottomBar.querySelector("input");
-            if (!queryInput)
+            const input = document.querySelector("#simulation-time");
+            if (!input)
                 throw "time input, play button or reset button not found";
-            this.domInput = queryInput;
+            this.domInput = input;
             this.domInput.value = this._time.toFixed(2);
             this.simulatables = [];
             this.domInput.addEventListener("change", () => {
