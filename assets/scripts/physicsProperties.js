@@ -1,22 +1,25 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "./vector2"], function (require, exports, genericCalulator_1, propertyLI_1, types_1, vector2_1) {
+define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "./vector2", "./gizmos"], function (require, exports, genericCalulator_1, propertyLI_1, types_1, vector2_1, gizmos_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_1 = __importDefault(vector2_1);
+    gizmos_1 = __importDefault(gizmos_1);
     console.log("Loading physicsProperties");
     class PhysicsProperty {
-        constructor(kind, changeable, object, iValue, oValue, genericCalculator) {
+        constructor(kind, changeable, object, iValue, oValue, genericCalculator, simulationPriority = 0) {
             this.kind = kind;
             this.changeable = changeable;
             this.object = object;
             this.iValue = iValue;
             this.oValue = oValue;
             this.genericCalculator = genericCalculator;
+            this.simulationPriority = simulationPriority;
             this.propertyLI = null;
             this.active = true;
             this.onValueChangedCallbacks = [];
+            this.doDrawGizmos = false;
         }
         get initialValue() {
             return this.iValue;
@@ -33,6 +36,8 @@ define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "
             this.oValue = this.genericCalculator.sub(value, this.iValue);
             this.propertyLI.setValue(this.value);
             this.onValueChangedCallbacks.forEach(callback => callback());
+        }
+        drawGizmos(canvasRenderer) {
         }
         simulate(step) {
         }
@@ -113,15 +118,25 @@ define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "
     exports.ObjectArea = ObjectArea;
     class ObjectVelocity extends PhysicsProperty {
         constructor(object) {
-            super(types_1.PhysicsPropertyType.ObjectVelocity, true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
+            super(types_1.PhysicsPropertyType.ObjectVelocity, true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance, 1);
             this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "vel", "<sup>m</sup>&frasl;<sub>s</sub>", vector2_1.default.zero, "Vetor velocidade", true, "m/s");
+            this.objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
+            this.objectAcceleration = this.object.getProperty(types_1.PhysicsPropertyType.ObjectAcceleration);
         }
         simulate(step) {
-            const displacement = vector2_1.default.mult(this.value, step);
-            const objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
-            //displace object
-            if (objectPosition)
-                objectPosition.value = vector2_1.default.sum(displacement, objectPosition.value);
+            const currentVel = this.value;
+            if (this.objectAcceleration)
+                this.value = vector2_1.default.sum(this.value, vector2_1.default.mult(this.objectAcceleration.value, step));
+            if (this.objectPosition && this.objectAcceleration) {
+                this.objectPosition.value = vector2_1.default.sum(this.objectPosition.value, vector2_1.default.sum(vector2_1.default.mult(currentVel, step), vector2_1.default.div(vector2_1.default.mult(this.objectAcceleration.value, Math.pow(step, 2)), 2)));
+            }
+        }
+        drawGizmos(canvasRenderer) {
+            if (this.doDrawGizmos && this.objectPosition) {
+                const from = this.objectPosition.value;
+                const to = vector2_1.default.sum(from, this.value);
+                gizmos_1.default.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+            }
         }
     }
     exports.ObjectVelocity = ObjectVelocity;
@@ -129,10 +144,18 @@ define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "
         constructor(object) {
             super(types_1.PhysicsPropertyType.ObjectDisplacement, false, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
             this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "des", "m", vector2_1.default.zero, "Deslocamento", true, "m");
+            this.objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
         }
         simulate(step) {
-            const objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
-            this.value = vector2_1.default.sub(objectPosition.value, objectPosition.initialValue);
+            if (this.objectPosition)
+                this.value = vector2_1.default.sub(this.objectPosition.value, this.objectPosition.initialValue);
+        }
+        drawGizmos(canvasRenderer) {
+            if (this.doDrawGizmos && this.objectPosition) {
+                const from = this.objectPosition.initialValue;
+                const to = vector2_1.default.sum(from, this.value);
+                gizmos_1.default.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+            }
         }
     }
     exports.ObjectDisplacement = ObjectDisplacement;
@@ -140,12 +163,14 @@ define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "
         constructor(object) {
             super(types_1.PhysicsPropertyType.ObjectAcceleration, true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
             this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue, "Vetor aceleração", true, "m/s²");
+            this.objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
         }
-        simulate(step) {
-            const objectVel = this.object.getProperty(types_1.PhysicsPropertyType.ObjectVelocity);
-            const velDisplacement = vector2_1.default.mult(this.value, step);
-            if (objectVel)
-                objectVel.value = vector2_1.default.sum(velDisplacement, objectVel.value);
+        drawGizmos(canvasRenderer) {
+            if (this.doDrawGizmos && this.objectPosition) {
+                const from = this.objectPosition.value;
+                const to = vector2_1.default.sum(from, this.value);
+                gizmos_1.default.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+            }
         }
     }
     exports.ObjectAcceleration = ObjectAcceleration;

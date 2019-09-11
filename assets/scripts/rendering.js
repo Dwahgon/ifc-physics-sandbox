@@ -20,7 +20,10 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
             this.isRunning = false;
             this.renderables = [];
             this.camera = new Camera(this, cameraPos, cameraZoom, cameraMinZoom, cameraMaxZoom, 5);
-            this.add({ draw(cam, ctx) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); } });
+            this.add({ draw(canvasRenderer) {
+                    const ctx = canvasRenderer.context;
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                } });
         }
         start() {
             this.isRunning = true;
@@ -42,14 +45,16 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
                 renderable.onCanvasRemoved(this);
         }
         render(step) {
-            const cam = this.camera;
-            const con = this.context;
             const canvas = this.context.canvas;
             const canvasParent = canvas.parentElement;
             const style = window.getComputedStyle(canvasParent, null);
             canvas.height = parseInt(style.getPropertyValue("height"));
             canvas.width = parseInt(style.getPropertyValue("width"));
-            this.renderables.forEach(rn => rn.draw(cam, con, step));
+            this.renderables.forEach(rn => {
+                this.context.save();
+                rn.draw(this, step);
+                this.context.restore();
+            });
             if (this.isRunning)
                 window.requestAnimationFrame(this.render.bind(this));
         }
@@ -68,6 +73,7 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
             const canvas = canvasRenderer.context.canvas;
             this._isMouseDown = false;
             this._mouseMoved = false;
+            this.allowMovement = true;
             this.clickedPos = vector2_1.default.zero;
             this.cameraPosOnMouseDown = vector2_1.default.zero;
             canvas.addEventListener("mousedown", ev => { this.onInputStart(new vector2_1.default(ev.offsetX, -ev.offsetY)); });
@@ -169,7 +175,8 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
         }
         onMove(cursorCoordinates, canvas) {
             if (this.isMouseDown) {
-                this.pos = vector2_1.default.sum(this.cameraPosOnMouseDown, vector2_1.default.sub(this.clickedPos, cursorCoordinates));
+                if (this.allowMovement)
+                    this.pos = vector2_1.default.sum(this.cameraPosOnMouseDown, vector2_1.default.sub(this.clickedPos, cursorCoordinates));
                 canvas.style.cursor = "move";
                 if (!vector2_1.default.equals(this.cameraPosOnMouseDown, this.pos)) {
                     this._mouseMoved = true;
@@ -204,10 +211,12 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
         getZoomedSize(zoom) {
             return vector2_1.default.mult(this.drawSize, zoom);
         }
-        draw(cam, context) {
+        draw(canvasRenderer) {
+            const cam = canvasRenderer.camera;
+            const ctx = canvasRenderer.context;
             const posInCanvas = vector2_1.default.sub(cam.getCanvasPosFromWorld(this.drawPosition), vector2_1.default.div(this.getZoomedSize(cam.zoom), 2));
             // @ts-ignore
-            context.drawImage(this.image, ...this.copyPosition.toArray(), ...this.copySize.toArray(), ...posInCanvas.toArray(), ...this.getZoomedSize(cam.zoom).toArray());
+            ctx.drawImage(this.image, ...this.copyPosition.toArray(), ...this.copySize.toArray(), ...posInCanvas.toArray(), ...this.getZoomedSize(cam.zoom).toArray());
         }
     }
     exports.Sprite = Sprite;
@@ -218,7 +227,9 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
             this.xAxisName = xAxisName;
             this.yAxisName = yAxisName;
         }
-        draw(cam, ctx) {
+        draw(canvasRenderer) {
+            const cam = canvasRenderer.camera;
+            const ctx = canvasRenderer.context;
             const canvas = ctx.canvas;
             const startPos = cam.getWorldPosFromCanvas(new vector2_1.default(0, 0));
             const finishPos = cam.getWorldPosFromCanvas(new vector2_1.default(canvas.width, canvas.height));
@@ -357,14 +368,15 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
             this.nextUpdate = 0;
             this.fps = 0;
         }
-        draw(cam, con, step) {
+        draw(canvasRenderer, step) {
+            const ctx = canvasRenderer.context;
             if (step > this.nextUpdate) {
                 this.fps = 1000 / (step - this.lastFrameTimestamp);
                 this.nextUpdate = step + this.delay;
             }
-            con.font = "12px Arial";
-            con.fillStyle = "black";
-            con.fillText(`${this.fps.toFixed(2)} FPS`, 5, con.canvas.height - 5);
+            ctx.font = "12px Arial";
+            ctx.fillStyle = "black";
+            ctx.fillText(`${this.fps.toFixed(2)} FPS`, 5, ctx.canvas.height - 5);
             this.lastFrameTimestamp = step;
         }
     }

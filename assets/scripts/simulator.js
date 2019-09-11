@@ -14,6 +14,7 @@ define(["require", "exports", "./document"], function (require, exports, documen
                 throw "time input, play button or reset button not found";
             this.domInput = input;
             this.domInput.value = this._time.toFixed(2);
+            this.domInput.title = `Valor exato: ${this._time}`;
             this.simulatables = [];
             this.domInput.addEventListener("change", () => {
                 if (this.isPlaying)
@@ -37,6 +38,7 @@ define(["require", "exports", "./document"], function (require, exports, documen
         set time(value) {
             this._time = value;
             this.domInput.value = value.toFixed(2);
+            this.domInput.title = `Valor exato: ${value}`;
             document_1.ObjectSelectionController.propertiesEnabled = value == 0;
             document_1.ObjectCreationController.objectCreatable = value == 0;
             this.destroyButton.enabled = value == 0 && document_1.ObjectSelectionController.selectedObject != null && document_1.ObjectSelectionController.selectedObject.isFollowable;

@@ -175,6 +175,6 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
     exports.documentElements.set("graph-config-form", document.querySelector("#graph-config-form"));
     exports.documentElements.set("graph-panel", document.querySelector("#graph-panel"));
     exports.documentElements.set("alert", document.querySelector("#alert"));
-    GraphPanel.initialize(document.querySelector("#graph-panel"));
+    GraphPanel.initialize(exports.documentElements.get("graph-panel"));
     Alert.initialize(exports.documentElements.get("alert"));
 });

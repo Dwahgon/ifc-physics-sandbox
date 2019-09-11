@@ -23,8 +23,40 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
             this.objectProperties = [];
             this.ambient.addObject(this);
         }
+        get isFollowable() {
+            return true;
+        }
+        get isDeletable() {
+            return true;
+        }
+        static createPhysicsObject(type, ambient, properties) {
+            switch (type) {
+                case types_1.PhysicsObjectType.Solid:
+                    const solids = ambient.objects.filter(obj => { return obj.kind == type; });
+                    return new Solid(`Sólido ${solids.length + 1}`, ambient, properties);
+            }
+        }
+        static fromJSON(json, ambient) {
+            if (typeof json === "string") {
+                return JSON.parse(json, function (key, value) {
+                    return key === "" ? PhysicsObject.fromJSON(value, ambient) : value;
+                });
+            }
+            else {
+                const physicsObj = this.createPhysicsObject(json.kind, ambient);
+                json.properties.forEach(prop => {
+                    physicsObj.getProperty(prop.kind).initialValue = prop.iValue;
+                });
+                return physicsObj;
+            }
+        }
+        draw(canvasRenderer) {
+            this.sprite.draw(canvasRenderer);
+            this.objectProperties.forEach(property => property.drawGizmos(canvasRenderer));
+        }
         addProperties(...properties) {
             properties.forEach(property => this.objectProperties.push(property));
+            this.objectProperties.sort((a, b) => { return b.simulationPriority - a.simulationPriority; });
         }
         simulate(step) {
             this.objectProperties.forEach(property => property.simulate(step));
@@ -53,24 +85,11 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
                     return this.objectProperties.find(physicsProperty => { return physicsProperty.kind == type; });
             }
         }
-        static createPhysicsObject(type, ambient, properties) {
-            switch (type) {
-                case types_1.PhysicsObjectType.Solid:
-                    const solids = ambient.objects.filter(obj => { return obj.kind == type; });
-                    return new Solid(`Sólido ${solids.length + 1}`, ambient, properties);
-            }
-        }
         appendPropertyListItems() {
             this.objectProperties.forEach(property => {
                 if (property.propertyLI)
                     property.propertyLI.appendToPropertyUL();
             });
-        }
-        get isFollowable() {
-            return true;
-        }
-        get isDeletable() {
-            return true;
         }
         destroy() {
             const index = this.ambient.objects.indexOf(this);
@@ -84,30 +103,16 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
                 properties: properties
             });
         }
-        static fromJSON(json, ambient) {
-            if (typeof json === "string") {
-                return JSON.parse(json, function (key, value) {
-                    return key === "" ? PhysicsObject.fromJSON(value, ambient) : value;
-                });
-            }
-            else {
-                const physicsObj = this.createPhysicsObject(json.kind, ambient);
-                json.properties.forEach(prop => {
-                    physicsObj.getProperty(prop.kind).initialValue = prop.iValue;
-                });
-                return physicsObj;
-            }
-        }
     }
     exports.PhysicsObject = PhysicsObject;
     class Solid extends PhysicsObject {
         constructor(name, ambient, properties) {
             super(types_1.PhysicsObjectType.Solid, name, new rendering_1.Sprite("./assets/images/solid.svg", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient);
             this.addProperties(new PhysicsProperties.ObjectPosition(properties ? properties.position : vector2_1.default.zero, this));
-            this.addProperties(new PhysicsProperties.ObjectSize(properties ? properties.size : vector2_1.default.zero, this));
-            this.addProperties(new PhysicsProperties.ObjectArea(this));
             this.addProperties(new PhysicsProperties.ObjectAcceleration(this));
             this.addProperties(new PhysicsProperties.ObjectVelocity(this));
+            this.addProperties(new PhysicsProperties.ObjectSize(properties ? properties.size : vector2_1.default.zero, this));
+            this.addProperties(new PhysicsProperties.ObjectArea(this));
             this.addProperties(new PhysicsProperties.ObjectDisplacement(this));
         }
     }

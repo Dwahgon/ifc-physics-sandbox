@@ -1,7 +1,7 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./main", "./physicsObjects", "./vector2", "./document"], function (require, exports, main_1, physicsObjects_1, vector2_1, document_1) {
+define(["require", "exports", "./main", "./physicsObjects", "./types", "./vector2", "./document"], function (require, exports, main_1, physicsObjects_1, types_1, vector2_1, document_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_1 = __importDefault(vector2_1);
@@ -12,6 +12,9 @@ define(["require", "exports", "./main", "./physicsObjects", "./vector2", "./docu
             this.onMouseMove = null;
             this.onTouchMove = null;
             this.onMouseUp = null;
+            this.onMouseDown = null;
+            this.onTouchStart = null;
+            this.draggingObject = null;
         }
         static fromJSON(json) {
             if (typeof json === "string") {
@@ -53,8 +56,8 @@ define(["require", "exports", "./main", "./physicsObjects", "./vector2", "./docu
         getProperty() {
             return undefined;
         }
-        draw(cam, ctx) {
-            this.objects.forEach(obj => obj.sprite.draw(cam, ctx));
+        draw(canvasRenderer) {
+            this.objects.forEach(obj => obj.draw(canvasRenderer));
         }
         onCanvasAdded(canvasRenderer) {
             const canvas = canvasRenderer.context.canvas;
@@ -62,15 +65,21 @@ define(["require", "exports", "./main", "./physicsObjects", "./vector2", "./docu
             this.onMouseMove = (ev) => this.setCursor(camera, new vector2_1.default(ev.offsetX, -ev.offsetY), canvas);
             this.onTouchMove = (ev) => this.setCursor(camera, camera.getTouchPosition(ev), canvas);
             this.onMouseUp = (ev) => this.selectObject(camera, ev);
+            this.onMouseDown = (ev) => this.dragObject(camera, new vector2_1.default(ev.offsetX, -ev.offsetY));
+            this.onTouchStart = (ev) => this.dragObject(camera, camera.getTouchPosition(ev));
             canvas.addEventListener("mousemove", this.onMouseMove);
             canvas.addEventListener("touchmove", this.onTouchMove);
             canvas.addEventListener("mouseup", this.onMouseUp);
+            canvas.addEventListener("mousedown", this.onMouseDown);
+            canvas.addEventListener("touchstart", this.onTouchStart);
         }
         onCanvasRemoved(canvasRenderer) {
             const canvas = canvasRenderer.context.canvas;
             canvas.removeEventListener("mousemove", this.onMouseMove);
             canvas.removeEventListener("touchmove", this.onTouchMove);
             canvas.removeEventListener("mouseup", this.onMouseUp);
+            canvas.removeEventListener("mousedown", this.onMouseDown);
+            canvas.removeEventListener("touchstart", this.onTouchStart);
         }
         simulate(step) {
             this.objects.forEach(object => object.simulate(step));
@@ -83,6 +92,18 @@ define(["require", "exports", "./main", "./physicsObjects", "./vector2", "./docu
                 const obj = this.getObjectOnPosition(new vector2_1.default(cursorCoordinates.x, -cursorCoordinates.y), true);
                 canvas.style.cursor = (obj) ? "pointer" : "default";
             }
+            else if (this.draggingObject) {
+                canvas.style.cursor = "pointer";
+                const objPos = this.draggingObject.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
+                objPos.initialValue = camera.getWorldPosFromCanvas(new vector2_1.default(cursorCoordinates.x, -cursorCoordinates.y));
+            }
+        }
+        dragObject(camera, cursorCoordinates) {
+            const obj = this.getObjectOnPosition(new vector2_1.default(cursorCoordinates.x, -cursorCoordinates.y), true);
+            if (obj) {
+                this.draggingObject = obj;
+                camera.allowMovement = false;
+            }
         }
         selectObject(camera, ev) {
             if (!camera.mouseMoved) {
@@ -90,6 +111,8 @@ define(["require", "exports", "./main", "./physicsObjects", "./vector2", "./docu
                 const obj = this.getObjectOnPosition(clickedPos, true);
                 document_1.ObjectSelectionController.selectObject(obj ? obj : this);
             }
+            this.draggingObject = null;
+            camera.allowMovement = true;
         }
     }
     exports.default = Ambient;
