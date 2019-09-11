@@ -6,22 +6,28 @@ import { PhysicsObject } from './physicsObjects';
 import PropertyLI, { PropertyLINumber, PropertyLIVector2 } from './propertyLI';
 import { PhysicsPropertyType, Simulatable } from './types';
 import Vector2 from './vector2';
+import Gizmos from './gizmos';
+import { CanvasRenderer } from './rendering';
 
 export default abstract class PhysicsProperty<T> implements Simulatable{
     public active: boolean;
     public propertyLI: PropertyLI<T> | null = null;
+    public doDrawGizmos: boolean;
     private onValueChangedCallbacks: Function[];
-    
+
     constructor(
         public readonly kind: PhysicsPropertyType,
         public readonly changeable: boolean,
         public readonly object: PhysicsObject,
         private iValue: T,
         private oValue: T,
-        private genericCalculator: GenericCalculator<T>
+        private genericCalculator: GenericCalculator<T>,
+        public readonly simulationPriority: number = 0
+
     ){
         this.active = true;
         this.onValueChangedCallbacks = [];
+        this.doDrawGizmos = false;
     }
 
     get initialValue(){
@@ -42,6 +48,9 @@ export default abstract class PhysicsProperty<T> implements Simulatable{
         this.oValue = this.genericCalculator.sub(value, this.iValue);
         this.propertyLI!.setValue(this.value);
         this.onValueChangedCallbacks.forEach(callback => callback());
+    }
+
+    drawGizmos(canvasRenderer: CanvasRenderer){
     }
 
     simulate(step: number): void{
@@ -142,47 +151,90 @@ export class ObjectArea extends PhysicsProperty<number>{
 }
 
 export class ObjectVelocity extends PhysicsProperty<Vector2>{
+    private objectPosition: ObjectPosition | null;
+    private objectAcceleration: ObjectAcceleration | null;
+
     constructor(object: PhysicsObject){
-        super(PhysicsPropertyType.ObjectVelocity, true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
+        super(PhysicsPropertyType.ObjectVelocity, true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance, 1);
         this.propertyLI = new PropertyLIVector2(this, "vel", "<sup>m</sup>&frasl;<sub>s</sub>", Vector2.zero, "Vetor velocidade", true, "m/s");
+
+        this.objectPosition = <ObjectPosition>this.object.getProperty(PhysicsPropertyType.ObjectPosition);
+        this.objectAcceleration = <ObjectAcceleration>this.object.getProperty(PhysicsPropertyType.ObjectAcceleration);
     }
 
     simulate(step: 0): void{
-        const displacement = Vector2.mult(this.value, step);
-        
-        const objectPosition = this.object.getProperty(PhysicsPropertyType.ObjectPosition);
+        const currentVel = this.value;
 
-        //displace object
-        if(objectPosition)
-            (<ObjectPosition>objectPosition).value = Vector2.sum(displacement, (<ObjectPosition>objectPosition).value);
+        if(this.objectAcceleration)
+            this.value = Vector2.sum(
+                this.value, Vector2.mult(
+                    this.objectAcceleration.value, step
+                )
+            );
+
+        if(this.objectPosition && this.objectAcceleration){
+            
+            this.objectPosition.value = Vector2.sum(
+                this.objectPosition.value, 
+                Vector2.sum(
+                    Vector2.mult(currentVel, step),
+                    Vector2.div(
+                        Vector2.mult(this.objectAcceleration.value, Math.pow(step, 2)),
+                        2
+                    )
+                )
+            );
+        }
+    }
+
+    drawGizmos(canvasRenderer: CanvasRenderer){
+        if(this.doDrawGizmos && this.objectPosition){
+            const from = this.objectPosition.value;
+            const to = Vector2.sum(from, this.value);
+            Gizmos.drawVector(canvasRenderer, from, to, {style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10});
+        }
     }
 }
 
 export class ObjectDisplacement extends PhysicsProperty<Vector2>{
+    private objectPosition: ObjectPosition | null;
+
     constructor(object: PhysicsObject){
         super(PhysicsPropertyType.ObjectDisplacement, false, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
         this.propertyLI = new PropertyLIVector2(this, "des", "m", Vector2.zero, "Deslocamento", true, "m");
+        this.objectPosition = <ObjectPosition>this.object.getProperty(PhysicsPropertyType.ObjectPosition)!;
     }
 
     simulate(step: 0): void {
-        const objectPosition = <ObjectPosition>this.object.getProperty(PhysicsPropertyType.ObjectPosition);
+        if(this.objectPosition)
+            this.value = Vector2.sub(this.objectPosition.value, this.objectPosition.initialValue);
+    }
 
-        this.value = Vector2.sub(objectPosition.value, objectPosition.initialValue);
+    drawGizmos(canvasRenderer: CanvasRenderer){
+        if(this.doDrawGizmos && this.objectPosition){
+            const from = this.objectPosition.initialValue;
+            const to = Vector2.sum(from, this.value);
+            Gizmos.drawVector(canvasRenderer, from, to, {style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10});
+        }
     }
 }
 
 export class ObjectAcceleration extends PhysicsProperty<Vector2>{
+    private objectPosition: ObjectPosition | null;
+
     constructor(object: PhysicsObject){
         super(PhysicsPropertyType.ObjectAcceleration, true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
         this.propertyLI = new PropertyLIVector2(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue, "Vetor aceleração", true, "m/s²");
+
+        this.objectPosition = <ObjectPosition>this.object.getProperty(PhysicsPropertyType.ObjectPosition);
     }
 
-    simulate(step: 0): void{
-        const objectVel = this.object.getProperty(PhysicsPropertyType.ObjectVelocity);
-        const velDisplacement = Vector2.mult(this.value, step);
-
-        if(objectVel)
-            (<ObjectVelocity>objectVel).value = Vector2.sum(velDisplacement, (<ObjectVelocity>objectVel).value);
+    drawGizmos(canvasRenderer: CanvasRenderer){
+        if(this.doDrawGizmos && this.objectPosition){
+            const from = this.objectPosition.value;
+            const to = Vector2.sum(from, this.value);
+            Gizmos.drawVector(canvasRenderer, from, to, {style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10});
+        }
     }
 }
 

@@ -3,20 +3,60 @@ console.log("Loading physicsobjects");
 import Ambient from './ambient';
 import { PhysicsObjectJSON, PhysicsPropertyJSON } from './fileController';
 import PhysicsProperty, * as PhysicsProperties from './physicsProperties';
-import { Sprite } from './rendering';
-import { PhysicsObjectConfig, PhysicsObjectType, PhysicsPropertyType, Selectable, Simulatable } from './types';
+import { Sprite, CanvasRenderer } from './rendering';
+import { PhysicsObjectConfig, PhysicsObjectType, PhysicsPropertyType, Selectable, Simulatable, Renderable } from './types';
 import Vector2 from './vector2';
 
-export class PhysicsObject implements Selectable, Simulatable{
+export class PhysicsObject implements Selectable, Simulatable, Renderable{
     private objectProperties: PhysicsProperty<any>[];
-
+    
     constructor(public readonly kind: PhysicsObjectType, public name: string, public readonly sprite: Sprite, protected ambient: Ambient){
         this.objectProperties = [];
         this.ambient.addObject(this);
     }
+    
+    get isFollowable(){
+        return true;
+    }
+    
+    get isDeletable(){
+        return true;
+    }
+    
+    static createPhysicsObject(type: PhysicsObjectType, ambient: Ambient, properties?: PhysicsObjectConfig): PhysicsObject{
+        switch(type){
+            case PhysicsObjectType.Solid:
+                const solids = ambient.objects.filter(obj => { return obj.kind == type });
+                return new Solid(`Sólido ${solids.length + 1}`, ambient, properties);
+        }
+    }
+
+    static fromJSON(json: PhysicsObjectJSON | string, ambient: Ambient): PhysicsObject{
+        if(typeof json === "string"){
+            return JSON.parse(
+                json, 
+                function(key: string, value: any){
+                    return key === "" ? PhysicsObject.fromJSON(value, ambient) : value
+                }
+            );
+        }else{
+            const physicsObj = this.createPhysicsObject(json.kind, ambient);
+            json.properties.forEach(prop => {
+                (<PhysicsProperty<any>>physicsObj.getProperty(prop.kind)!).initialValue = prop.iValue;
+            });
+
+            return physicsObj;
+        }
+    }
+
+    draw(canvasRenderer: CanvasRenderer): void {
+        this.sprite.draw(canvasRenderer);
+        this.objectProperties.forEach(property => property.drawGizmos(canvasRenderer));
+    }
 
     addProperties(...properties: PhysicsProperty<any>[]): void{
         properties.forEach(property => this.objectProperties.push(property));
+        this.objectProperties.sort((a, b) => {return b.simulationPriority - a.simulationPriority;});
     }
 
     simulate(step: number): void{
@@ -41,7 +81,6 @@ export class PhysicsObject implements Selectable, Simulatable{
                 position.y >= objPos.y - objSize.y &&
                 position.y <= objPos.y + objSize.y
     }
-
     
     getProperty (type: PhysicsPropertyType): PhysicsProperty<any>[] |PhysicsProperty<any> | undefined {
         switch(type){
@@ -52,27 +91,11 @@ export class PhysicsObject implements Selectable, Simulatable{
         }
     }
 
-    public static createPhysicsObject(type: PhysicsObjectType, ambient: Ambient, properties?: PhysicsObjectConfig): PhysicsObject{
-        switch(type){
-            case PhysicsObjectType.Solid:
-                const solids = ambient.objects.filter(obj => { return obj.kind == type });
-                return new Solid(`Sólido ${solids.length + 1}`, ambient, properties);
-        }
-    }
-    
     appendPropertyListItems(): void{
         this.objectProperties.forEach(property=>{
             if(property.propertyLI)
             property.propertyLI.appendToPropertyUL();
         });
-    }
-    
-    get isFollowable(){
-        return true;
-    }
-    
-    get isDeletable(){
-        return true;
     }
     
     destroy(): void{
@@ -87,24 +110,6 @@ export class PhysicsObject implements Selectable, Simulatable{
             kind: this.kind,
             properties: properties
         });
-    }
-
-    static fromJSON(json: PhysicsObjectJSON | string, ambient: Ambient): PhysicsObject{
-        if(typeof json === "string"){
-            return JSON.parse(
-                json, 
-                function(key: string, value: any){
-                    return key === "" ? PhysicsObject.fromJSON(value, ambient) : value
-                }
-            );
-        }else{
-            const physicsObj = this.createPhysicsObject(json.kind, ambient);
-            json.properties.forEach(prop => {
-                (<PhysicsProperty<any>>physicsObj.getProperty(prop.kind)!).initialValue = prop.iValue;
-            });
-
-            return physicsObj;
-        }
     }
 }
 
@@ -121,12 +126,12 @@ class Solid extends PhysicsObject{
                 Vector2.zero
             ), 
             ambient);
-
+            
         this.addProperties(new PhysicsProperties.ObjectPosition(properties ? properties.position : Vector2.zero, this));
-        this.addProperties(new PhysicsProperties.ObjectSize(properties ? properties.size : Vector2.zero, this));
-        this.addProperties(new PhysicsProperties.ObjectArea(this));
         this.addProperties(new PhysicsProperties.ObjectAcceleration(this));
         this.addProperties(new PhysicsProperties.ObjectVelocity(this));
+        this.addProperties(new PhysicsProperties.ObjectSize(properties ? properties.size : Vector2.zero, this));
+        this.addProperties(new PhysicsProperties.ObjectArea(this));
         this.addProperties(new PhysicsProperties.ObjectDisplacement(this));
     }
 }

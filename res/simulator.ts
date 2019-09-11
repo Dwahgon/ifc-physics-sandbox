@@ -21,6 +21,7 @@ export default class Simulator {
         
         this.domInput = <HTMLInputElement>input;
         this.domInput.value = this._time.toFixed(2);
+        this.domInput.title = `Valor exato: ${this._time}`;
         this.simulatables = [];
 
         this.domInput.addEventListener("change", () => {
@@ -50,6 +51,7 @@ export default class Simulator {
     set time(value: number){
         this._time = value;
         this.domInput.value = value.toFixed(2);
+        this.domInput.title = `Valor exato: ${value}`;
 
         ObjectSelectionController.propertiesEnabled = value == 0;
         ObjectCreationController.objectCreatable = value == 0;

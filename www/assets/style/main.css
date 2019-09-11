@@ -459,6 +459,21 @@ main {
     box-sizing: border-box;
 }
 
+#property-list>li>label:first-of-type {
+    width: 20%;
+    border: solid #474747;
+    border-width: 0px 1px 0px 0px;
+    cursor: pointer;
+}
+
+#property-list>li>label:last-of-type {
+    padding-right: .5vw;
+    box-sizing: content-box;
+    display: inline;
+    text-align: right;
+    overflow: hidden;
+}
+
 #property-list>li>button {
     height: calc(var(--property-li-height) - 6px);
     width: calc(var(--property-li-height) - 6px);
@@ -471,21 +486,6 @@ main {
 
 #property-list>li>button>img {
     box-sizing: border-box;
-}
-
-#property-list>li>label:first-child {
-    width: 30%;
-    padding-left: .5vw;
-    border: solid #474747;
-    border-width: 0px 1px 0px 0px;
-}
-
-#property-list>li>label:last-child {
-    padding-right: .5vw;
-    box-sizing: content-box;
-    display: inline;
-    text-align: right;
-    overflow: hidden;
 }
 
 

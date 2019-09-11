@@ -1,7 +1,7 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./vector2", "./document", "./buttons", "./types"], function (require, exports, vector2_1, document_1, buttons_1, types_1) {
+define(["require", "exports", "./buttons", "./document", "./types", "./vector2"], function (require, exports, buttons_1, document_1, types_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_1 = __importDefault(vector2_1);
@@ -37,11 +37,34 @@ define(["require", "exports", "./vector2", "./document", "./buttons", "./types"]
             this.enabled = this.property.changeable;
             this.setValue(initialValue);
             this.input.addEventListener("change", this.onInputChanged.bind(this));
+            this.domNameLabel.addEventListener("mouseover", () => { this.property.doDrawGizmos = true; });
+            this.domNameLabel.addEventListener("mouseleave", () => { this.property.doDrawGizmos = false; });
+        }
+        set enabled(value) {
+            const isDisabled = !value || !this.property.changeable;
+            this.input.disabled = isDisabled;
+            this.li.style.backgroundColor = (isDisabled) ? "#474747" : "#282828";
+            const textColor = (isDisabled) ? "#a0a0a0" : "#ffffff";
+            this.input.style.color = textColor;
+            this.domNameLabel.style.color = textColor;
+            this.domUnitLabel.style.color = textColor;
         }
         setValue(value) {
             const formattedValue = this.formatValue(value);
             this.input.value = formattedValue;
             this.lastValue = formattedValue;
+        }
+        resetToLastString() {
+            this.input.value = this.lastValue;
+        }
+        appendToPropertyUL() {
+            document_1.documentElements.get("property-list").appendChild(this.li);
+        }
+        formatValue(value) {
+            throw "formatValue(value: T) has not been implemented";
+        }
+        processMatch(match) {
+            throw "processMatch(match: RegExpMatchArray): T has not been implemented";
         }
         onInputChanged() {
             let match = this.input.value.match(this.regExp);
@@ -56,27 +79,6 @@ define(["require", "exports", "./vector2", "./document", "./buttons", "./types"]
                 return;
             }
             this.property.initialValue = matchResult;
-        }
-        formatValue(value) {
-            throw "formatValue(value: T) has not been implemented";
-        }
-        processMatch(match) {
-            throw "processMatch(match: RegExpMatchArray): T has not been implemented";
-        }
-        resetToLastString() {
-            this.input.value = this.lastValue;
-        }
-        appendToPropertyUL() {
-            document_1.documentElements.get("property-list").appendChild(this.li);
-        }
-        set enabled(value) {
-            const isDisabled = !value || !this.property.changeable;
-            this.input.disabled = isDisabled;
-            this.li.style.backgroundColor = (isDisabled) ? "#474747" : "#282828";
-            const textColor = (isDisabled) ? "#a0a0a0" : "#ffffff";
-            this.input.style.color = textColor;
-            this.domNameLabel.style.color = textColor;
-            this.domUnitLabel.style.color = textColor;
         }
     }
     exports.default = PropertyLI;

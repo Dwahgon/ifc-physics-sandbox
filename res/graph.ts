@@ -4,7 +4,7 @@ import * as Document from "./document";
 import * as Modal from "./modals";
 import { PhysicsObject } from "./physicsObjects";
 import PhysicsProperty from "./physicsProperties";
-import { Camera } from "./rendering";
+import { Camera, CanvasRenderer } from "./rendering";
 import Simulator from "./simulator";
 import { PhysicsPropertyType, Renderable, Simulatable, ValueGetter } from "./types";
 import Vector2 from "./vector2";
@@ -136,7 +136,10 @@ export class Graph implements Renderable, Simulatable {
         this.points = [];
         this.simulate(0);
     }
-    draw(cam: Camera, con: CanvasRenderingContext2D): void {
+    draw(canvasRenderer: CanvasRenderer): void {
+        const cam = canvasRenderer.camera;
+        const ctx = canvasRenderer.context;
+
         if (this.points.length > 0) {
             for (let index = 0; index < this.points.length; index++) {
                 const pointStart = this.points[index];
@@ -145,13 +148,13 @@ export class Graph implements Renderable, Simulatable {
 
                 if (pointFinish) {
                     const canvasFinish = cam.getCanvasPosFromWorld(pointFinish);
-                    this.drawLine(con, canvasStart, canvasFinish, 5, "black");
-                    this.drawLine(con, canvasStart, canvasFinish, 3, "orange");
+                    this.drawLine(ctx, canvasStart, canvasFinish, 5, "black");
+                    this.drawLine(ctx, canvasStart, canvasFinish, 3, "orange");
                 }
             }
 
-            this.drawCircle(con, cam.getCanvasPosFromWorld(this.points[0]), 4, 2, "orange", "black");
-            this.drawCircle(con, cam.getCanvasPosFromWorld(this.points[this.points.length - 1]), 4, 2, "orange", "black");
+            this.drawCircle(ctx, cam.getCanvasPosFromWorld(this.points[0]), 4, 2, "orange", "black");
+            this.drawCircle(ctx, cam.getCanvasPosFromWorld(this.points[this.points.length - 1]), 4, 2, "orange", "black");
         }
     }
 

@@ -4,6 +4,8 @@ import PhysicsProperty from './physicsProperties';
 import { Camera, CanvasRenderer } from './rendering';
 import Vector2 from './vector2';
 
+/* Enums */ 
+
 export enum ButtonColor {
     Dark = "dark-button",
     White = "white-button",
@@ -24,6 +26,8 @@ export enum PhysicsObjectType {
     Solid = 0
 }
 
+/* Interfaces */
+
 export interface Selectable {
     isFollowable: boolean;
     name: string;
@@ -43,7 +47,7 @@ export interface Simulatable {
 }
 
 export interface Renderable {
-    draw(cam: Camera, con: CanvasRenderingContext2D, step?: DOMHighResTimeStamp): void;
+    draw(canvasRenderer: CanvasRenderer, step?: DOMHighResTimeStamp): void;
     onCanvasAdded?(canvasRenderer: CanvasRenderer): void;
     onCanvasRemoved?(canvasRenderer: CanvasRenderer): void;
 }
@@ -81,4 +85,12 @@ export interface CartesianPlaneStyle {
     measurementFont?: string;
 
     showMeasurements: boolean;
+}
+
+export interface VectorGizmosStyle{
+    style: string;
+    strokeStyle?: string;
+    lineThickness: number;
+    strokeThickness?:number;
+    headLength: number;
 }

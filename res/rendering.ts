@@ -16,7 +16,10 @@ export class CanvasRenderer {
         this.renderables = [];
         this.camera = new Camera(this, cameraPos, cameraZoom, cameraMinZoom, cameraMaxZoom, 5);
 
-        this.add({ draw(cam, ctx) { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height) } });
+        this.add({ draw(canvasRenderer: CanvasRenderer) {
+            const ctx = canvasRenderer.context;
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height) 
+        }});
     }
 
     start() {
@@ -44,8 +47,6 @@ export class CanvasRenderer {
     }
 
     render(step: DOMHighResTimeStamp) {
-        const cam = this.camera;
-        const con = this.context;
         const canvas = this.context.canvas;
         const canvasParent = canvas.parentElement!;
         const style = window.getComputedStyle(canvasParent, null);
@@ -53,7 +54,11 @@ export class CanvasRenderer {
         canvas.height = parseInt(style.getPropertyValue("height"));
         canvas.width = parseInt(style.getPropertyValue("width"));
 
-        this.renderables.forEach(rn => rn.draw(cam, con, step));
+        this.renderables.forEach(rn => {
+            this.context.save();
+            rn.draw(this, step);
+            this.context.restore();
+        });
 
         if (this.isRunning)
             window.requestAnimationFrame(this.render.bind(this));
@@ -61,6 +66,8 @@ export class CanvasRenderer {
 }
 
 export class Camera {
+    public allowMovement: boolean;
+
     private targetObjectPosition: ObjectPosition | null;
     private _zoom: number;
 
@@ -78,6 +85,7 @@ export class Camera {
 
         this._isMouseDown = false;
         this._mouseMoved = false;
+        this.allowMovement = true;
         this.clickedPos = Vector2.zero;
         this.cameraPosOnMouseDown = Vector2.zero;
 
@@ -212,7 +220,9 @@ export class Camera {
 
     private onMove(cursorCoordinates: Vector2, canvas: HTMLCanvasElement) {
         if (this.isMouseDown) {
-            this.pos = Vector2.sum(this.cameraPosOnMouseDown, Vector2.sub(this.clickedPos, cursorCoordinates));
+            if(this.allowMovement)
+                this.pos = Vector2.sum(this.cameraPosOnMouseDown, Vector2.sub(this.clickedPos, cursorCoordinates));
+                
             canvas.style.cursor = "move";
 
             if (!Vector2.equals(this.cameraPosOnMouseDown, this.pos)) {
@@ -254,11 +264,13 @@ export class Sprite implements Renderable {
         return Vector2.mult(this.drawSize, zoom);
     }
 
-    draw(cam: Camera, context: CanvasRenderingContext2D): void {
+    draw(canvasRenderer: CanvasRenderer): void {
+        const cam = canvasRenderer.camera;
+        const ctx = canvasRenderer.context;
         const posInCanvas = Vector2.sub(cam.getCanvasPosFromWorld(this.drawPosition), Vector2.div(this.getZoomedSize(cam.zoom), 2));
 
         // @ts-ignore
-        context.drawImage(this.image,
+        ctx.drawImage(this.image,
             ...this.copyPosition.toArray(),
             ...this.copySize.toArray(),
             ...posInCanvas.toArray(),
@@ -300,7 +312,9 @@ export class CartesianPlane implements Renderable {
     constructor(public gridSize: number, private readonly style: CartesianPlaneStyle = CartesianPlane.BASIC_STYLE, public xAxisName?: string, public yAxisName?: string) {
     }
 
-    draw(cam: Camera, ctx: CanvasRenderingContext2D) {
+    draw(canvasRenderer: CanvasRenderer) {
+        const cam = canvasRenderer.camera
+        const ctx = canvasRenderer.context;
         const canvas = ctx.canvas;
 
         const startPos = cam.getWorldPosFromCanvas(new Vector2(0, 0));
@@ -457,15 +471,17 @@ export class FPSCounter implements Renderable{
         this.fps = 0;
     }
 
-    draw(cam: Camera, con: CanvasRenderingContext2D, step: number): void {
+    draw(canvasRenderer: CanvasRenderer, step: number): void {
+        const ctx = canvasRenderer.context;
+
         if(step > this.nextUpdate){
             this.fps = 1000/(step - this.lastFrameTimestamp);
             this.nextUpdate = step + this.delay;
         }
 
-        con.font = "12px Arial";
-        con.fillStyle = "black";
-        con.fillText(`${this.fps.toFixed(2)} FPS`, 5, con.canvas.height - 5);
+        ctx.font = "12px Arial";
+        ctx.fillStyle = "black";
+        ctx.fillText(`${this.fps.toFixed(2)} FPS`, 5, ctx.canvas.height - 5);
         this.lastFrameTimestamp = step;
     }
 }
