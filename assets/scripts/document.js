@@ -30,8 +30,8 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
             this.setElementVisible(false);
         }
     }
-    PropertyDescriptionUI.element = document.querySelector("#property-description-modal");
     exports.PropertyDescriptionUI = PropertyDescriptionUI;
+    PropertyDescriptionUI.element = document.querySelector("#property-description-modal");
     class GraphPanel {
         static initialize(element) {
             this.panel = element;
@@ -87,9 +87,9 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
             return this._objectCreatable;
         }
     }
+    exports.ObjectCreationController = ObjectCreationController;
     ObjectCreationController._objectCreatable = true;
     ObjectCreationController.objectListElement = null;
-    exports.ObjectCreationController = ObjectCreationController;
     /**
      * Controlls the selection of Selectable objects
      */
@@ -140,9 +140,9 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
             }
         }
     }
+    exports.ObjectSelectionController = ObjectSelectionController;
     ObjectSelectionController._selectedObject = null;
     ObjectSelectionController._propertiesEnabled = true;
-    exports.ObjectSelectionController = ObjectSelectionController;
     class Alert {
         static initialize(element) {
             this.element = element;
@@ -153,9 +153,9 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
             this.element.style.display = "flex";
         }
     }
+    exports.Alert = Alert;
     Alert.WARNING = "alert-warning";
     Alert.ERROR = "alert-error";
-    exports.Alert = Alert;
     /**
      * A map that contains various Elements in the application HTML document.
      */
