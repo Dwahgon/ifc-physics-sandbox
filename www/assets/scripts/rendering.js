@@ -271,8 +271,8 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
         }
         drawText(ctx, text, font, color, x, y, strokeText, strokeStyle, strokeWidth) {
             ctx.save();
-            ctx.lineWidth = strokeWidth ? strokeWidth : ctx.lineWidth;
-            ctx.strokeStyle = strokeStyle ? strokeStyle : ctx.strokeStyle;
+            ctx.lineWidth = strokeWidth || ctx.lineWidth;
+            ctx.strokeStyle = strokeStyle || ctx.strokeStyle;
             ctx.font = font;
             ctx.fillStyle = color;
             if (strokeText)
@@ -336,6 +336,7 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
             this.drawText(ctx, "O", this.style.axisMarkerFont, this.style.originStyle, textX, textY, true, "white", 4);
         }
     }
+    exports.CartesianPlane = CartesianPlane;
     CartesianPlane.ENVIRONMENT_STYLE = {
         xAxisStyle: "red",
         yAxisStyle: "green",
@@ -360,7 +361,6 @@ define(["require", "exports", "./buttons", "./document", "./types", "./vector2"]
         measurementFont: "italic 12px CMU Serif",
         showMeasurements: true
     };
-    exports.CartesianPlane = CartesianPlane;
     class FPSCounter {
         constructor(delay) {
             this.delay = delay;

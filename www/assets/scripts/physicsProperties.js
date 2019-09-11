@@ -75,12 +75,17 @@ define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "
             super.value = value;
             this.updateSpritePosition();
         }
+        drawGizmos(canvasRenderer) {
+            if (this.doDrawGizmos)
+                gizmos_1.default.drawPositionPoint(canvasRenderer, this.value, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, font: "italic 15px CMU Serif", pointRadius: 3 });
+        }
     }
     exports.ObjectPosition = ObjectPosition;
     class ObjectSize extends PhysicsProperty {
         constructor(initialSize, object) {
             super(types_1.PhysicsPropertyType.ObjectSize, true, object, initialSize, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
             this.propertyLI = new propertyLI_1.PropertyLIVector2(this, "tam<sub>(x, y)</sub>", "m", initialSize, "Tamanho", false);
+            this.objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
             this.updateSpriteSize();
         }
         updateSpriteSize() {
@@ -103,6 +108,13 @@ define(["require", "exports", "./genericCalulator", "./propertyLI", "./types", "
         set value(value) {
             super.value = value;
             this.updateSpriteSize();
+        }
+        drawGizmos(canvasRenderer) {
+            if (this.doDrawGizmos && this.objectPosition) {
+                const from = vector2_1.default.sub(this.objectPosition.value, vector2_1.default.div(this.value, 2));
+                const to = vector2_1.default.sum(this.objectPosition.value, vector2_1.default.div(this.value, 2));
+                gizmos_1.default.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+            }
         }
     }
     exports.ObjectSize = ObjectSize;

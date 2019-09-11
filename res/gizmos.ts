@@ -1,5 +1,5 @@
 import Vector2 from "./vector2";
-import { VectorGizmosStyle } from "./types";
+import { VectorGizmosStyle, PositionPointGizmosStyle } from "./types";
 import { CanvasRenderer } from "./rendering";
 
 export default abstract class Gizmos{
@@ -16,6 +16,31 @@ export default abstract class Gizmos{
         ctx.strokeStyle = "gray";
         ctx.lineCap = "square";
         this.drawRect(ctx, canvasFrom, canvasTo);
+    }
+
+    static drawPositionPoint(canvasRenderer: CanvasRenderer, pos: Vector2, pointPositionStyle: PositionPointGizmosStyle){
+        const ctx = canvasRenderer.context;
+        const cam = canvasRenderer.camera;
+
+        const canvasPos = cam.getCanvasPosFromWorld(pos);
+
+        ctx.lineWidth = pointPositionStyle.strokeThickness || 0;
+        ctx.strokeStyle = pointPositionStyle.strokeStyle || "";
+        ctx.fillStyle = pointPositionStyle.style;
+        ctx.font = pointPositionStyle.font;
+        const textOffset = new Vector2(5, -5);
+
+        
+        ctx.beginPath();
+        //@ts-ignore
+        ctx.arc(...canvasPos.toArray(), pointPositionStyle.pointRadius, 0, 2*Math.PI);
+        ctx.fill();
+        ctx.stroke();
+
+        //@ts-ignore
+        ctx.strokeText(pos.toString(), ...Vector2.sum(canvasPos, textOffset).toArray());
+        //@ts-ignore
+        ctx.fillText(pos.toString(), ...Vector2.sum(canvasPos, textOffset).toArray());
     }
 
     private static drawArrow(ctx: CanvasRenderingContext2D, from: Vector2, to: Vector2, vectorStyle: VectorGizmosStyle){

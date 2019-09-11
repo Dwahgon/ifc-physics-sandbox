@@ -1,6 +1,10 @@
-define(["require", "exports"], function (require, exports) {
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+define(["require", "exports", "./vector2"], function (require, exports, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    vector2_1 = __importDefault(vector2_1);
     class Gizmos {
         static drawVector(canvasRenderer, from, to, vectorStyle) {
             const ctx = canvasRenderer.context;
@@ -12,6 +16,25 @@ define(["require", "exports"], function (require, exports) {
             ctx.strokeStyle = "gray";
             ctx.lineCap = "square";
             this.drawRect(ctx, canvasFrom, canvasTo);
+        }
+        static drawPositionPoint(canvasRenderer, pos, pointPositionStyle) {
+            const ctx = canvasRenderer.context;
+            const cam = canvasRenderer.camera;
+            const canvasPos = cam.getCanvasPosFromWorld(pos);
+            ctx.lineWidth = pointPositionStyle.strokeThickness || 0;
+            ctx.strokeStyle = pointPositionStyle.strokeStyle || "";
+            ctx.fillStyle = pointPositionStyle.style;
+            ctx.font = pointPositionStyle.font;
+            const textOffset = new vector2_1.default(5, -5);
+            ctx.beginPath();
+            //@ts-ignore
+            ctx.arc(...canvasPos.toArray(), pointPositionStyle.pointRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            //@ts-ignore
+            ctx.strokeText(pos.toString(), ...vector2_1.default.sum(canvasPos, textOffset).toArray());
+            //@ts-ignore
+            ctx.fillText(pos.toString(), ...vector2_1.default.sum(canvasPos, textOffset).toArray());
         }
         static drawArrow(ctx, from, to, vectorStyle) {
             const dx = to.x - from.x;

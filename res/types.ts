@@ -87,10 +87,19 @@ export interface CartesianPlaneStyle {
     showMeasurements: boolean;
 }
 
-export interface VectorGizmosStyle{
+interface GizmosStyle{
     style: string;
     strokeStyle?: string;
+}
+
+export interface VectorGizmosStyle extends GizmosStyle{
     lineThickness: number;
-    strokeThickness?:number;
+    strokeThickness?: number;
     headLength: number;
+}
+
+export interface PositionPointGizmosStyle extends GizmosStyle{
+    font: string;
+    pointRadius: number;
+    strokeThickness?: number;
 }

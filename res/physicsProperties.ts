@@ -99,15 +99,23 @@ export class ObjectPosition extends PhysicsProperty<Vector2>{
         super.value = value;
         this.updateSpritePosition();
     }
+
+    drawGizmos(canvasRenderer: CanvasRenderer){
+        if(this.doDrawGizmos)
+            Gizmos.drawPositionPoint(canvasRenderer, this.value, {style: "lightblue", strokeStyle: "black", strokeThickness: 2, font: "italic 15px CMU Serif", pointRadius: 3});
+    }
 }
 
 export class ObjectSize extends PhysicsProperty<Vector2>{
+    private objectPosition: ObjectPosition | null;
+
     constructor(
         initialSize: Vector2,
         object: PhysicsObject
     ){
         super(PhysicsPropertyType.ObjectSize, true, object, initialSize, Vector2.zero, Vector2Calculator.instance);
         this.propertyLI = new PropertyLIVector2(this, "tam<sub>(x, y)</sub>", "m", initialSize, "Tamanho", false);
+        this.objectPosition = <ObjectPosition>this.object.getProperty(PhysicsPropertyType.ObjectPosition);
         this.updateSpriteSize();
     }
 
@@ -136,6 +144,14 @@ export class ObjectSize extends PhysicsProperty<Vector2>{
     set value(value: Vector2){
         super.value = value;
         this.updateSpriteSize();
+    }
+
+    drawGizmos(canvasRenderer: CanvasRenderer){
+        if(this.doDrawGizmos && this.objectPosition){
+            const from = Vector2.sub(this.objectPosition.value, Vector2.div(this.value, 2));
+            const to = Vector2.sum(this.objectPosition.value, Vector2.div(this.value, 2));
+            Gizmos.drawVector(canvasRenderer, from, to, {style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10});
+        }
     }
 }
 

@@ -17,8 +17,12 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
     private onMouseUp: ((evt: MouseEvent) => void) | null;
     private onMouseDown: ((evt: MouseEvent) => void) | null;
     private onTouchStart: ((evt: TouchEvent) => void) | null;
+    private onKeyDown: ((evt: KeyboardEvent) => void) | null;
+    private onKeyUp: ((evt: KeyboardEvent) => void) | null;
 
+    private lastCursosPos: Vector2;
     private draggingObject: PhysicsObject | null;
+    private snapToGrid: boolean;
 
     constructor() {
         this.objects = [];
@@ -29,6 +33,10 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
         this.onMouseDown = null;
         this.onTouchStart = null;
         this.draggingObject = null;
+        this.onKeyDown = null;
+        this.onKeyUp = null;
+        this.snapToGrid = false;
+        this.lastCursosPos = Vector2.zero;
     }
 
     static fromJSON(json: AmbientJSON | string): Ambient {
@@ -95,12 +103,16 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
         this.onMouseUp = (ev: MouseEvent) => this.selectObject(camera, ev);
         this.onMouseDown = (ev: MouseEvent) => this.dragObject(camera, new Vector2(ev.offsetX, -ev.offsetY));
         this.onTouchStart = (ev: TouchEvent) => this.dragObject(camera, camera.getTouchPosition(ev));
+        this.onKeyDown = (ev: KeyboardEvent) => this.setSnapToGrid(ev, true);
+        this.onKeyUp = (ev: KeyboardEvent) => this.setSnapToGrid(ev, false);
 
         canvas.addEventListener("mousemove", this.onMouseMove);
         canvas.addEventListener("touchmove", this.onTouchMove);
         canvas.addEventListener("mouseup", this.onMouseUp);
         canvas.addEventListener("mousedown", this.onMouseDown);
         canvas.addEventListener("touchstart", this.onTouchStart);
+        document.addEventListener("keydown", this.onKeyDown);
+        document.addEventListener("keyup", this.onKeyUp);
     }
 
     onCanvasRemoved(canvasRenderer: CanvasRenderer): void {
@@ -111,6 +123,8 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
         canvas.removeEventListener("mouseup", this.onMouseUp!);
         canvas.removeEventListener("mousedown", this.onMouseDown!);
         canvas.removeEventListener("touchstart", this.onTouchStart!);
+        document.removeEventListener("keydown", this.onKeyDown!);
+        document.removeEventListener("keyup", this.onKeyUp!);
     }
 
     simulate(step: number): void {
@@ -125,12 +139,18 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
         if (!camera.isMouseDown) {
             const obj = this.getObjectOnPosition(new Vector2(cursorCoordinates.x, -cursorCoordinates.y), true);
             canvas.style.cursor = (obj) ? "pointer" : "default";
-        }else if (this.draggingObject){
+        }else if (this.draggingObject && !Vector2.equals(cursorCoordinates, this.lastCursosPos)){
             canvas.style.cursor = "pointer";
             
             const objPos = <ObjectPosition>this.draggingObject.getProperty(PhysicsPropertyType.ObjectPosition)!;
-            objPos.initialValue = camera.getWorldPosFromCanvas(new Vector2(cursorCoordinates.x, -cursorCoordinates.y));
+            const cursorPos = new Vector2(cursorCoordinates.x, -cursorCoordinates.y);
+            const cursorWorldPos = camera.getWorldPosFromCanvas(cursorPos);
+            const newPos = (this.snapToGrid) ? new Vector2(Math.round(cursorWorldPos.x), Math.round(cursorWorldPos.y)) : cursorWorldPos;
+
+            objPos.initialValue = newPos;
         }
+
+        this.lastCursosPos = cursorCoordinates;
     }
 
     private dragObject (camera: Camera, cursorCoordinates: Vector2){
@@ -151,5 +171,10 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
 
         this.draggingObject = null;
         camera.allowMovement = true;
+    }
+
+    private setSnapToGrid(ev: KeyboardEvent, value: boolean){
+        if(ev.key == "Shift")
+            this.snapToGrid = value;
     }
 }

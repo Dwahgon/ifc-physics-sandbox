@@ -372,8 +372,8 @@ export class CartesianPlane implements Renderable {
     private drawText(ctx: CanvasRenderingContext2D, text: string, font: string, color: string, x: number, y: number, strokeText: boolean, strokeStyle?: string, strokeWidth?: number){
         ctx.save();
         
-        ctx.lineWidth = strokeWidth ? strokeWidth : ctx.lineWidth;
-        ctx.strokeStyle = strokeStyle ? strokeStyle : ctx.strokeStyle;
+        ctx.lineWidth = strokeWidth || ctx.lineWidth;
+        ctx.strokeStyle = strokeStyle || ctx.strokeStyle;
         ctx.font = font;
         ctx.fillStyle = color;
         

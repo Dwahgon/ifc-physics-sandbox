@@ -15,6 +15,10 @@ define(["require", "exports", "./main", "./physicsObjects", "./types", "./vector
             this.onMouseDown = null;
             this.onTouchStart = null;
             this.draggingObject = null;
+            this.onKeyDown = null;
+            this.onKeyUp = null;
+            this.snapToGrid = false;
+            this.lastCursosPos = vector2_1.default.zero;
         }
         static fromJSON(json) {
             if (typeof json === "string") {
@@ -67,11 +71,15 @@ define(["require", "exports", "./main", "./physicsObjects", "./types", "./vector
             this.onMouseUp = (ev) => this.selectObject(camera, ev);
             this.onMouseDown = (ev) => this.dragObject(camera, new vector2_1.default(ev.offsetX, -ev.offsetY));
             this.onTouchStart = (ev) => this.dragObject(camera, camera.getTouchPosition(ev));
+            this.onKeyDown = (ev) => this.setSnapToGrid(ev, true);
+            this.onKeyUp = (ev) => this.setSnapToGrid(ev, false);
             canvas.addEventListener("mousemove", this.onMouseMove);
             canvas.addEventListener("touchmove", this.onTouchMove);
             canvas.addEventListener("mouseup", this.onMouseUp);
             canvas.addEventListener("mousedown", this.onMouseDown);
             canvas.addEventListener("touchstart", this.onTouchStart);
+            document.addEventListener("keydown", this.onKeyDown);
+            document.addEventListener("keyup", this.onKeyUp);
         }
         onCanvasRemoved(canvasRenderer) {
             const canvas = canvasRenderer.context.canvas;
@@ -80,6 +88,8 @@ define(["require", "exports", "./main", "./physicsObjects", "./types", "./vector
             canvas.removeEventListener("mouseup", this.onMouseUp);
             canvas.removeEventListener("mousedown", this.onMouseDown);
             canvas.removeEventListener("touchstart", this.onTouchStart);
+            document.removeEventListener("keydown", this.onKeyDown);
+            document.removeEventListener("keyup", this.onKeyUp);
         }
         simulate(step) {
             this.objects.forEach(object => object.simulate(step));
@@ -92,11 +102,15 @@ define(["require", "exports", "./main", "./physicsObjects", "./types", "./vector
                 const obj = this.getObjectOnPosition(new vector2_1.default(cursorCoordinates.x, -cursorCoordinates.y), true);
                 canvas.style.cursor = (obj) ? "pointer" : "default";
             }
-            else if (this.draggingObject) {
+            else if (this.draggingObject && !vector2_1.default.equals(cursorCoordinates, this.lastCursosPos)) {
                 canvas.style.cursor = "pointer";
                 const objPos = this.draggingObject.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
-                objPos.initialValue = camera.getWorldPosFromCanvas(new vector2_1.default(cursorCoordinates.x, -cursorCoordinates.y));
+                const cursorPos = new vector2_1.default(cursorCoordinates.x, -cursorCoordinates.y);
+                const cursorWorldPos = camera.getWorldPosFromCanvas(cursorPos);
+                const newPos = (this.snapToGrid) ? new vector2_1.default(Math.round(cursorWorldPos.x), Math.round(cursorWorldPos.y)) : cursorWorldPos;
+                objPos.initialValue = newPos;
             }
+            this.lastCursosPos = cursorCoordinates;
         }
         dragObject(camera, cursorCoordinates) {
             const obj = this.getObjectOnPosition(new vector2_1.default(cursorCoordinates.x, -cursorCoordinates.y), true);
@@ -113,6 +127,10 @@ define(["require", "exports", "./main", "./physicsObjects", "./types", "./vector
             }
             this.draggingObject = null;
             camera.allowMovement = true;
+        }
+        setSnapToGrid(ev, value) {
+            if (ev.key == "Shift")
+                this.snapToGrid = value;
         }
     }
     exports.default = Ambient;
