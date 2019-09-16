@@ -8,7 +8,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./physicsProperties", "./rendering", "./types", "./vector2"], function (require, exports, PhysicsProperties, rendering_1, types_1, vector2_1) {
+define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./types", "./vector2"], function (require, exports, PhysicsProperties, sprite_1, types_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     PhysicsProperties = __importStar(PhysicsProperties);
@@ -22,9 +22,6 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
             this.ambient = ambient;
             this.objectProperties = [];
             this.ambient.addObject(this);
-        }
-        get isFollowable() {
-            return true;
         }
         get isDeletable() {
             return true;
@@ -64,6 +61,9 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
         reset() {
             this.objectProperties.forEach(property => property.reset());
         }
+        locate() {
+            return this.getProperty(types_1.PhysicsPropertyType.ObjectPosition).value;
+        }
         /**
          * Returns rather the position(world position) parameter is located inside the object
          * @param position
@@ -85,11 +85,13 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
                     return this.objectProperties.find(physicsProperty => { return physicsProperty.kind == type; });
             }
         }
-        appendPropertyListItems() {
-            this.objectProperties.forEach(property => {
-                if (property.propertyLI)
-                    property.propertyLI.appendToPropertyUL();
+        getPropertyEditorRows() {
+            const rows = [];
+            this.objectProperties.forEach(el => {
+                if (el.propertyEditorInput)
+                    rows.push(el.propertyEditorInput);
             });
+            return rows;
         }
         destroy() {
             const index = this.ambient.objects.indexOf(this);
@@ -107,7 +109,7 @@ define(["require", "exports", "./physicsProperties", "./rendering", "./types", "
     exports.PhysicsObject = PhysicsObject;
     class Solid extends PhysicsObject {
         constructor(name, ambient, properties) {
-            super(types_1.PhysicsObjectType.Solid, name, new rendering_1.Sprite("./assets/images/solid.svg", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient);
+            super(types_1.PhysicsObjectType.Solid, name, new sprite_1.Sprite("./assets/images/solid.svg", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient);
             this.addProperties(new PhysicsProperties.ObjectPosition(properties ? properties.position : vector2_1.default.zero, this));
             this.addProperties(new PhysicsProperties.ObjectAcceleration(this));
             this.addProperties(new PhysicsProperties.ObjectVelocity(this));

@@ -1,5 +1,6 @@
 :root {
     --property-panel-width: 30vw;
+    --property-panel-max-width: 500px;
     --header-height: 36px;
     --simulation-controller-height: 50px;
     --simulation-controller-width: 300px;
@@ -382,6 +383,7 @@ main {
 
 #property-side-panel {
     width: var(--property-panel-width);
+    max-width: var(--property-panel-max-width);
     right: 5px;
     box-sizing: border-box;
 }
@@ -422,6 +424,10 @@ main {
     overflow: auto;
 }
 
+#property-list>h1 {
+    font-size: 14px;
+}
+
 #property-list>li {
     width: 100%;
     height: var(--property-li-height);
@@ -429,13 +435,20 @@ main {
     border: 1px solid #191919;
     margin-bottom: 3px;
     box-sizing: border-box;
-    background-color: #282828;
     border-radius: 4px;
     display: flex;
 }
 
 #property-list>li:last-child {
     margin-bottom: 0px;
+}
+
+#property-list>li.active-row {
+    background-color: #282828;
+}
+
+#property-list>li.inactive-row {
+    background-color: #474747;
 }
 
 #property-list>li>input {
@@ -445,11 +458,20 @@ main {
     background-color: #00000000;
     background-color: rgba(0, 0, 0, 0);
     box-sizing: border-box;
-    color: #ffffff;
     font-size: inherit;
     font-family: inherit;
     text-align: right;
     flex-grow: 1;
+}
+
+#property-list>li.active-row>input,
+#property-list>li.active-row>label {
+    color: #ffffff;
+}
+
+#property-list>li.inactive-row>input,
+#property-list>li.inactive-row>label {
+    color: #a0a0a0;
 }
 
 #property-list>li>label {
@@ -463,7 +485,11 @@ main {
     width: 20%;
     border: solid #474747;
     border-width: 0px 1px 0px 0px;
-    cursor: pointer;
+}
+
+#property-list>.object-locator-row>label:first-of-type {
+    text-align: start;
+    margin-left: 5px;
 }
 
 #property-list>li>label:last-of-type {
@@ -482,6 +508,12 @@ main {
     border-right-width: 1px;
     margin-right: 5px;
     box-sizing: content-box;
+}
+
+#property-list>.object-locator-row>button:last-of-type {
+    margin-left: auto;
+    margin-right: 0;
+    border: none;
 }
 
 #property-list>li>button>img {

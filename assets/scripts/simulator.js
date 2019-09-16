@@ -1,4 +1,4 @@
-define(["require", "exports", "./document"], function (require, exports, document_1) {
+define(["require", "exports", "./document/document"], function (require, exports, document_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     console.log("Loading simulator");
@@ -39,9 +39,9 @@ define(["require", "exports", "./document"], function (require, exports, documen
             this._time = value;
             this.domInput.value = value.toFixed(2);
             this.domInput.title = `Valor exato: ${value}`;
-            document_1.ObjectSelectionController.propertiesEnabled = value == 0;
+            document_1.ObjectSelectionController.propertyEditor.setEnabled(value == 0);
             document_1.ObjectCreationController.objectCreatable = value == 0;
-            this.destroyButton.enabled = value == 0 && document_1.ObjectSelectionController.selectedObject != null && document_1.ObjectSelectionController.selectedObject.isFollowable;
+            this.destroyButton.enabled = value == 0 && document_1.ObjectSelectionController.selectedObject != null;
         }
         get isPlaying() {
             return this._isPlaying;

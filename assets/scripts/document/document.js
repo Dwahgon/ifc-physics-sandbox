@@ -1,3 +1,6 @@
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -5,14 +8,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "./rendering", "./types", "./vector2"], function (require, exports, Buttons, main_1, propertyDescriptions_1, rendering_1, types_1, vector2_1) {
+define(["require", "exports", "../main", "../propertyDescriptions", "../rendering/canvasRenderer", "../rendering/cartesianPlane", "../vector2", "./buttons", "./propertyEditor"], function (require, exports, main_1, propertyDescriptions_1, canvasRenderer_1, cartesianPlane_1, vector2_1, Buttons, propertyEditor_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    Buttons = __importStar(Buttons);
     vector2_1 = __importDefault(vector2_1);
+    Buttons = __importStar(Buttons);
     console.log("Loading document");
     class PropertyDescriptionUI {
         static setElementVisible(isVisible) {
@@ -30,8 +30,8 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
             this.setElementVisible(false);
         }
     }
-    exports.PropertyDescriptionUI = PropertyDescriptionUI;
     PropertyDescriptionUI.element = document.querySelector("#property-description-modal");
+    exports.PropertyDescriptionUI = PropertyDescriptionUI;
     class GraphPanel {
         static initialize(element) {
             this.panel = element;
@@ -40,9 +40,9 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
             canvas.width = 10;
             canvas.height = 10;
             this.panel.querySelector(".panel-content").appendChild(canvas);
-            this.canvasRenderer = new rendering_1.CanvasRenderer(canvas.getContext("2d"));
+            this.canvasRenderer = new canvasRenderer_1.CanvasRenderer(canvas.getContext("2d"));
             this.canvasRenderer.camera.pos = new vector2_1.default(150, 150);
-            this.cartesianPlane = new rendering_1.CartesianPlane(1);
+            this.cartesianPlane = new cartesianPlane_1.CartesianPlane(1);
             this.canvasRenderer.add(this.cartesianPlane);
         }
         static setElementVisible(v, title = "Gráfico") {
@@ -87,13 +87,16 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
             return this._objectCreatable;
         }
     }
-    exports.ObjectCreationController = ObjectCreationController;
     ObjectCreationController._objectCreatable = true;
     ObjectCreationController.objectListElement = null;
+    exports.ObjectCreationController = ObjectCreationController;
     /**
      * Controlls the selection of Selectable objects
      */
     class ObjectSelectionController {
+        static initialize(propertyEditor) {
+            this.propertyEditor = propertyEditor;
+        }
         /**
          * @returns the currently selected object
          */
@@ -105,44 +108,25 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
          * @param object the object to be selected
          */
         static selectObject(object) {
+            if (object == this.selectedObject)
+                return;
             console.log("Selected:", object);
-            const domPropertyUL = exports.documentElements.get("property-list");
             const domPropertyH1 = exports.documentElements.get("property-list-title");
             this._selectedObject = object;
-            while (domPropertyUL.firstChild)
-                domPropertyUL.removeChild(domPropertyUL.firstChild);
+            this.propertyEditor.build(object);
             domPropertyH1.innerHTML = `Propriedades do ${object.name}`;
-            if (object.appendPropertyListItems)
-                object.appendPropertyListItems(domPropertyUL, this.propertiesEnabled);
-            domPropertyUL.style.display = domPropertyUL.childElementCount > 0 ? "block" : "none";
             const followButton = Buttons.getButtonById("follow-button");
             const destroyButton = Buttons.getButtonById("destroy-button");
-            followButton.enabled = object.isFollowable;
+            followButton.enabled = object.locate;
             if (main_1.canvasRenderer.camera.objectBeingFollowed == this._selectedObject)
                 followButton.swapToAltImg();
             else
                 followButton.swapToDefaultImg();
             destroyButton.enabled = object.destroy != undefined && main_1.simulator.time == 0;
         }
-        static get propertiesEnabled() {
-            return this._propertiesEnabled;
-        }
-        static set propertiesEnabled(value) {
-            if (!this._selectedObject)
-                return;
-            this._propertiesEnabled = value;
-            const physicsProperties = this._selectedObject.getProperty(types_1.PhysicsPropertyType.All);
-            if (physicsProperties) {
-                physicsProperties.forEach(objectProperty => {
-                    if (objectProperty.propertyLI)
-                        objectProperty.propertyLI.enabled = value;
-                });
-            }
-        }
     }
-    exports.ObjectSelectionController = ObjectSelectionController;
     ObjectSelectionController._selectedObject = null;
-    ObjectSelectionController._propertiesEnabled = true;
+    exports.ObjectSelectionController = ObjectSelectionController;
     class Alert {
         static initialize(element) {
             this.element = element;
@@ -153,9 +137,9 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
             this.element.style.display = "flex";
         }
     }
-    exports.Alert = Alert;
     Alert.WARNING = "alert-warning";
     Alert.ERROR = "alert-error";
+    exports.Alert = Alert;
     /**
      * A map that contains various Elements in the application HTML document.
      */
@@ -175,6 +159,8 @@ define(["require", "exports", "./buttons", "./main", "./propertyDescriptions", "
     exports.documentElements.set("graph-config-form", document.querySelector("#graph-config-form"));
     exports.documentElements.set("graph-panel", document.querySelector("#graph-panel"));
     exports.documentElements.set("alert", document.querySelector("#alert"));
+    //Initialize static classes
     GraphPanel.initialize(exports.documentElements.get("graph-panel"));
     Alert.initialize(exports.documentElements.get("alert"));
+    ObjectSelectionController.initialize(new propertyEditor_1.PropertyEditor(exports.documentElements.get("property-list")));
 });
