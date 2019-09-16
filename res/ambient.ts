@@ -1,13 +1,14 @@
 console.log("Loading ambient");
 
+import { ObjectSelectionController } from './document/document';
+import { ObjectLocatorPropertyEditorRow } from './document/propertyEditor';
 import { AmbientJSON, PhysicsObjectJSON } from './fileController';
 import { canvasRenderer } from './main';
 import { PhysicsObject } from './physicsObjects';
-import { Camera, CanvasRenderer } from './rendering';
-import { Renderable, Selectable, Simulatable, PhysicsPropertyType } from './types';
-import Vector2 from './vector2';
-import { ObjectSelectionController } from './document';
 import { ObjectPosition } from './physicsProperties';
+import { Camera, CanvasRenderer } from './rendering/canvasRenderer';
+import { PhysicsPropertyType, PropertyEditorRow, Renderable, Selectable, Simulatable } from './types';
+import Vector2 from './vector2';
 
 export default class Ambient implements Selectable, Renderable, Simulatable {
     public readonly objects: PhysicsObject[];
@@ -53,7 +54,7 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
             return loadedAmbient;
         }
     }
-    
+
     get name(): string {
         return "Ambiente";
     }
@@ -82,6 +83,14 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
         return null;
     }
 
+    getPropertyEditorRows(): PropertyEditorRow[] {
+        const rows: PropertyEditorRow[] = [];
+
+        this.objects.forEach(obj => rows.push(new ObjectLocatorPropertyEditorRow(obj, "Objetos", 0)));
+
+        return rows;
+    }
+
     addObject(obj: PhysicsObject): void {
         this.objects.push(obj);
     }
@@ -97,7 +106,7 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
     onCanvasAdded(canvasRenderer: CanvasRenderer): void {
         const canvas = canvasRenderer.context.canvas;
         const camera = canvasRenderer.camera;
-        
+
         this.onMouseMove = (ev: MouseEvent) => this.setCursor(camera, new Vector2(ev.offsetX, -ev.offsetY), canvas);
         this.onTouchMove = (ev: TouchEvent) => this.setCursor(camera, camera.getTouchPosition(ev), canvas);
         this.onMouseUp = (ev: MouseEvent) => this.selectObject(camera, ev);
@@ -117,7 +126,7 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
 
     onCanvasRemoved(canvasRenderer: CanvasRenderer): void {
         const canvas = canvasRenderer.context.canvas;
-        
+
         canvas.removeEventListener("mousemove", this.onMouseMove!);
         canvas.removeEventListener("touchmove", this.onTouchMove!);
         canvas.removeEventListener("mouseup", this.onMouseUp!);
@@ -135,13 +144,13 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
         this.objects.forEach(object => object.reset());
     }
 
-    private setCursor (camera: Camera, cursorCoordinates: Vector2, canvas: HTMLCanvasElement){
+    private setCursor(camera: Camera, cursorCoordinates: Vector2, canvas: HTMLCanvasElement) {
         if (!camera.isMouseDown) {
             const obj = this.getObjectOnPosition(new Vector2(cursorCoordinates.x, -cursorCoordinates.y), true);
             canvas.style.cursor = (obj) ? "pointer" : "default";
-        }else if (this.draggingObject && !Vector2.equals(cursorCoordinates, this.lastCursosPos)){
+        } else if (this.draggingObject && !Vector2.equals(cursorCoordinates, this.lastCursosPos)) {
             canvas.style.cursor = "pointer";
-            
+
             const objPos = <ObjectPosition>this.draggingObject.getProperty(PhysicsPropertyType.ObjectPosition)!;
             const cursorPos = new Vector2(cursorCoordinates.x, -cursorCoordinates.y);
             const cursorWorldPos = camera.getWorldPosFromCanvas(cursorPos);
@@ -153,19 +162,19 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
         this.lastCursosPos = cursorCoordinates;
     }
 
-    private dragObject (camera: Camera, cursorCoordinates: Vector2){
+    private dragObject(camera: Camera, cursorCoordinates: Vector2) {
         const obj = this.getObjectOnPosition(new Vector2(cursorCoordinates.x, -cursorCoordinates.y), true);
-        if(obj){
+        if (obj) {
             this.draggingObject = obj;
             camera.allowMovement = false;
         }
     }
-    
-    private selectObject (camera: Camera, ev: MouseEvent){
+
+    private selectObject(camera: Camera, ev: MouseEvent) {
         if (!camera.mouseMoved) {
             const clickedPos = new Vector2(ev.offsetX, ev.offsetY);
             const obj = this.getObjectOnPosition(clickedPos, true);
-    
+
             ObjectSelectionController.selectObject(obj ? obj : this);
         }
 
@@ -173,8 +182,8 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
         camera.allowMovement = true;
     }
 
-    private setSnapToGrid(ev: KeyboardEvent, value: boolean){
-        if(ev.key == "Shift")
+    private setSnapToGrid(ev: KeyboardEvent, value: boolean) {
+        if (ev.key == "Shift")
             this.snapToGrid = value;
     }
 }

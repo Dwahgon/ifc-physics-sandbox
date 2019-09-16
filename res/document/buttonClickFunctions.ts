@@ -1,13 +1,13 @@
 console.log("Loaded buttonClickFunctions");
 
-import Ambient from "./ambient";
+import Ambient from "../ambient";
+import { downloadJSON } from "../fileController";
+import * as Main from "../main";
+import { PhysicsObject } from "../physicsObjects";
+import Vector2 from "../vector2";
 import * as Buttons from "./buttons";
-import { ObjectSelectionController, PropertyDescriptionUI, Alert } from "./document";
-import { downloadJSON } from "./fileController";
-import * as Main from "./main";
+import { Alert, ObjectSelectionController, PropertyDescriptionUI } from "./document";
 import * as Modals from "./modals";
-import { PhysicsObject } from "./physicsObjects";
-import Vector2 from "./vector2";
 
 /*
     Button onClick setter
@@ -23,8 +23,8 @@ Buttons.getButtonById("destroy-button")!.onClick = () => {
 };
 
 Buttons.getButtonById("follow-button")!.onClick = () => {
-    const selectedObject = ObjectSelectionController.selectedObject;
-    if (!selectedObject || !selectedObject.isFollowable)
+    const selectedObject = <any>ObjectSelectionController.selectedObject;
+    if (!selectedObject || !selectedObject.locate)
         return;
 
     const camera = Main.canvasRenderer.camera;
@@ -61,9 +61,9 @@ Buttons.getButtonById("load-file-button")!.onClick = function () {
             reader.onload = ev => {
                 const result = <string>(<FileReader>ev.target!).result;
 
-                try{
+                try {
                     Main.setAmbient(Ambient.fromJSON(result));
-                }catch{
+                } catch{
                     Alert.throwAlert("Não foi possível carregar este arquivo!", Alert.ERROR);
                 }
             };
@@ -82,7 +82,7 @@ Buttons.getButtonById("center-camera-button")!.onClick = Main.canvasRenderer.cam
 Buttons.predefinedClickEvents.set("closeModal", (args: string) => Modals.getModalById(args)!.setVisible(false));
 Buttons.predefinedClickEvents.set("hideElement", (args: string) => document.getElementById(args)!.style.display = "none");
 Buttons.predefinedClickEvents.set("createObject", (args: string) => {
-    if(Main.simulator.time > 0)
+    if (Main.simulator.time > 0)
         return;
 
     PhysicsObject.createPhysicsObject(parseInt(args), Main.ambient, {
@@ -91,10 +91,24 @@ Buttons.predefinedClickEvents.set("createObject", (args: string) => {
         ),
         size: new Vector2(1, 1)
     })
+
+    if (ObjectSelectionController.propertyEditor && ObjectSelectionController.selectedObject == Main.ambient)
+        ObjectSelectionController.propertyEditor.build(Main.ambient);
 });
 Buttons.predefinedClickEvents.set("openPropertyDescription", (args: string) => PropertyDescriptionUI.show(parseInt(args)));
 Buttons.predefinedClickEvents.set("openModal", (args: string) => {
     const modal = Modals.getModalById(args);
-    if(modal)
+    if (modal)
         modal.setVisible(true);
 });
+Buttons.predefinedClickEvents.set("locateObject", (args: string) => {
+    const obj = Main.ambient.objects.find(obj => obj.name == args);
+
+    if (!obj)
+        return;
+
+    const cam = Main.canvasRenderer.camera;
+
+    ObjectSelectionController.selectObject(obj);
+    cam.pos = Vector2.mult(obj.locate(), cam.zoom);
+})

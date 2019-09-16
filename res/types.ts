@@ -1,10 +1,10 @@
 console.log("Loading types");
 
 import PhysicsProperty from './physicsProperties';
-import { Camera, CanvasRenderer } from './rendering';
+import { CanvasRenderer } from './rendering/canvasRenderer';
 import Vector2 from './vector2';
 
-/* Enums */ 
+/* Enums */
 
 export enum ButtonColor {
     Dark = "dark-button",
@@ -29,9 +29,8 @@ export enum PhysicsObjectType {
 /* Interfaces */
 
 export interface Selectable {
-    isFollowable: boolean;
     name: string;
-    appendPropertyListItems?(ul: HTMLUListElement, enabled: boolean): void;
+    getPropertyEditorRows?(): PropertyEditorRow[];
     getProperty(type: PhysicsPropertyType): PhysicsProperty<any>[] | PhysicsProperty<any> | undefined;
     destroy?(): void;
 }
@@ -79,7 +78,7 @@ export interface CartesianPlaneStyle {
 
     axisLineThickness: number;
     gridThickness: number;
-    
+
     axisMarkerFont: string;
     axisNameFont: string;
     measurementFont?: string;
@@ -87,19 +86,36 @@ export interface CartesianPlaneStyle {
     showMeasurements: boolean;
 }
 
-interface GizmosStyle{
+export interface Followable {
+    locate(): Vector2;
+}
+
+interface GizmosStyle {
     style: string;
     strokeStyle?: string;
 }
 
-export interface VectorGizmosStyle extends GizmosStyle{
+export interface VectorGizmosStyle extends GizmosStyle {
     lineThickness: number;
     strokeThickness?: number;
     headLength: number;
 }
 
-export interface PositionPointGizmosStyle extends GizmosStyle{
+export interface PositionPointGizmosStyle extends GizmosStyle {
     font: string;
     pointRadius: number;
     strokeThickness?: number;
+}
+
+
+export interface PropertyEditorRow {
+    readonly element: HTMLElement;
+    readonly category: string;
+    readonly layoutOrder: number;
+    active: boolean;
+    appendTo(element: HTMLElement): void;
+    onChanged?(ev: Event): void;
+    onClicked?(ev: MouseEvent): void;
+    onMouseOver?(ev: MouseEvent): void;
+    onMouseOut?(ev: MouseEvent): void;
 }

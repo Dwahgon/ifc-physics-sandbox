@@ -8,13 +8,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./buttons", "./document", "./modals", "./types", "./vector2"], function (require, exports, Buttons, Document, Modal, types_1, vector2_1) {
+define(["require", "exports", "../document/buttons", "../document/document", "../document/modals", "../main", "../types", "../vector2"], function (require, exports, Buttons, Document, Modal, Main, types_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Buttons = __importStar(Buttons);
     Document = __importStar(Document);
     Modal = __importStar(Modal);
+    Main = __importStar(Main);
     vector2_1 = __importDefault(vector2_1);
+    console.log("Loading graph...");
     /*
         Class definitions
     */
@@ -23,8 +25,6 @@ define(["require", "exports", "./buttons", "./document", "./modals", "./types", 
             this.name = name;
             this.propertyType = propertyType;
             this.getValueCallbackIndex = getValueCallbackIndex;
-            this.ambient = null;
-            new Promise((resolve_1, reject_1) => { require(["./main"], resolve_1, reject_1); }).then(__importStar).then((element) => { this.ambient = element.ambient; }).catch(() => { throw "Could not import ambient"; });
         }
         static initialize() {
             this.getValueCallbacks = [];
@@ -46,18 +46,15 @@ define(["require", "exports", "./buttons", "./document", "./modals", "./types", 
             };
         }
         getTargetNames() {
-            if (this.ambient) {
-                const objectNames = [];
-                this.ambient.objects.forEach(object => {
-                    if (object.getProperty(this.propertyType))
-                        objectNames.push(object.name);
-                });
-                return objectNames;
-            }
-            throw "Ambient is null";
+            const objectNames = [];
+            Main.ambient.objects.forEach(object => {
+                if (object.getProperty(this.propertyType))
+                    objectNames.push(object.name);
+            });
+            return objectNames;
         }
         getValue(target) {
-            const targetObj = this.ambient.objects.find(obj => { return obj.name == target; });
+            const targetObj = Main.ambient.objects.find(obj => { return obj.name == target; });
             return PhysicsObjectValueGetter.getValueCallbacks[this.getValueCallbackIndex](targetObj, this.propertyType);
         }
     }
@@ -70,7 +67,7 @@ define(["require", "exports", "./buttons", "./document", "./modals", "./types", 
             this.name = name;
             this.getValueCallback = getValueCallback;
             this.simulator = null;
-            new Promise((resolve_2, reject_2) => { require(["./main"], resolve_2, reject_2); }).then(__importStar).then((element) => { this.simulator = element.simulator; }).catch(() => { throw "Could not import simulator"; });
+            new Promise((resolve_1, reject_1) => { require(["../main"], resolve_1, reject_1); }).then(__importStar).then((element) => { this.simulator = element.simulator; }).catch(() => { throw "Could not import simulator"; });
         }
         static initialize() {
             this.getValueCallbacks = [];
@@ -226,11 +223,11 @@ define(["require", "exports", "./buttons", "./document", "./modals", "./types", 
         const graph = new Graph(targetX, targetY, vGX, vGY, 4);
         graphConfigModal.setVisible(false);
         Document.GraphPanel.setElementVisible(true, `Gráfico ${vGY.name} x ${vGX.name}`);
-        new Promise((resolve_3, reject_3) => { require(["./main"], resolve_3, reject_3); }).then(__importStar).then(main => {
+        new Promise((resolve_2, reject_2) => { require(["../main"], resolve_2, reject_2); }).then(__importStar).then(main => {
             main.simulator.add(graph);
             main.simulator.start();
         });
-        Document.GraphPanel.onClose = () => new Promise((resolve_4, reject_4) => { require(["./main"], resolve_4, reject_4); }).then(__importStar).then(main => main.simulator.remove(graph));
+        Document.GraphPanel.onClose = () => new Promise((resolve_3, reject_3) => { require(["../main"], resolve_3, reject_3); }).then(__importStar).then(main => main.simulator.remove(graph));
         Document.GraphPanel.renderGraph(graph);
     };
     /*

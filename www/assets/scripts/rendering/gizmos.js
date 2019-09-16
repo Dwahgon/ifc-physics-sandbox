@@ -1,11 +1,14 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./vector2"], function (require, exports, vector2_1) {
+define(["require", "exports", "../vector2"], function (require, exports, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_1 = __importDefault(vector2_1);
+    console.log("Loading gizmos");
     class Gizmos {
+        static drawSelection(canvasRenderer, object) {
+        }
         static drawVector(canvasRenderer, from, to, vectorStyle) {
             const ctx = canvasRenderer.context;
             const cam = canvasRenderer.camera;

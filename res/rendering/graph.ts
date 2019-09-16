@@ -1,13 +1,15 @@
-import Ambient from "./ambient";
-import * as Buttons from "./buttons";
-import * as Document from "./document";
-import * as Modal from "./modals";
-import { PhysicsObject } from "./physicsObjects";
-import PhysicsProperty from "./physicsProperties";
-import { Camera, CanvasRenderer } from "./rendering";
-import Simulator from "./simulator";
-import { PhysicsPropertyType, Renderable, Simulatable, ValueGetter } from "./types";
-import Vector2 from "./vector2";
+console.log("Loading graph...");
+
+import * as Buttons from "../document/buttons";
+import * as Document from "../document/document";
+import * as Modal from "../document/modals";
+import * as Main from "../main";
+import { PhysicsObject } from "../physicsObjects";
+import PhysicsProperty from "../physicsProperties";
+import Simulator from "../simulator";
+import { PhysicsPropertyType, Renderable, Simulatable, ValueGetter } from "../types";
+import Vector2 from "../vector2";
+import { CanvasRenderer } from "./canvasRenderer";
 
 /*
     Class definitions
@@ -20,15 +22,8 @@ class PhysicsObjectValueGetter implements ValueGetter {
     public static readonly VECTOR2_MODULUS_CALLBACK: number = 3;
 
     private static getValueCallbacks: Function[];
-    private ambient: Ambient | null;
 
     constructor(public name: string, public readonly propertyType: PhysicsPropertyType, private getValueCallbackIndex: number) {
-        this.ambient = null;
-        import("./main").then(
-            (element) => { this.ambient = element.ambient; }
-        ).catch(
-            () => { throw "Could not import ambient"; }
-        );
     }
 
     static initialize() {
@@ -55,22 +50,18 @@ class PhysicsObjectValueGetter implements ValueGetter {
     }
 
     getTargetNames(): string[] {
-        if (this.ambient) {
-            const objectNames: string[] = [];
+        const objectNames: string[] = [];
 
-            this.ambient.objects.forEach(object => {
-                if (object.getProperty(this.propertyType))
-                    objectNames.push(object.name);
-            });
+        Main.ambient.objects.forEach(object => {
+            if (object.getProperty(this.propertyType))
+                objectNames.push(object.name);
+        });
 
-            return objectNames;
-        }
-
-        throw "Ambient is null";
+        return objectNames;
     }
 
     getValue(target: string): number {
-        const targetObj = this.ambient!.objects.find(obj => { return obj.name == target });
+        const targetObj = Main.ambient.objects.find(obj => { return obj.name == target });
         return PhysicsObjectValueGetter.getValueCallbacks[this.getValueCallbackIndex]!(targetObj, this.propertyType);
     }
 }
@@ -83,7 +74,7 @@ class SimulatorValueGetter implements ValueGetter {
 
     constructor(public name: string, private readonly getValueCallback: number) {
         this.simulator = null;
-        import("./main").then(
+        import("../main").then(
             (element) => { this.simulator = element.simulator; }
         ).catch(
             () => { throw "Could not import simulator"; }
@@ -116,7 +107,7 @@ export class Graph implements Renderable, Simulatable {
 
         this.simulate(0);
     }
-    
+
     simulate(step: number): void {
         const x = this.valueGetterX.getValue(this.targetX);
         const y = this.valueGetterY.getValue(this.targetY);
@@ -267,7 +258,7 @@ Buttons.getButtonById("create-graph-button")!.onClick = () => {
     const targetX = <string>formData.get("x-axis-property-holder");
     const targetY = <string>formData.get("y-axis-property-holder");
 
-    if(!targetX || !targetY){
+    if (!targetX || !targetY) {
         Document.Alert.throwAlert("Há campos não preenchidos!", Document.Alert.WARNING);
         return;
     }
@@ -278,14 +269,14 @@ Buttons.getButtonById("create-graph-button")!.onClick = () => {
 
     Document.GraphPanel.setElementVisible(true, `Gráfico ${vGY.name} x ${vGX.name}`);
 
-    import("./main").then(
+    import("../main").then(
         main => {
             main.simulator.add(graph);
             main.simulator.start();
         }
     )
 
-    Document.GraphPanel.onClose = () => import("./main").then(main => main.simulator.remove(graph));
+    Document.GraphPanel.onClose = () => import("../main").then(main => main.simulator.remove(graph));
 
     Document.GraphPanel.renderGraph(graph);
 };

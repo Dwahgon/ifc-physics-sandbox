@@ -1,4 +1,4 @@
-import {PhysicsPropertyType} from './types';
+import { PhysicsPropertyType } from './types';
 
 export const propertyDescriptions = new Map<PhysicsPropertyType, string>();
 propertyDescriptions.set(

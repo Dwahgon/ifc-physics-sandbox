@@ -1,13 +1,14 @@
 console.log("Loading document");
 
+import { canvasRenderer, simulator } from "../main";
+import { propertyDescriptions } from '../propertyDescriptions';
+import { CanvasRenderer } from "../rendering/canvasRenderer";
+import { CartesianPlane } from "../rendering/cartesianPlane";
+import { Graph } from "../rendering/graph";
+import { PhysicsPropertyType, Selectable } from '../types';
+import Vector2 from "../vector2";
 import * as Buttons from "./buttons";
-import { Graph } from "./graph";
-import { canvasRenderer, simulator } from "./main";
-import PhysicsProperty from "./physicsProperties";
-import { propertyDescriptions } from './propertyDescriptions';
-import { CanvasRenderer, CartesianPlane } from "./rendering";
-import { PhysicsPropertyType, Selectable } from './types';
-import Vector2 from "./vector2";
+import { PropertyEditor } from "./propertyEditor";
 
 export abstract class PropertyDescriptionUI {
     private static readonly element: HTMLDivElement = <HTMLDivElement>document.querySelector("#property-description-modal");
@@ -114,8 +115,12 @@ export abstract class ObjectCreationController {
  * Controlls the selection of Selectable objects
  */
 export abstract class ObjectSelectionController {
+    public static propertyEditor: PropertyEditor | null;
     private static _selectedObject: Selectable | null = null;
-    private static _propertiesEnabled: boolean = true;
+
+    static initialize(propertyEditor: PropertyEditor){
+        this.propertyEditor = propertyEditor;
+    }
 
     /** 
      * @returns the currently selected object
@@ -129,53 +134,27 @@ export abstract class ObjectSelectionController {
      * @param object the object to be selected
      */
     static selectObject(object: Selectable): void {
+        if(object == this.selectedObject)
+            return;
+
         console.log("Selected:", object);
-        const domPropertyUL = <HTMLUListElement>documentElements.get("property-list")!;
         const domPropertyH1 = documentElements.get("property-list-title")!;
 
         this._selectedObject = object;
-
-        while (domPropertyUL.firstChild)
-            domPropertyUL.removeChild(domPropertyUL.firstChild);
+        this.propertyEditor!.build(object);
 
         domPropertyH1.innerHTML = `Propriedades do ${object.name}`;
-
-        if (object.appendPropertyListItems)
-            object.appendPropertyListItems(domPropertyUL, this.propertiesEnabled);
-
-        domPropertyUL.style.display = domPropertyUL.childElementCount > 0 ? "block" : "none";
 
         const followButton = Buttons.getButtonById("follow-button")!;
         const destroyButton = Buttons.getButtonById("destroy-button")!;
 
-        followButton.enabled = object.isFollowable;
-        if (canvasRenderer.camera.objectBeingFollowed == this._selectedObject)
+        followButton.enabled = (<any>object).locate;
+        if (canvasRenderer.camera.objectBeingFollowed == <any>this._selectedObject)
             followButton.swapToAltImg();
         else
             followButton.swapToDefaultImg();
 
         destroyButton!.enabled = object.destroy != undefined && simulator.time == 0;
-    }
-
-    static get propertiesEnabled() {
-        return this._propertiesEnabled;
-    }
-
-    static set propertiesEnabled(value: boolean) {
-        if (!this._selectedObject)
-            return
-
-        this._propertiesEnabled = value;
-
-
-        const physicsProperties = <PhysicsProperty<any>[]>this._selectedObject.getProperty(PhysicsPropertyType.All);
-
-        if (physicsProperties) {
-            physicsProperties.forEach(objectProperty => {
-                if (objectProperty.propertyLI)
-                    objectProperty.propertyLI.enabled = value;
-            });
-        }
     }
 }
 
@@ -217,5 +196,9 @@ documentElements.set("object-list", document.querySelector("#object-list")!);
 documentElements.set("graph-config-form", document.querySelector("#graph-config-form")!);
 documentElements.set("graph-panel", document.querySelector("#graph-panel")!);
 documentElements.set("alert", document.querySelector("#alert")!);
+
+//Initialize static classes
+
 GraphPanel.initialize(<HTMLDivElement>documentElements.get("graph-panel")!);
 Alert.initialize(<HTMLDivElement>documentElements.get("alert")!);
+ObjectSelectionController.initialize(new PropertyEditor(<HTMLElement>documentElements.get("property-list")));

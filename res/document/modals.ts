@@ -18,9 +18,9 @@ export class Modal {
 
         const application = <HTMLElement>Document.documentElements.get("application-wrapper")!;
 
-        application.style.filter =  value ? "blur(3px)" : "none";
-        
-        if(value && this.onOpen)
+        application.style.filter = value ? "blur(3px)" : "none";
+
+        if (value && this.onOpen)
             this.onOpen();
     }
 }
@@ -51,6 +51,6 @@ export const pushModalElement = (element: HTMLElement) => {
 
 export const removeModalElement = (element: HTMLElement) => {
     const btn = getModalByHTMLElement(element);
-    if (btn) 
+    if (btn)
         modals.splice(modals.indexOf(btn));
 }

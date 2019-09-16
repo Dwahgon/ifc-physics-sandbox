@@ -1,6 +1,6 @@
 import Vector2 from "./vector2";
 
-export default interface GenericCalculator<T>{
+export default interface GenericCalculator<T> {
     sum(a: T, b: T): T;
     sub(a: T, b: T): T;
     mult(a: T, b: T): T;
@@ -10,11 +10,11 @@ export default interface GenericCalculator<T>{
 export class Vector2Calculator implements GenericCalculator<Vector2>{
     public static readonly instance: GenericCalculator<any> = new Vector2Calculator();
 
-    private constructor(){}
+    private constructor() { }
 
     sum(a: Vector2, b: Vector2): Vector2 {
         return Vector2.sum(a, b);
-    }    
+    }
     sub(a: Vector2, b: Vector2): Vector2 {
         return Vector2.sub(a, b);
     }
@@ -29,11 +29,11 @@ export class Vector2Calculator implements GenericCalculator<Vector2>{
 export class NumberCalculator implements GenericCalculator<number>{
     public static readonly instance: GenericCalculator<any> = new NumberCalculator();
 
-    private constructor(){}
+    private constructor() { }
 
     sum(a: number, b: number): number {
         return a + b;
-    }    
+    }
     sub(a: number, b: number): number {
         return a - b;
     }

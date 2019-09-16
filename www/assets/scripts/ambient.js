@@ -1,7 +1,7 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./main", "./physicsObjects", "./types", "./vector2", "./document"], function (require, exports, main_1, physicsObjects_1, types_1, vector2_1, document_1) {
+define(["require", "exports", "./document/document", "./document/propertyEditor", "./main", "./physicsObjects", "./types", "./vector2"], function (require, exports, document_1, propertyEditor_1, main_1, physicsObjects_1, types_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_1 = __importDefault(vector2_1);
@@ -53,6 +53,11 @@ define(["require", "exports", "./main", "./physicsObjects", "./types", "./vector
                     return obj;
             }
             return null;
+        }
+        getPropertyEditorRows() {
+            const rows = [];
+            this.objects.forEach(obj => rows.push(new propertyEditor_1.ObjectLocatorPropertyEditorRow(obj, "Objetos", 0)));
+            return rows;
         }
         addObject(obj) {
             this.objects.push(obj);

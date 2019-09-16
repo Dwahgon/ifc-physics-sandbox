@@ -1,9 +1,11 @@
 console.log("Loading main");
 
 import Ambient from './ambient';
-import * as Buttons from "./buttons";
-import { ObjectSelectionController } from './document';
-import { CanvasRenderer, CartesianPlane, FPSCounter } from './rendering';
+import * as Buttons from "./document/buttons";
+import { ObjectSelectionController } from './document/document';
+import { CanvasRenderer } from './rendering/canvasRenderer';
+import { CartesianPlane } from './rendering/cartesianPlane';
+import { FPSCounter } from './rendering/fpsCounter';
 import Simulator from './simulator';
 import Vector2 from './vector2';
 
@@ -15,8 +17,8 @@ export const canvasRenderer = new CanvasRenderer(ctx!, Vector2.zero, 100, 5, 500
 export let ambient = new Ambient();
 export const simulator = new Simulator(Buttons.getButtonById("play-button")!, Buttons.getButtonById("reset-button")!, Buttons.getButtonById("destroy-button")!);
 
-import("./buttonClickFunctions");
-import("./graph");
+import("./document/buttonClickFunctions");
+import("./rendering/graph");
 
 export const setAmbient = function (a: Ambient) {
     canvasRenderer.remove(ambient);

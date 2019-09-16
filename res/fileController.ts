@@ -1,22 +1,22 @@
 import { PhysicsObjectType, PhysicsPropertyType } from "./types";
 
-export interface AmbientJSON{
+export interface AmbientJSON {
     objects: PhysicsObjectJSON[];
 }
 
-export interface PhysicsObjectJSON{
+export interface PhysicsObjectJSON {
     kind: PhysicsObjectType;
     properties: PhysicsPropertyJSON<any>[];
 }
 
-export interface PhysicsPropertyJSON<T>{
+export interface PhysicsPropertyJSON<T> {
     kind: PhysicsPropertyType;
     iValue: T;
 }
 
-export const downloadJSON = function(data: string, filename: string, type: string){
-    const file = new Blob([data], {type: type});
-    
+export const downloadJSON = function (data: string, filename: string, type: string) {
+    const file = new Blob([data], { type: type });
+
     if (window.navigator.msSaveOrOpenBlob) // IE10+
         window.navigator.msSaveOrOpenBlob(file, filename);
     else {
@@ -26,9 +26,9 @@ export const downloadJSON = function(data: string, filename: string, type: strin
         a.download = filename;
         document.body.appendChild(a);
         a.click();
-        setTimeout(function() {
+        setTimeout(function () {
             document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);  
-        }, 0); 
+            window.URL.revokeObjectURL(url);
+        }, 0);
     }
 }

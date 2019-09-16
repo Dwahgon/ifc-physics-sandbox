@@ -1,6 +1,6 @@
 console.log("Loaded buttons");
 
-import { ButtonConfig } from "./types";
+import { ButtonConfig } from "../types";
 
 /*
     Class Definitions
@@ -58,27 +58,27 @@ export class Button {
         button.setAttribute("id", buttonConfig.buttonName);
         button.setAttribute("class", `${buttonConfig.buttonColor} ${buttonConfig.enabled ? "active-button" : "inactive-button"}`);
         button.setAttribute("button-name", buttonConfig.buttonName);
-        
+
         if (buttonConfig.func)
             button.setAttribute("func", buttonConfig.func);
 
         if (buttonConfig.args)
             button.setAttribute("args", buttonConfig.args);
-        
-        if(buttonConfig.title)
+
+        if (buttonConfig.title)
             button.setAttribute("title", buttonConfig.title);
 
-        if(buttonConfig.altTitle)
+        if (buttonConfig.altTitle)
             button.setAttribute("alt-title", buttonConfig.altTitle);
-        
-        if(buttonConfig.imgSrc){
+
+        if (buttonConfig.imgSrc) {
             const imgElement = document.createElement("img");
             imgElement.src = buttonConfig.imgSrc;
 
             button.appendChild(imgElement);
         }
 
-        if(buttonConfig.altImgSrc)
+        if (buttonConfig.altImgSrc)
             button.setAttribute("alt-img", buttonConfig.altImgSrc);
 
         button.querySelectorAll("*").forEach(element => element.setAttribute("button-name", buttonConfig.buttonName));
