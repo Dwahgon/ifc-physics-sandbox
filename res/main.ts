@@ -2,7 +2,7 @@ console.log("Loading main");
 
 import Ambient from './ambient';
 import * as Buttons from "./document/buttons";
-import { ObjectSelectionController } from './document/document';
+import { ObjectSelectionController } from './document/documentUtilities';
 import { CanvasRenderer } from './rendering/canvasRenderer';
 import { CartesianPlane } from './rendering/cartesianPlane';
 import { FPSCounter } from './rendering/fpsCounter';

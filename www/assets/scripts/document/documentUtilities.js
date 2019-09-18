@@ -1,3 +1,6 @@
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -5,15 +8,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-define(["require", "exports", "../main", "../propertyDescriptions", "../rendering/canvasRenderer", "../rendering/cartesianPlane", "./modals", "../vector2", "./buttons", "./propertyEditor"], function (require, exports, main_1, propertyDescriptions_1, canvasRenderer_1, cartesianPlane_1, Modals, vector2_1, Buttons, propertyEditor_1) {
+define(["require", "exports", "../main", "../propertyDescriptions", "../rendering/canvasRenderer", "../rendering/cartesianPlane", "../vector2", "./buttons", "./documentElements", "./modals", "./propertyEditor"], function (require, exports, main_1, propertyDescriptions_1, canvasRenderer_1, cartesianPlane_1, vector2_1, Buttons, documentElements_1, Modals, propertyEditor_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    Modals = __importStar(Modals);
+    propertyDescriptions_1 = __importDefault(propertyDescriptions_1);
     vector2_1 = __importDefault(vector2_1);
     Buttons = __importStar(Buttons);
+    documentElements_1 = __importDefault(documentElements_1);
+    Modals = __importStar(Modals);
     console.log("Loading document");
     class PropertyDescriptionUI {
         static setElementVisible(isVisible) {
@@ -21,7 +23,7 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
         }
         static show(propertyKind) {
             this.setElementVisible(true);
-            const description = propertyDescriptions_1.propertyDescriptions.get(propertyKind);
+            const description = propertyDescriptions_1.default.get(propertyKind);
             if (description)
                 this.modal.element.querySelector("article").innerHTML = description;
             else
@@ -81,7 +83,7 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
         static set objectCreatable(value) {
             this._objectCreatable = value;
             if (!this.objectListElement)
-                this.objectListElement = exports.documentElements.get("object-list");
+                this.objectListElement = documentElements_1.default.get("object-list");
             this.objectListElement.querySelectorAll("button").forEach(element => Buttons.getButtonByHTMLElement(element).enabled = value);
         }
         static get objectCreatable() {
@@ -112,7 +114,7 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
             if (object == this.selectedObject)
                 return;
             console.log("Selected:", object);
-            const domPropertyH1 = exports.documentElements.get("property-list-title");
+            const domPropertyH1 = documentElements_1.default.get("property-list-title");
             this._selectedObject = object;
             this.propertyEditor.build(object);
             domPropertyH1.innerHTML = `Propriedades do ${object.name}`;
@@ -141,27 +143,8 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
     exports.Alert = Alert;
     Alert.WARNING = "alert-warning";
     Alert.ERROR = "alert-error";
-    /**
-     * A map that contains various Elements in the application HTML document.
-     */
-    exports.documentElements = new Map();
-    exports.documentElements.set("application-wrapper", document.querySelector("#application-wrapper"));
-    exports.documentElements.set("header", document.querySelector("#buttons-header"));
-    exports.documentElements.set("main-interface", document.querySelector("main"));
-    exports.documentElements.set("file-buttons", exports.documentElements.get("header").querySelector("#header-file-buttons"));
-    exports.documentElements.set("camera-buttons", exports.documentElements.get("header").querySelector("#header-camera-buttons"));
-    exports.documentElements.set("graph-buttons", exports.documentElements.get("header").querySelector("#header-graph-buttons"));
-    exports.documentElements.set("property-panel", document.querySelector("#property-side-panel"));
-    exports.documentElements.set("object-interactor", document.querySelector("#object-interactor"));
-    exports.documentElements.set("property-list-title", exports.documentElements.get("property-panel").querySelector("h1"));
-    exports.documentElements.set("property-list", document.querySelector("#property-list"));
-    exports.documentElements.set("simulation-controller-buttons", document.querySelector("#simulation-controller-buttons"));
-    exports.documentElements.set("object-list", document.querySelector("#object-list"));
-    exports.documentElements.set("graph-config-form", document.querySelector("#graph-config-form"));
-    exports.documentElements.set("graph-panel", document.querySelector("#graph-panel"));
-    exports.documentElements.set("alert", document.querySelector("#alert"));
     //Initialize static classes
-    GraphPanel.initialize(exports.documentElements.get("graph-panel"));
-    Alert.initialize(exports.documentElements.get("alert"));
-    ObjectSelectionController.initialize(new propertyEditor_1.PropertyEditor(exports.documentElements.get("property-list")));
+    GraphPanel.initialize(documentElements_1.default.get("graph-panel"));
+    Alert.initialize(documentElements_1.default.get("alert"));
+    ObjectSelectionController.initialize(new propertyEditor_1.PropertyEditor(documentElements_1.default.get("property-list")));
 });

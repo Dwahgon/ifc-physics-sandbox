@@ -1,6 +1,6 @@
 console.log("Loaded modal");
 
-import * as Document from "./document";
+import documentElements from "./documentElements";
 
 /*
     Class Definitions
@@ -16,7 +16,7 @@ export class Modal {
     setVisible(value: boolean) {
         this.element.style.display = value ? "flex" : "none";
 
-        const application = <HTMLElement>Document.documentElements.get("application-wrapper")!;
+        const application = <HTMLElement>documentElements.get("application-wrapper")!;
 
         application.style.filter = value ? "blur(3px)" : "none";
 

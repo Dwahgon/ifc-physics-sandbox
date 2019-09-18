@@ -6,7 +6,7 @@ import * as Main from "../main";
 import { PhysicsObject } from "../physicsObjects";
 import Vector2 from "../vector2";
 import * as Buttons from "./buttons";
-import { Alert, ObjectSelectionController, PropertyDescriptionUI } from "./document";
+import { Alert, ObjectSelectionController, PropertyDescriptionUI } from "./documentUtilities";
 import * as Modals from "./modals";
 
 /*

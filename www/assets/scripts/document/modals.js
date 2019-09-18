@@ -1,14 +1,10 @@
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./document"], function (require, exports, Document) {
+define(["require", "exports", "./documentElements"], function (require, exports, documentElements_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    Document = __importStar(Document);
+    documentElements_1 = __importDefault(documentElements_1);
     console.log("Loaded modal");
     /*
         Class Definitions
@@ -20,7 +16,7 @@ define(["require", "exports", "./document"], function (require, exports, Documen
         }
         setVisible(value) {
             this.element.style.display = value ? "flex" : "none";
-            const application = Document.documentElements.get("application-wrapper");
+            const application = documentElements_1.default.get("application-wrapper");
             application.style.filter = value ? "blur(3px)" : "none";
             if (value && this.onOpen)
                 this.onOpen();

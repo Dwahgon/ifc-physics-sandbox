@@ -1,20 +1,22 @@
 console.log("Loading document");
 
 import { canvasRenderer, simulator } from "../main";
-import { propertyDescriptions } from '../propertyDescriptions';
+import propertyDescriptions from '../propertyDescriptions';
 import { CanvasRenderer } from "../rendering/canvasRenderer";
 import { CartesianPlane } from "../rendering/cartesianPlane";
 import { Graph } from "../rendering/graph";
 import { PhysicsPropertyType, Selectable } from '../types';
 import Vector2 from "../vector2";
 import * as Buttons from "./buttons";
+import documentElements from "./documentElements";
+import * as Modals from "./modals";
 import { PropertyEditor } from "./propertyEditor";
 
 export abstract class PropertyDescriptionUI {
-    private static readonly element: HTMLDivElement = <HTMLDivElement>document.querySelector("#property-description-modal");
+    private static readonly modal: Modals.Modal = Modals.getModalById("property-description-modal")!;
 
     private static setElementVisible(isVisible: boolean): void {
-        this.element.style.display = (isVisible) ? "flex" : "none";
+        this.modal.setVisible(isVisible);
     }
 
     static show(propertyKind: PhysicsPropertyType): void {
@@ -23,7 +25,7 @@ export abstract class PropertyDescriptionUI {
         const description = propertyDescriptions.get(propertyKind);
 
         if (description)
-            this.element.querySelector("article")!.innerHTML = description;
+            this.modal.element.querySelector("article")!.innerHTML = description;
         else
             this.hide();
     }
@@ -118,7 +120,7 @@ export abstract class ObjectSelectionController {
     public static propertyEditor: PropertyEditor | null;
     private static _selectedObject: Selectable | null = null;
 
-    static initialize(propertyEditor: PropertyEditor){
+    static initialize(propertyEditor: PropertyEditor) {
         this.propertyEditor = propertyEditor;
     }
 
@@ -134,7 +136,7 @@ export abstract class ObjectSelectionController {
      * @param object the object to be selected
      */
     static selectObject(object: Selectable): void {
-        if(object == this.selectedObject)
+        if (object == this.selectedObject)
             return;
 
         console.log("Selected:", object);
@@ -161,41 +163,21 @@ export abstract class ObjectSelectionController {
 export abstract class Alert {
     public static readonly WARNING: string = "alert-warning";
     public static readonly ERROR: string = "alert-error";
-    
+
     private static element: HTMLDivElement;
 
     static initialize(element: HTMLDivElement) {
         this.element = element;
     }
-    
-    static throwAlert(text: string, style: string){
+
+    static throwAlert(text: string, style: string) {
         this.element.classList.replace(this.element.classList[1], style);
         this.element.querySelector("p")!.innerHTML = text;
         this.element.style.display = "flex";
     }
 }
 
-/**
- * A map that contains various Elements in the application HTML document.
- */
-export const documentElements = new Map<
-    "application-wrapper" | "header" | "main-interface" | "file-buttons" | "camera-buttons" | "graph-buttons" | "property-panel" | "object-interactor"| "property-list-title" | "property-list" | "simulation-controller-buttons" | "object-list" | "graph-config-form" | "graph-panel" | "alert" 
-, Element>();
-documentElements.set("application-wrapper", document.querySelector("#application-wrapper")!);
-documentElements.set("header", document.querySelector("#buttons-header")!);
-documentElements.set("main-interface", document.querySelector("main")!);
-documentElements.set("file-buttons", documentElements.get("header")!.querySelector("#header-file-buttons")!);
-documentElements.set("camera-buttons", documentElements.get("header")!.querySelector("#header-camera-buttons")!);
-documentElements.set("graph-buttons", documentElements.get("header")!.querySelector("#header-graph-buttons")!);
-documentElements.set("property-panel", document.querySelector("#property-side-panel")!);
-documentElements.set("object-interactor", document.querySelector("#object-interactor")!);
-documentElements.set("property-list-title", documentElements.get("property-panel")!.querySelector("h1")!);
-documentElements.set("property-list", document.querySelector("#property-list")!);
-documentElements.set("simulation-controller-buttons", document.querySelector("#simulation-controller-buttons")!);
-documentElements.set("object-list", document.querySelector("#object-list")!);
-documentElements.set("graph-config-form", document.querySelector("#graph-config-form")!);
-documentElements.set("graph-panel", document.querySelector("#graph-panel")!);
-documentElements.set("alert", document.querySelector("#alert")!);
+
 
 //Initialize static classes
 

@@ -3,6 +3,8 @@ console.log("Loading types");
 import PhysicsProperty from './physicsProperties';
 import { CanvasRenderer } from './rendering/canvasRenderer';
 import Vector2 from './vector2';
+import Simulator from './simulator';
+import Gizmos from './rendering/gizmos';
 
 /* Enums */
 
@@ -36,6 +38,7 @@ export interface Selectable {
 }
 
 export interface PhysicsObjectConfig {
+    name?: string;
     position: Vector2;
     size: Vector2;
 }
@@ -43,6 +46,7 @@ export interface PhysicsObjectConfig {
 export interface Simulatable {
     simulate(step: number): void;
     reset(): void;
+    onSimulatorAdded?(simulator: Simulator): void;
 }
 
 export interface Renderable {
@@ -105,6 +109,12 @@ export interface PositionPointGizmosStyle extends GizmosStyle {
     font: string;
     pointRadius: number;
     strokeThickness?: number;
+}
+
+export interface SelectionGizmosStyle extends GizmosStyle {
+    lineThickness: number;
+    lineDash: number[];
+    offset: number;
 }
 
 

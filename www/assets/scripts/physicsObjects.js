@@ -8,19 +8,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./types", "./vector2"], function (require, exports, PhysicsProperties, sprite_1, types_1, vector2_1) {
+define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./types", "./vector2", "./document/documentUtilities", "./rendering/gizmos"], function (require, exports, PhysicsProperties, sprite_1, types_1, vector2_1, documentUtilities_1, gizmos_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     PhysicsProperties = __importStar(PhysicsProperties);
     vector2_1 = __importDefault(vector2_1);
+    gizmos_1 = __importDefault(gizmos_1);
     console.log("Loading physicsobjects");
     class PhysicsObject {
-        constructor(kind, name, sprite, ambient) {
+        constructor(kind, sprite, ambient, name) {
             this.kind = kind;
-            this.name = name;
             this.sprite = sprite;
             this.ambient = ambient;
             this.objectProperties = [];
+            this.name = name || this.generateName();
             this.ambient.addObject(this);
         }
         get isDeletable() {
@@ -29,8 +30,7 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
         static createPhysicsObject(type, ambient, properties) {
             switch (type) {
                 case types_1.PhysicsObjectType.Solid:
-                    const solids = ambient.objects.filter(obj => { return obj.kind == type; });
-                    return new Solid(`Sólido ${solids.length + 1}`, ambient, properties);
+                    return new Solid(ambient, properties);
             }
         }
         static fromJSON(json, ambient) {
@@ -50,6 +50,12 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
         draw(canvasRenderer) {
             this.sprite.draw(canvasRenderer);
             this.objectProperties.forEach(property => property.drawGizmos(canvasRenderer));
+            if (documentUtilities_1.ObjectSelectionController.selectedObject == this) {
+                const pos = this.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
+                const size = this.getProperty(types_1.PhysicsPropertyType.ObjectSize);
+                const drawPos = vector2_1.default.sub(pos.value, vector2_1.default.div(size.value, new vector2_1.default(2, -2)));
+                gizmos_1.default.drawSelection(canvasRenderer, drawPos, size.value, { style: "MediumSeaGreen", lineThickness: 4, offset: 6, lineDash: [8, 3] });
+            }
         }
         addProperties(...properties) {
             properties.forEach(property => this.objectProperties.push(property));
@@ -63,6 +69,17 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
         }
         locate() {
             return this.getProperty(types_1.PhysicsPropertyType.ObjectPosition).value;
+        }
+        generateName() {
+            const objs = this.ambient.objects.filter(obj => obj.kind == this.kind);
+            const defaultName = Object.getPrototypeOf(this).constructor.DEFAULT_NAME;
+            let i = 0;
+            while (true) {
+                const object = objs.find(obj => obj.name.includes(i.toString()));
+                if (!object)
+                    return `${defaultName} ${i}`;
+                i++;
+            }
         }
         /**
          * Returns rather the position(world position) parameter is located inside the object
@@ -107,9 +124,10 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
         }
     }
     exports.PhysicsObject = PhysicsObject;
+    PhysicsObject.DEFAULT_NAME = "";
     class Solid extends PhysicsObject {
-        constructor(name, ambient, properties) {
-            super(types_1.PhysicsObjectType.Solid, name, new sprite_1.Sprite("./assets/images/solid.svg", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient);
+        constructor(ambient, properties) {
+            super(types_1.PhysicsObjectType.Solid, new sprite_1.Sprite("./assets/images/solid.svg", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient, properties ? properties.name : undefined);
             this.addProperties(new PhysicsProperties.ObjectPosition(properties ? properties.position : vector2_1.default.zero, this));
             this.addProperties(new PhysicsProperties.ObjectAcceleration(this));
             this.addProperties(new PhysicsProperties.ObjectVelocity(this));
@@ -118,4 +136,5 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
             this.addProperties(new PhysicsProperties.ObjectDisplacement(this));
         }
     }
+    Solid.DEFAULT_NAME = "Sólido";
 });

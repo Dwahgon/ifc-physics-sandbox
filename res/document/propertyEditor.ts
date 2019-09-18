@@ -7,9 +7,11 @@ import { Button } from "./buttons";
 
 export class PropertyEditor {
     private rows: PropertyEditorRow[];
+    private enabled: boolean;
 
     constructor(private htmlElement: HTMLElement) {
         this.rows = [];
+        this.enabled = true;
 
         this.htmlElement.addEventListener("change", this.onChanged.bind(this));
         this.htmlElement.addEventListener("click", this.onClicked.bind(this));
@@ -19,6 +21,7 @@ export class PropertyEditor {
 
     setEnabled(v: boolean) {
         this.rows.forEach(row => row.active = v);
+        this.enabled = v;
     }
 
     build(object: Selectable): void {
@@ -42,7 +45,10 @@ export class PropertyEditor {
             categoryH1.innerHTML = category.name;
 
             this.htmlElement.append(categoryH1);
-            rowWithCategory.forEach(row => row.appendTo(this.htmlElement));
+            rowWithCategory.forEach(row => {
+                row.appendTo(this.htmlElement);
+                row.active = this.enabled;
+            });
         });
 
         this.htmlElement.style.display = this.htmlElement.childElementCount > 0 ? "block" : "none";
@@ -143,7 +149,7 @@ export abstract class PropertyEditorInput<T> extends BasicPropertyEditorRow {
     private nameLabel: HTMLLabelElement;
     private lastValue: string;
 
-    constructor(protected readonly target: { doDrawGizmos: boolean, onUserInput(value: T): void; value: T }, name: string, unit: string, private readonly regExp: RegExp, category: string, layoutOrder: number, changeable: boolean, initialValue: T, descriptionId?: number) {
+    constructor(protected readonly target: { doDrawGizmos: boolean, onUserInput(value: T): void; value: T }, name: string, unit: string, private readonly regExp: RegExp, category: string, layoutOrder: number, changeable: boolean, initialValue: T, title: string, descriptionId?: number) {
         super(category, layoutOrder, changeable, descriptionId);
 
         this.element.classList.add("input-row");
@@ -153,6 +159,7 @@ export abstract class PropertyEditorInput<T> extends BasicPropertyEditorRow {
         const unitLabel = document.createElement("label");
 
         this.nameLabel.innerHTML = name;
+        this.nameLabel.title = title;
         unitLabel.innerHTML = unit;
         const inputId = `${name}-input`;
         this.nameLabel.setAttribute("for", inputId);
@@ -220,13 +227,13 @@ export abstract class PropertyEditorInput<T> extends BasicPropertyEditorRow {
 }
 
 export class Vector2PropertyEditorInput extends PropertyEditorInput<Vector2>{
-    constructor(target: { doDrawGizmos: boolean, onUserInput(value: Vector2): void, value: Vector2 }, name: string, unit: string, category: string, layoutOrder: number, changeable: boolean, initialValue: Vector2, descriptionId?: number, private modulusUnit?: string) {
-        super(target, name, unit, /\-?\d*\.?\d*/g, category, layoutOrder, changeable, initialValue, descriptionId);
+    constructor(target: { doDrawGizmos: boolean, onUserInput(value: Vector2): void, value: Vector2 }, name: string, unit: string, category: string, layoutOrder: number, changeable: boolean, initialValue: Vector2, title: string, descriptionId?: number, private modulusUnit?: string) {
+        super(target, name, unit, /\-?\d*\.?\d*/g, category, layoutOrder, changeable, initialValue, title, descriptionId);
         this.updateInputTitle(initialValue);
     }
 
-    onChanged() {
-        super.onChanged();
+    updateValue(v: Vector2) {
+        super.updateValue(v);
         this.updateInputTitle(this.target.value);
     }
 
@@ -250,8 +257,8 @@ export class Vector2PropertyEditorInput extends PropertyEditorInput<Vector2>{
 }
 
 export class NumberPropertyEditorInput extends PropertyEditorInput<number>{
-    constructor(target: { doDrawGizmos: boolean, onUserInput(value: number): void, value: number }, name: string, unit: string, category: string, layoutOrder: number, changeable: boolean, initialValue: number, descriptionId?: number) {
-        super(target, name, unit, /\-?\d*\.?\d*/i, category, layoutOrder, changeable, initialValue, descriptionId);
+    constructor(target: { doDrawGizmos: boolean, onUserInput(value: number): void, value: number }, name: string, unit: string, category: string, layoutOrder: number, changeable: boolean, initialValue: number, title: string, descriptionId?: number) {
+        super(target, name, unit, /\-?\d*\.?\d*/i, category, layoutOrder, changeable, initialValue, title, descriptionId);
     }
 
     protected formatValue(value: number): string {

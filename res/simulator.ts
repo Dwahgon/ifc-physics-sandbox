@@ -1,7 +1,7 @@
 console.log("Loading simulator");
 
 import { Button } from './document/buttons';
-import { ObjectCreationController, ObjectSelectionController } from './document/document';
+import { ObjectCreationController, ObjectSelectionController } from './document/documentUtilities';
 import { Simulatable } from './types';
 
 export default class Simulator {
@@ -70,6 +70,8 @@ export default class Simulator {
 
     add(simulatable: Simulatable): void {
         this.simulatables.push(simulatable);
+        if(simulatable.onSimulatorAdded)
+            simulatable.onSimulatorAdded(this);
     }
 
     remove(simulatable: Simulatable): void {

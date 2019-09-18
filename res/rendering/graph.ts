@@ -1,7 +1,7 @@
 console.log("Loading graph...");
 
 import * as Buttons from "../document/buttons";
-import * as Document from "../document/document";
+import * as Document from "../document/documentUtilities";
 import * as Modal from "../document/modals";
 import * as Main from "../main";
 import { PhysicsObject } from "../physicsObjects";
@@ -10,6 +10,7 @@ import Simulator from "../simulator";
 import { PhysicsPropertyType, Renderable, Simulatable, ValueGetter } from "../types";
 import Vector2 from "../vector2";
 import { CanvasRenderer } from "./canvasRenderer";
+import documentElements from "../document/documentElements";
 
 /*
     Class definitions
@@ -196,7 +197,7 @@ const valueGetters: ValueGetter[] = [
 ];
 
 const graphConfigModal = Modal.getModalById("graph-config-modal")!;
-const graphConfigForm = <HTMLFormElement>Document.documentElements.get("graph-config-form")!;
+const graphConfigForm = <HTMLFormElement>documentElements.get("graph-config-form")!;
 const xAxisPropertySelect = <HTMLSelectElement>graphConfigForm.querySelector("#x-axis-property")!;
 const yAxisPropertySelect = <HTMLSelectElement>graphConfigForm.querySelector("#y-axis-property")!;
 const xAxisPropertyHolderSelect = <HTMLSelectElement>graphConfigForm.querySelector("#x-axis-property-holder")!;

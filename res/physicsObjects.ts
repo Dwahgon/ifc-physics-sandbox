@@ -8,12 +8,19 @@ import { CanvasRenderer } from './rendering/canvasRenderer';
 import { Sprite } from './rendering/sprite';
 import { Followable, PhysicsObjectConfig, PhysicsObjectType, PhysicsPropertyType, PropertyEditorRow, Renderable, Selectable, Simulatable } from './types';
 import Vector2 from './vector2';
+import { ObjectSelectionController } from './document/documentUtilities';
+import Gizmos from './rendering/gizmos';
 
 export class PhysicsObject implements Selectable, Simulatable, Renderable, Followable {
+    static DEFAULT_NAME: string = "";
+
+    public name: string;
+    
     private objectProperties: PhysicsProperty<any>[];
 
-    constructor(public readonly kind: PhysicsObjectType, public name: string, public readonly sprite: Sprite, protected ambient: Ambient) {
+    constructor(public readonly kind: PhysicsObjectType, public readonly sprite: Sprite, protected ambient: Ambient, name?: string) {
         this.objectProperties = [];
+        this.name = name || this.generateName();
         this.ambient.addObject(this);
     }
 
@@ -24,8 +31,7 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
     static createPhysicsObject(type: PhysicsObjectType, ambient: Ambient, properties?: PhysicsObjectConfig): PhysicsObject {
         switch (type) {
             case PhysicsObjectType.Solid:
-                const solids = ambient.objects.filter(obj => { return obj.kind == type });
-                return new Solid(`Sólido ${solids.length + 1}`, ambient, properties);
+                return new Solid(ambient, properties);
         }
     }
 
@@ -50,6 +56,14 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
     draw(canvasRenderer: CanvasRenderer): void {
         this.sprite.draw(canvasRenderer);
         this.objectProperties.forEach(property => property.drawGizmos(canvasRenderer));
+
+        if(ObjectSelectionController.selectedObject == this){
+            const pos = <PhysicsProperties.ObjectPosition>this.getProperty(PhysicsPropertyType.ObjectPosition)!;
+            const size = <PhysicsProperties.ObjectSize>this.getProperty(PhysicsPropertyType.ObjectSize)!;
+            const drawPos = Vector2.sub(pos.value, Vector2.div(size.value, new Vector2(2, -2)));
+
+            Gizmos.drawSelection(canvasRenderer, drawPos, size.value, {style: "MediumSeaGreen", lineThickness: 4, offset: 6, lineDash: [8, 3]});
+        }
     }
 
     addProperties(...properties: PhysicsProperty<any>[]): void {
@@ -67,6 +81,20 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
 
     locate(): Vector2 {
         return (<PhysicsProperties.ObjectPosition>this.getProperty(PhysicsPropertyType.ObjectPosition)).value;
+    }
+
+    generateName(): string{
+        const objs = this.ambient.objects.filter(obj => obj.kind == this.kind);
+        const defaultName = Object.getPrototypeOf(this).constructor.DEFAULT_NAME;
+        
+        let i = 0;
+        while(true){
+            const object = objs.find(obj => obj.name.includes(i.toString()));
+            if(!object)
+                return `${defaultName} ${i}`;
+            
+            i++;
+        }
     }
 
     /**
@@ -120,10 +148,11 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
 }
 
 class Solid extends PhysicsObject {
-    constructor(name: string, ambient: Ambient, properties?: PhysicsObjectConfig) {
+    static DEFAULT_NAME = "Sólido";
+
+    constructor(ambient: Ambient, properties?: PhysicsObjectConfig) {
         super(
             PhysicsObjectType.Solid,
-            name,
             new Sprite(
                 "./assets/images/solid.svg",
                 new Vector2(0, 0),
@@ -131,7 +160,8 @@ class Solid extends PhysicsObject {
                 Vector2.zero,
                 Vector2.zero
             ),
-            ambient);
+            ambient,
+            properties ? properties.name : undefined);
 
         this.addProperties(new PhysicsProperties.ObjectPosition(properties ? properties.position : Vector2.zero, this));
         this.addProperties(new PhysicsProperties.ObjectAcceleration(this));

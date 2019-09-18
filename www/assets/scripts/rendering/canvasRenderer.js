@@ -8,7 +8,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "../document/buttons", "../document/document", "../vector2"], function (require, exports, Buttons, document_1, vector2_1) {
+define(["require", "exports", "../document/buttons", "../document/documentUtilities", "../vector2"], function (require, exports, Buttons, documentUtilities_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Buttons = __importStar(Buttons);
@@ -157,7 +157,7 @@ define(["require", "exports", "../document/buttons", "../document/document", "..
         }
         changeButtonText(isFollowing) {
             const followButton = Buttons.getButtonById("follow-button");
-            if (document_1.ObjectSelectionController.selectedObject == this.objectBeingFollowed && !isFollowing) {
+            if (documentUtilities_1.ObjectSelectionController.selectedObject == this.objectBeingFollowed && !isFollowing) {
                 followButton.swapToAltImg();
                 followButton.swapToAltTitle();
             }

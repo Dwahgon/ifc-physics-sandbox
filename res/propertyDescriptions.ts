@@ -1,6 +1,6 @@
 import { PhysicsPropertyType } from './types';
 
-export const propertyDescriptions = new Map<PhysicsPropertyType, string>();
+const propertyDescriptions = new Map<PhysicsPropertyType, string>();
 propertyDescriptions.set(
     PhysicsPropertyType.ObjectPosition,
     `
@@ -12,3 +12,5 @@ propertyDescriptions.set(
     </p>
     `
 )
+
+export default propertyDescriptions;

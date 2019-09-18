@@ -8,7 +8,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-define(["require", "exports", "./ambient", "./document/buttons", "./document/document", "./rendering/canvasRenderer", "./rendering/cartesianPlane", "./rendering/fpsCounter", "./simulator", "./vector2"], function (require, exports, ambient_1, Buttons, document_1, canvasRenderer_1, cartesianPlane_1, fpsCounter_1, simulator_1, vector2_1) {
+define(["require", "exports", "./ambient", "./document/buttons", "./document/documentUtilities", "./rendering/canvasRenderer", "./rendering/cartesianPlane", "./rendering/fpsCounter", "./simulator", "./vector2"], function (require, exports, ambient_1, Buttons, documentUtilities_1, canvasRenderer_1, cartesianPlane_1, fpsCounter_1, simulator_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     ambient_1 = __importDefault(ambient_1);
@@ -30,9 +30,9 @@ define(["require", "exports", "./ambient", "./document/buttons", "./document/doc
         exports.ambient = a;
         exports.canvasRenderer.add(exports.ambient);
         exports.simulator.add(exports.ambient);
-        document_1.ObjectSelectionController.selectObject(exports.ambient);
+        documentUtilities_1.ObjectSelectionController.selectObject(exports.ambient);
     };
-    document_1.ObjectSelectionController.selectObject(exports.ambient);
+    documentUtilities_1.ObjectSelectionController.selectObject(exports.ambient);
     exports.simulator.add(exports.ambient);
     exports.canvasRenderer.add(new cartesianPlane_1.CartesianPlane(1, cartesianPlane_1.CartesianPlane.ENVIRONMENT_STYLE));
     exports.canvasRenderer.add(exports.ambient);

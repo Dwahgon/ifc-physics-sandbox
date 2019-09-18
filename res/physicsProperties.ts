@@ -78,7 +78,7 @@ export class ObjectPosition extends PhysicsProperty<Vector2>{
         object: PhysicsObject
     ) {
         super(PhysicsPropertyType.ObjectPosition, true, object, initialPosition, Vector2.zero, Vector2Calculator.instance);
-        this.propertyEditorInput = new Vector2PropertyEditorInput(this, "pos<sub>(x, y)</sub>", "m", "Localização", 0, true, initialPosition, this.kind);
+        this.propertyEditorInput = new Vector2PropertyEditorInput(this, "pos<sub>(x, y)</sub>", "m", "Localização", 0, true, initialPosition, "Posição",this.kind);
         this.updateSpritePosition();
     }
 
@@ -118,7 +118,7 @@ export class ObjectSize extends PhysicsProperty<Vector2>{
         object: PhysicsObject
     ) {
         super(PhysicsPropertyType.ObjectSize, true, object, initialSize, Vector2.zero, Vector2Calculator.instance);
-        this.propertyEditorInput = new Vector2PropertyEditorInput(this, "tam<sub>(x, y)</sub>", "m", "Dimensões", 1, true, initialSize, this.kind);
+        this.propertyEditorInput = new Vector2PropertyEditorInput(this, "tam<sub>(x, y)</sub>", "m", "Dimensões", 1, true, initialSize, "Tamanho", this.kind);
         this.objectPosition = <ObjectPosition>this.object.getProperty(PhysicsPropertyType.ObjectPosition);
         this.updateSpriteSize();
     }
@@ -162,7 +162,7 @@ export class ObjectSize extends PhysicsProperty<Vector2>{
 export class ObjectArea extends PhysicsProperty<number>{
     constructor(object: PhysicsObject) {
         super(PhysicsPropertyType.ObjectArea, false, object, 0, 0, NumberCalculator.instance);
-        this.propertyEditorInput = new NumberPropertyEditorInput(this, "área", "m", "Dimensões", 2, false, 0, this.kind);
+        this.propertyEditorInput = new NumberPropertyEditorInput(this, "área", "m", "Dimensões", 2, false, 0, "Área", this.kind);
 
         const objectSize = <PhysicsProperty<any>>object.getProperty(PhysicsPropertyType.ObjectSize);
         const sizeVector2 = (objectSize) ? objectSize.initialValue : Vector2.zero;
@@ -177,7 +177,7 @@ export class ObjectVelocity extends PhysicsProperty<Vector2>{
     constructor(object: PhysicsObject) {
         super(PhysicsPropertyType.ObjectVelocity, true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance, 1);
 
-        this.propertyEditorInput = new Vector2PropertyEditorInput(this, "vel", "<sup>m</sup>&frasl;<sub>s</sub>", "Cinemática", 2, true, Vector2.zero, this.kind, "m/s");
+        this.propertyEditorInput = new Vector2PropertyEditorInput(this, "vel", "<sup>m</sup>&frasl;<sub>s</sub>", "Cinemática", 2, true, Vector2.zero,  "Vetor velocidade", this.kind, "m/s");
 
         this.objectPosition = <ObjectPosition>this.object.getProperty(PhysicsPropertyType.ObjectPosition);
         this.objectAcceleration = <ObjectAcceleration>this.object.getProperty(PhysicsPropertyType.ObjectAcceleration);
@@ -222,7 +222,7 @@ export class ObjectDisplacement extends PhysicsProperty<Vector2>{
 
     constructor(object: PhysicsObject) {
         super(PhysicsPropertyType.ObjectDisplacement, false, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
-        this.propertyEditorInput = new Vector2PropertyEditorInput(this, "des", "m", "Cinemática", 4, false, Vector2.zero, this.kind, "m");
+        this.propertyEditorInput = new Vector2PropertyEditorInput(this, "des", "m", "Cinemática", 4, false, Vector2.zero, "Vetor deslocamento", this.kind, "m");
         this.objectPosition = <ObjectPosition>this.object.getProperty(PhysicsPropertyType.ObjectPosition)!;
     }
 
@@ -245,7 +245,7 @@ export class ObjectAcceleration extends PhysicsProperty<Vector2>{
 
     constructor(object: PhysicsObject) {
         super(PhysicsPropertyType.ObjectAcceleration, true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
-        this.propertyEditorInput = new Vector2PropertyEditorInput(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", "Cinemática", 3, true, this.initialValue, this.kind, "m/s²");
+        this.propertyEditorInput = new Vector2PropertyEditorInput(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", "Cinemática", 3, true, this.initialValue, "Vetor aceleração", this.kind, "m/s²");
 
         this.objectPosition = <ObjectPosition>this.object.getProperty(PhysicsPropertyType.ObjectPosition);
     }

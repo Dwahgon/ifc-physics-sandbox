@@ -1,7 +1,7 @@
 console.log("Loading canvasRenderer");
 
 import * as Buttons from "../document/buttons";
-import { ObjectSelectionController } from "../document/document";
+import { ObjectSelectionController } from "../document/documentUtilities";
 import { Followable, Renderable } from "../types";
 import Vector2 from "../vector2";
 

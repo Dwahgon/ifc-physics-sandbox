@@ -1,17 +1,40 @@
 console.log("Loading gizmos");
 
-import { Followable, PositionPointGizmosStyle, VectorGizmosStyle } from "../types";
+import { PositionPointGizmosStyle, VectorGizmosStyle, SelectionGizmosStyle } from "../types";
 import Vector2 from "../vector2";
 import { CanvasRenderer } from "./canvasRenderer";
 
 export default abstract class Gizmos {
-    static drawSelection(canvasRenderer: CanvasRenderer, object: Followable) {
+    static drawSelection(canvasRenderer: CanvasRenderer, rectStart: Vector2, rectSize: Vector2, selectionStyle: SelectionGizmosStyle) {
+        const ctx = canvasRenderer.context;
+        const cam = canvasRenderer.camera;
 
+        ctx.save();
+
+        let canvasFrom = cam.getCanvasPosFromWorld(rectStart);
+        let sizeOnCanvas = Vector2.mult(rectSize, cam.zoom);
+        const offset =  new Vector2(selectionStyle.offset, selectionStyle.offset);
+
+        canvasFrom = Vector2.sub(canvasFrom, offset);
+        sizeOnCanvas = Vector2.sum(sizeOnCanvas, Vector2.mult(offset, 2));
+
+        ctx.strokeStyle = selectionStyle.style;
+        ctx.lineWidth = selectionStyle.lineThickness;
+        ctx.setLineDash(selectionStyle.lineDash);
+
+        ctx.beginPath();
+        //@ts-ignore
+        ctx.rect(...canvasFrom.toArray(), ...sizeOnCanvas.toArray());
+        ctx.stroke();
+
+        ctx.restore();
     }
 
     static drawVector(canvasRenderer: CanvasRenderer, from: Vector2, to: Vector2, vectorStyle: VectorGizmosStyle) {
         const ctx = canvasRenderer.context;
         const cam = canvasRenderer.camera;
+
+        ctx.save();
 
         const canvasFrom = cam.getCanvasPosFromWorld(from);
         const canvasTo = cam.getCanvasPosFromWorld(to);
@@ -22,11 +45,15 @@ export default abstract class Gizmos {
         ctx.strokeStyle = "gray";
         ctx.lineCap = "square";
         this.drawRect(ctx, canvasFrom, canvasTo);
+
+        ctx.restore();
     }
 
     static drawPositionPoint(canvasRenderer: CanvasRenderer, pos: Vector2, pointPositionStyle: PositionPointGizmosStyle) {
         const ctx = canvasRenderer.context;
         const cam = canvasRenderer.camera;
+
+        ctx.save();
 
         const canvasPos = cam.getCanvasPosFromWorld(pos);
 
@@ -47,6 +74,8 @@ export default abstract class Gizmos {
         ctx.strokeText(pos.toString(), ...Vector2.sum(canvasPos, textOffset).toArray());
         //@ts-ignore
         ctx.fillText(pos.toString(), ...Vector2.sum(canvasPos, textOffset).toArray());
+
+        ctx.restore();
     }
 
     private static drawArrow(ctx: CanvasRenderingContext2D, from: Vector2, to: Vector2, vectorStyle: VectorGizmosStyle) {
