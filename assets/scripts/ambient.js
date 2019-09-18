@@ -35,9 +35,6 @@ define(["require", "exports", "./document/document", "./document/propertyEditor"
         get name() {
             return "Ambiente";
         }
-        get isFollowable() {
-            return false;
-        }
         toJSON() {
             const objectsArrayJson = [];
             this.objects.forEach(obj => objectsArrayJson.push(obj.toJSON()));
