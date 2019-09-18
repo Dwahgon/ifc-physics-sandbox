@@ -8,7 +8,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-define(["require", "exports", "../ambient", "../fileController", "../main", "../physicsObjects", "../vector2", "./buttons", "./document", "./modals"], function (require, exports, ambient_1, fileController_1, Main, physicsObjects_1, vector2_1, Buttons, document_1, Modals) {
+define(["require", "exports", "../ambient", "../fileController", "../main", "../physicsObjects", "../vector2", "./buttons", "./documentUtilities", "./modals"], function (require, exports, ambient_1, fileController_1, Main, physicsObjects_1, vector2_1, Buttons, documentUtilities_1, Modals) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     ambient_1 = __importDefault(ambient_1);
@@ -21,14 +21,14 @@ define(["require", "exports", "../ambient", "../fileController", "../main", "../
         Button onClick setter
     */
     Buttons.getButtonById("destroy-button").onClick = () => {
-        const selectedObject = document_1.ObjectSelectionController.selectedObject;
+        const selectedObject = documentUtilities_1.ObjectSelectionController.selectedObject;
         if (!selectedObject || !selectedObject.destroy || Main.simulator.time != 0)
             return;
         selectedObject.destroy();
-        document_1.ObjectSelectionController.selectObject(Main.ambient);
+        documentUtilities_1.ObjectSelectionController.selectObject(Main.ambient);
     };
     Buttons.getButtonById("follow-button").onClick = () => {
-        const selectedObject = document_1.ObjectSelectionController.selectedObject;
+        const selectedObject = documentUtilities_1.ObjectSelectionController.selectedObject;
         if (!selectedObject || !selectedObject.locate)
             return;
         const camera = Main.canvasRenderer.camera;
@@ -62,7 +62,7 @@ define(["require", "exports", "../ambient", "../fileController", "../main", "../
                         Main.setAmbient(ambient_1.default.fromJSON(result));
                     }
                     catch (_a) {
-                        document_1.Alert.throwAlert("Não foi possível carregar este arquivo!", document_1.Alert.ERROR);
+                        documentUtilities_1.Alert.throwAlert("Não foi possível carregar este arquivo!", documentUtilities_1.Alert.ERROR);
                     }
                 };
             }
@@ -82,10 +82,10 @@ define(["require", "exports", "../ambient", "../fileController", "../main", "../
             position: Main.canvasRenderer.camera.getWorldPosFromCanvas(new vector2_1.default(Main.canvasRenderer.context.canvas.width / 2, Main.canvasRenderer.context.canvas.height / 2)),
             size: new vector2_1.default(1, 1)
         });
-        if (document_1.ObjectSelectionController.propertyEditor && document_1.ObjectSelectionController.selectedObject == Main.ambient)
-            document_1.ObjectSelectionController.propertyEditor.build(Main.ambient);
+        if (documentUtilities_1.ObjectSelectionController.propertyEditor && documentUtilities_1.ObjectSelectionController.selectedObject == Main.ambient)
+            documentUtilities_1.ObjectSelectionController.propertyEditor.build(Main.ambient);
     });
-    Buttons.predefinedClickEvents.set("openPropertyDescription", (args) => document_1.PropertyDescriptionUI.show(parseInt(args)));
+    Buttons.predefinedClickEvents.set("openPropertyDescription", (args) => documentUtilities_1.PropertyDescriptionUI.show(parseInt(args)));
     Buttons.predefinedClickEvents.set("openModal", (args) => {
         const modal = Modals.getModalById(args);
         if (modal)
@@ -96,7 +96,7 @@ define(["require", "exports", "../ambient", "../fileController", "../main", "../
         if (!obj)
             return;
         const cam = Main.canvasRenderer.camera;
-        document_1.ObjectSelectionController.selectObject(obj);
+        documentUtilities_1.ObjectSelectionController.selectObject(obj);
         cam.pos = vector2_1.default.mult(obj.locate(), cam.zoom);
     });
 });

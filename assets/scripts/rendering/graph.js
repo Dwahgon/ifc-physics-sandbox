@@ -8,7 +8,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "../document/buttons", "../document/document", "../document/modals", "../main", "../types", "../vector2"], function (require, exports, Buttons, Document, Modal, Main, types_1, vector2_1) {
+define(["require", "exports", "../document/buttons", "../document/documentUtilities", "../document/modals", "../main", "../types", "../vector2", "../document/documentElements"], function (require, exports, Buttons, Document, Modal, Main, types_1, vector2_1, documentElements_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Buttons = __importStar(Buttons);
@@ -16,6 +16,7 @@ define(["require", "exports", "../document/buttons", "../document/document", "..
     Modal = __importStar(Modal);
     Main = __importStar(Main);
     vector2_1 = __importDefault(vector2_1);
+    documentElements_1 = __importDefault(documentElements_1);
     console.log("Loading graph...");
     /*
         Class definitions
@@ -172,7 +173,7 @@ define(["require", "exports", "../document/buttons", "../document/document", "..
         new PhysicsObjectValueGetter("Deslocamento (módulo)", types_1.PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK)
     ];
     const graphConfigModal = Modal.getModalById("graph-config-modal");
-    const graphConfigForm = Document.documentElements.get("graph-config-form");
+    const graphConfigForm = documentElements_1.default.get("graph-config-form");
     const xAxisPropertySelect = graphConfigForm.querySelector("#x-axis-property");
     const yAxisPropertySelect = graphConfigForm.querySelector("#y-axis-property");
     const xAxisPropertyHolderSelect = graphConfigForm.querySelector("#x-axis-property-holder");

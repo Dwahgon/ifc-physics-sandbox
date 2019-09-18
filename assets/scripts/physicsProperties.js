@@ -58,7 +58,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     class ObjectPosition extends PhysicsProperty {
         constructor(initialPosition, object) {
             super(types_1.PhysicsPropertyType.ObjectPosition, true, object, initialPosition, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "pos<sub>(x, y)</sub>", "m", "Localização", 0, true, initialPosition, this.kind);
+            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "pos<sub>(x, y)</sub>", "m", "Localização", 0, true, initialPosition, "Posição", this.kind);
             this.updateSpritePosition();
         }
         updateSpritePosition() {
@@ -87,7 +87,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     class ObjectSize extends PhysicsProperty {
         constructor(initialSize, object) {
             super(types_1.PhysicsPropertyType.ObjectSize, true, object, initialSize, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "tam<sub>(x, y)</sub>", "m", "Dimensões", 1, true, initialSize, this.kind);
+            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "tam<sub>(x, y)</sub>", "m", "Dimensões", 1, true, initialSize, "Tamanho", this.kind);
             this.objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
             this.updateSpriteSize();
         }
@@ -124,7 +124,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     class ObjectArea extends PhysicsProperty {
         constructor(object) {
             super(types_1.PhysicsPropertyType.ObjectArea, false, object, 0, 0, genericCalulator_1.NumberCalculator.instance);
-            this.propertyEditorInput = new propertyEditor_1.NumberPropertyEditorInput(this, "área", "m", "Dimensões", 2, false, 0, this.kind);
+            this.propertyEditorInput = new propertyEditor_1.NumberPropertyEditorInput(this, "área", "m", "Dimensões", 2, false, 0, "Área", this.kind);
             const objectSize = object.getProperty(types_1.PhysicsPropertyType.ObjectSize);
             const sizeVector2 = (objectSize) ? objectSize.initialValue : vector2_1.default.zero;
             this.initialValue = sizeVector2.x * sizeVector2.y;
@@ -134,7 +134,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     class ObjectVelocity extends PhysicsProperty {
         constructor(object) {
             super(types_1.PhysicsPropertyType.ObjectVelocity, true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance, 1);
-            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "vel", "<sup>m</sup>&frasl;<sub>s</sub>", "Cinemática", 2, true, vector2_1.default.zero, this.kind, "m/s");
+            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "vel", "<sup>m</sup>&frasl;<sub>s</sub>", "Cinemática", 2, true, vector2_1.default.zero, "Vetor velocidade", this.kind, "m/s");
             this.objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
             this.objectAcceleration = this.object.getProperty(types_1.PhysicsPropertyType.ObjectAcceleration);
         }
@@ -158,7 +158,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     class ObjectDisplacement extends PhysicsProperty {
         constructor(object) {
             super(types_1.PhysicsPropertyType.ObjectDisplacement, false, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "des", "m", "Cinemática", 4, false, vector2_1.default.zero, this.kind, "m");
+            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "des", "m", "Cinemática", 4, false, vector2_1.default.zero, "Vetor deslocamento", this.kind, "m");
             this.objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
         }
         simulate(step) {
@@ -177,7 +177,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     class ObjectAcceleration extends PhysicsProperty {
         constructor(object) {
             super(types_1.PhysicsPropertyType.ObjectAcceleration, true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", "Cinemática", 3, true, this.initialValue, this.kind, "m/s²");
+            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", "Cinemática", 3, true, this.initialValue, "Vetor aceleração", this.kind, "m/s²");
             this.objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
         }
         drawGizmos(canvasRenderer) {

@@ -122,6 +122,7 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             this.drawText(ctx, "O", this.style.axisMarkerFont, this.style.originStyle, textX, textY, true, "white", 4);
         }
     }
+    exports.CartesianPlane = CartesianPlane;
     CartesianPlane.ENVIRONMENT_STYLE = {
         xAxisStyle: "red",
         yAxisStyle: "green",
@@ -146,5 +147,4 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
         measurementFont: "italic 12px CMU Serif",
         showMeasurements: true
     };
-    exports.CartesianPlane = CartesianPlane;
 });

@@ -10,6 +10,7 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
         constructor(htmlElement) {
             this.htmlElement = htmlElement;
             this.rows = [];
+            this.enabled = true;
             this.htmlElement.addEventListener("change", this.onChanged.bind(this));
             this.htmlElement.addEventListener("click", this.onClicked.bind(this));
             this.htmlElement.addEventListener("mouseover", this.onMouseOver.bind(this));
@@ -17,6 +18,7 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
         }
         setEnabled(v) {
             this.rows.forEach(row => row.active = v);
+            this.enabled = v;
         }
         build(object) {
             this.clear();
@@ -34,7 +36,10 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
                 const categoryH1 = document.createElement("h1");
                 categoryH1.innerHTML = category.name;
                 this.htmlElement.append(categoryH1);
-                rowWithCategory.forEach(row => row.appendTo(this.htmlElement));
+                rowWithCategory.forEach(row => {
+                    row.appendTo(this.htmlElement);
+                    row.active = this.enabled;
+                });
             });
             this.htmlElement.style.display = this.htmlElement.childElementCount > 0 ? "block" : "none";
             this.rows = propertyEditorRows;
@@ -108,7 +113,7 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
         }
     }
     class PropertyEditorInput extends BasicPropertyEditorRow {
-        constructor(target, name, unit, regExp, category, layoutOrder, changeable, initialValue, descriptionId) {
+        constructor(target, name, unit, regExp, category, layoutOrder, changeable, initialValue, title, descriptionId) {
             super(category, layoutOrder, changeable, descriptionId);
             this.target = target;
             this.regExp = regExp;
@@ -118,6 +123,7 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
             this.nameLabel = document.createElement("label");
             const unitLabel = document.createElement("label");
             this.nameLabel.innerHTML = name;
+            this.nameLabel.title = title;
             unitLabel.innerHTML = unit;
             const inputId = `${name}-input`;
             this.nameLabel.setAttribute("for", inputId);
@@ -170,13 +176,13 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
     }
     exports.PropertyEditorInput = PropertyEditorInput;
     class Vector2PropertyEditorInput extends PropertyEditorInput {
-        constructor(target, name, unit, category, layoutOrder, changeable, initialValue, descriptionId, modulusUnit) {
-            super(target, name, unit, /\-?\d*\.?\d*/g, category, layoutOrder, changeable, initialValue, descriptionId);
+        constructor(target, name, unit, category, layoutOrder, changeable, initialValue, title, descriptionId, modulusUnit) {
+            super(target, name, unit, /\-?\d*\.?\d*/g, category, layoutOrder, changeable, initialValue, title, descriptionId);
             this.modulusUnit = modulusUnit;
             this.updateInputTitle(initialValue);
         }
-        onChanged() {
-            super.onChanged();
+        updateValue(v) {
+            super.updateValue(v);
             this.updateInputTitle(this.target.value);
         }
         formatValue(value) {
@@ -196,8 +202,8 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
     }
     exports.Vector2PropertyEditorInput = Vector2PropertyEditorInput;
     class NumberPropertyEditorInput extends PropertyEditorInput {
-        constructor(target, name, unit, category, layoutOrder, changeable, initialValue, descriptionId) {
-            super(target, name, unit, /\-?\d*\.?\d*/i, category, layoutOrder, changeable, initialValue, descriptionId);
+        constructor(target, name, unit, category, layoutOrder, changeable, initialValue, title, descriptionId) {
+            super(target, name, unit, /\-?\d*\.?\d*/i, category, layoutOrder, changeable, initialValue, title, descriptionId);
         }
         formatValue(value) {
             return value.toFixed(2);
