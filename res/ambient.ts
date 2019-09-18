@@ -59,10 +59,6 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
         return "Ambiente";
     }
 
-    get isFollowable() {
-        return false;
-    }
-
     toJSON(): AmbientJSON {
         const objectsArrayJson: PhysicsObjectJSON[] = [];
         this.objects.forEach(obj => objectsArrayJson.push(obj.toJSON()))
