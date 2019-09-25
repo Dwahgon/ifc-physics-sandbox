@@ -20,7 +20,7 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
             this.kind = kind;
             this.sprite = sprite;
             this.ambient = ambient;
-            this.objectProperties = [];
+            this.properties = new Map();
             this.name = name || this.generateName();
             this.ambient.addObject(this);
         }
@@ -49,26 +49,26 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
         }
         draw(canvasRenderer) {
             this.sprite.draw(canvasRenderer);
-            this.objectProperties.forEach(property => property.drawGizmos(canvasRenderer));
+            this.properties.forEach(property => property.drawGizmos(canvasRenderer));
             if (documentUtilities_1.ObjectSelectionController.selectedObject == this) {
-                const pos = this.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
-                const size = this.getProperty(types_1.PhysicsPropertyType.ObjectSize);
+                const pos = this.getProperty("position");
+                const size = this.getProperty("size");
                 const drawPos = vector2_1.default.sub(pos.value, vector2_1.default.div(size.value, new vector2_1.default(2, -2)));
                 gizmos_1.default.drawSelection(canvasRenderer, drawPos, size.value, { style: "MediumSeaGreen", lineThickness: 4, offset: 6, lineDash: [8, 3] });
             }
         }
-        addProperties(...properties) {
-            properties.forEach(property => this.objectProperties.push(property));
-            this.objectProperties.sort((a, b) => { return b.simulationPriority - a.simulationPriority; });
+        addProperty(name, property) {
+            this.properties.set(name, property);
         }
         simulate(step) {
-            this.objectProperties.forEach(property => property.simulate(step));
+            const sorted = Array.from(this.properties.values()).sort((a, b) => { return b.simulationPriority - a.simulationPriority; });
+            sorted.forEach(property => property.simulate(step));
         }
         reset() {
-            this.objectProperties.forEach(property => property.reset());
+            this.properties.forEach(property => property.reset());
         }
         locate() {
-            return this.getProperty(types_1.PhysicsPropertyType.ObjectPosition).value;
+            return this.getProperty("position").value;
         }
         generateName() {
             const objs = this.ambient.objects.filter(obj => obj.kind == this.kind);
@@ -86,25 +86,26 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
          * @param position
          */
         isPositionInsideObject(position) {
-            const objPos = this.getProperty(types_1.PhysicsPropertyType.ObjectPosition).value;
-            let objSize = this.getProperty(types_1.PhysicsPropertyType.ObjectSize).value;
+            const objPos = this.getProperty("position").value;
+            let objSize = this.getProperty("size").value;
             objSize = vector2_1.default.div(objSize, 2);
             return position.x >= objPos.x - objSize.x &&
                 position.x <= objPos.x + objSize.x &&
                 position.y >= objPos.y - objSize.y &&
                 position.y <= objPos.y + objSize.y;
         }
-        getProperty(type) {
-            switch (type) {
-                case types_1.PhysicsPropertyType.All:
-                    return this.objectProperties;
-                default:
-                    return this.objectProperties.find(physicsProperty => { return physicsProperty.kind == type; });
-            }
+        getProperty(property) {
+            if (typeof property == "number")
+                return Array.from(this.properties.values()).find(el => el.kind == property);
+            else
+                return this.properties.get(property);
+        }
+        getAllProperties() {
+            return Array.from(this.properties.values());
         }
         getPropertyEditorRows() {
             const rows = [];
-            this.objectProperties.forEach(el => {
+            this.properties.forEach(el => {
                 if (el.propertyEditorInput)
                     rows.push(el.propertyEditorInput);
             });
@@ -116,24 +117,25 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
         }
         toJSON() {
             const properties = [];
-            this.objectProperties.forEach(prop => properties.push(prop.toJSON()));
+            this.properties.forEach(prop => properties.push(prop.toJSON()));
             return Object.assign({}, {
                 kind: this.kind,
                 properties: properties
             });
         }
     }
-    exports.PhysicsObject = PhysicsObject;
     PhysicsObject.DEFAULT_NAME = "";
+    exports.PhysicsObject = PhysicsObject;
     class Solid extends PhysicsObject {
         constructor(ambient, properties) {
             super(types_1.PhysicsObjectType.Solid, new sprite_1.Sprite("./assets/images/solid.svg", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient, properties ? properties.name : undefined);
-            this.addProperties(new PhysicsProperties.ObjectPosition(properties ? properties.position : vector2_1.default.zero, this));
-            this.addProperties(new PhysicsProperties.ObjectAcceleration(this));
-            this.addProperties(new PhysicsProperties.ObjectVelocity(this));
-            this.addProperties(new PhysicsProperties.ObjectSize(properties ? properties.size : vector2_1.default.zero, this));
-            this.addProperties(new PhysicsProperties.ObjectArea(this));
-            this.addProperties(new PhysicsProperties.ObjectDisplacement(this));
+            this.addProperty("position", new PhysicsProperties.ObjectPosition(properties ? properties.position : vector2_1.default.zero, this));
+            this.addProperty("acceleration", new PhysicsProperties.ObjectAcceleration(this));
+            this.addProperty("velocity", new PhysicsProperties.ObjectVelocity(this));
+            this.addProperty("size", new PhysicsProperties.ObjectSize(properties ? properties.size : vector2_1.default.zero, this));
+            this.addProperty("area", new PhysicsProperties.ObjectArea(this));
+            this.addProperty("displacement", new PhysicsProperties.ObjectDisplacement(this));
+            this.addProperty("centripetalAcceleration", new PhysicsProperties.ObjectCentripetalAcceleration(this, false));
         }
     }
     Solid.DEFAULT_NAME = "Sólido";

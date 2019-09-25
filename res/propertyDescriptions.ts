@@ -1,8 +1,6 @@
-import { PhysicsPropertyType } from './types';
-
-const propertyDescriptions = new Map<PhysicsPropertyType, string>();
+const propertyDescriptions = new Map<number, string>();
 propertyDescriptions.set(
-    PhysicsPropertyType.ObjectPosition,
+    0,
     `
     <h1>
         Posição

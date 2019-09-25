@@ -5,7 +5,7 @@ import propertyDescriptions from '../propertyDescriptions';
 import { CanvasRenderer } from "../rendering/canvasRenderer";
 import { CartesianPlane } from "../rendering/cartesianPlane";
 import { Graph } from "../rendering/graph";
-import { PhysicsPropertyType, Selectable } from '../types';
+import { PhysicsObjectType, Selectable } from '../types';
 import Vector2 from "../vector2";
 import * as Buttons from "./buttons";
 import documentElements from "./documentElements";
@@ -19,7 +19,7 @@ export abstract class PropertyDescriptionUI {
         this.modal.setVisible(isVisible);
     }
 
-    static show(propertyKind: PhysicsPropertyType): void {
+    static show(propertyKind: PhysicsObjectType): void {
         this.setElementVisible(true);
 
         const description = propertyDescriptions.get(propertyKind);
@@ -43,7 +43,7 @@ export abstract class GraphPanel {
     private static cartesianPlane: CartesianPlane;
     private static graph: Graph | null;
 
-    static initialize(element: HTMLDivElement) {
+    static initialize(element: HTMLDivElement, closeGraphButton: Buttons.Button) {
         this.panel = element!;
         this.title = this.panel.querySelector("h1")!;
 
@@ -56,6 +56,8 @@ export abstract class GraphPanel {
         this.canvasRenderer.camera.pos = new Vector2(150, 150);
         this.cartesianPlane = new CartesianPlane(1);
         this.canvasRenderer.add(this.cartesianPlane);
+
+        closeGraphButton.onClick = () => this.stopRenderingGraph();
     }
 
     static setElementVisible(v: boolean, title: string = "Gráfico") {
@@ -181,6 +183,6 @@ export abstract class Alert {
 
 //Initialize static classes
 
-GraphPanel.initialize(<HTMLDivElement>documentElements.get("graph-panel")!);
+GraphPanel.initialize(<HTMLDivElement>documentElements.get("graph-panel")!, Buttons.getButtonById("close-graph-panel-button")!);
 Alert.initialize(<HTMLDivElement>documentElements.get("alert")!);
 ObjectSelectionController.initialize(new PropertyEditor(<HTMLElement>documentElements.get("property-list")));

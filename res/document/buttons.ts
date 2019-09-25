@@ -163,14 +163,14 @@ document.addEventListener("click", ev => {
         return;
 
     const buttonObject = getButtonById(target.getAttribute("button-name")!);
+    const buttonElement = document.querySelector(`button#${target.getAttribute("button-name")}`);
+    
     if (buttonObject && buttonObject.onClick)
         buttonObject.click();
-    else {
-        const buttonElement = document.querySelector(`button#${target.getAttribute("button-name")}`);
-        if (buttonElement && buttonElement.getAttribute("func")) {
-            const func = predefinedClickEvents.get(buttonElement.getAttribute("func")!);
-            if (func)
-                func(buttonElement.getAttribute("args"));
-        }
+
+    if (buttonElement && buttonElement.getAttribute("func")) {
+        const func = predefinedClickEvents.get(buttonElement.getAttribute("func")!);
+        if (func)
+            func(buttonElement.getAttribute("args"));
     }
 });

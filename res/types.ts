@@ -4,7 +4,6 @@ import PhysicsProperty from './physicsProperties';
 import { CanvasRenderer } from './rendering/canvasRenderer';
 import Vector2 from './vector2';
 import Simulator from './simulator';
-import Gizmos from './rendering/gizmos';
 
 /* Enums */
 
@@ -14,26 +13,21 @@ export enum ButtonColor {
     InvisibleBackground = "invisible-bg-button"
 }
 
-export enum PhysicsPropertyType {
-    All = 0,
-    ObjectPosition = 1,
-    ObjectAcceleration = 2,
-    ObjectSize = 3,
-    ObjectArea = 4,
-    ObjectVelocity = 5,
-    ObjectDisplacement = 6
-}
-
 export enum PhysicsObjectType {
     Solid = 0
 }
+
+/* Types */
+
+export type PhysicsPropertyName = "position" | "size" | "velocity" | "acceleration" | "displacement" | "area" | "name" | "centripetalAcceleration";
 
 /* Interfaces */
 
 export interface Selectable {
     name: string;
     getPropertyEditorRows?(): PropertyEditorRow[];
-    getProperty(type: PhysicsPropertyType): PhysicsProperty<any>[] | PhysicsProperty<any> | undefined;
+    getProperty(name: PhysicsPropertyName): PhysicsProperty<any> | undefined;
+    getAllProperties(): PhysicsProperty<any>[] | undefined;
     destroy?(): void;
 }
 
@@ -117,7 +111,6 @@ export interface SelectionGizmosStyle extends GizmosStyle {
     offset: number;
 }
 
-
 export interface PropertyEditorRow {
     readonly element: HTMLElement;
     readonly category: string;
@@ -128,4 +121,24 @@ export interface PropertyEditorRow {
     onClicked?(ev: MouseEvent): void;
     onMouseOver?(ev: MouseEvent): void;
     onMouseOut?(ev: MouseEvent): void;
+}
+
+export interface PropertyEditorFormTarget {
+    doDrawGizmos: boolean;
+    onUserInput(formData: any[]): void;
+    onUserToggle?(v: boolean): void;
+}
+
+export interface PropertyEditorFormInput<T> {
+    name: string;
+    active: boolean;
+    appendTo(target: HTMLElement): void;
+    onChanged(): T;
+    resetToLastValue(): void;
+    updateValue(v: T): void;
+}
+
+export interface VectorModulus {
+    vector: Vector2;
+    modulus: number;
 }

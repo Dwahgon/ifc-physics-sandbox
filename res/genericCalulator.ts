@@ -1,4 +1,5 @@
 import Vector2 from "./vector2";
+import { VectorModulus } from "./types";
 
 export default interface GenericCalculator<T> {
     sum(a: T, b: T): T;
@@ -42,5 +43,36 @@ export class NumberCalculator implements GenericCalculator<number>{
     }
     div(a: number, b: number): number {
         return a / b;
+    }
+}
+
+export class VectorModulusCalculator implements GenericCalculator<VectorModulus> {
+    public static readonly instance: GenericCalculator<any> = new VectorModulusCalculator();
+
+    private constructor() { }
+
+    sum(a: VectorModulus, b: VectorModulus): VectorModulus {
+        return {
+            modulus: a.modulus + b.modulus,
+            vector: Vector2.sum(a.vector, b.vector)
+        };
+    }
+    sub(a: VectorModulus, b: VectorModulus): VectorModulus {
+        return {
+            modulus: a.modulus - b.modulus,
+            vector: Vector2.sub(a.vector, b.vector)
+        };
+    }
+    mult(a: VectorModulus, b: VectorModulus): VectorModulus {
+        return {
+            modulus: a.modulus * b.modulus,
+            vector: Vector2.mult(a.vector, b.vector)
+        };
+    }
+    div(a: VectorModulus, b: VectorModulus): VectorModulus {
+        return {
+            modulus: a.modulus / b.modulus,
+            vector: Vector2.div(a.vector, b.vector)
+        };
     }
 }

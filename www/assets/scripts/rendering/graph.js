@@ -8,7 +8,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "../document/buttons", "../document/documentUtilities", "../document/modals", "../main", "../types", "../vector2", "../document/documentElements"], function (require, exports, Buttons, Document, Modal, Main, types_1, vector2_1, documentElements_1) {
+define(["require", "exports", "../document/buttons", "../document/documentUtilities", "../document/modals", "../main", "../vector2", "../document/documentElements"], function (require, exports, Buttons, Document, Modal, Main, vector2_1, documentElements_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Buttons = __importStar(Buttons);
@@ -123,6 +123,7 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
                     if (pointFinish) {
                         const canvasFinish = cam.getCanvasPosFromWorld(pointFinish);
                         this.drawLine(ctx, canvasStart, canvasFinish, 5, "black");
+                        ctx.lineCap = "round";
                         this.drawLine(ctx, canvasStart, canvasFinish, 3, "orange");
                     }
                 }
@@ -157,20 +158,20 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
     */
     const valueGetters = [
         new SimulatorValueGetter("Tempo", SimulatorValueGetter.TIME_CALLBACK),
-        new PhysicsObjectValueGetter("Posição (eixo X)", types_1.PhysicsPropertyType.ObjectPosition, PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
-        new PhysicsObjectValueGetter("Posição (eixo Y)", types_1.PhysicsPropertyType.ObjectPosition, PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
-        new PhysicsObjectValueGetter("Tamanho (eixo X)", types_1.PhysicsPropertyType.ObjectSize, PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
-        new PhysicsObjectValueGetter("Tamanho (eixo Y)", types_1.PhysicsPropertyType.ObjectSize, PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
-        new PhysicsObjectValueGetter("Área", types_1.PhysicsPropertyType.ObjectArea, PhysicsObjectValueGetter.NUMBER_CALLBACK),
-        new PhysicsObjectValueGetter("Aceleração (eixo X)", types_1.PhysicsPropertyType.ObjectAcceleration, PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
-        new PhysicsObjectValueGetter("Aceleração (eixo Y)", types_1.PhysicsPropertyType.ObjectAcceleration, PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
-        new PhysicsObjectValueGetter("Aceleração (módulo)", types_1.PhysicsPropertyType.ObjectAcceleration, PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK),
-        new PhysicsObjectValueGetter("Velocidade (eixo X)", types_1.PhysicsPropertyType.ObjectVelocity, PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
-        new PhysicsObjectValueGetter("Velocidade (eixo Y)", types_1.PhysicsPropertyType.ObjectVelocity, PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
-        new PhysicsObjectValueGetter("Velocidade (módulo)", types_1.PhysicsPropertyType.ObjectVelocity, PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK),
-        new PhysicsObjectValueGetter("Deslocamento (eixo X)", types_1.PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
-        new PhysicsObjectValueGetter("Deslocamento (eixo Y)", types_1.PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
-        new PhysicsObjectValueGetter("Deslocamento (módulo)", types_1.PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK)
+        new PhysicsObjectValueGetter("Posição (eixo X)", "position", PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
+        new PhysicsObjectValueGetter("Posição (eixo Y)", "position", PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
+        new PhysicsObjectValueGetter("Tamanho (eixo X)", "size", PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
+        new PhysicsObjectValueGetter("Tamanho (eixo Y)", "size", PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
+        new PhysicsObjectValueGetter("Área", "area", PhysicsObjectValueGetter.NUMBER_CALLBACK),
+        new PhysicsObjectValueGetter("Aceleração (eixo X)", "acceleration", PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
+        new PhysicsObjectValueGetter("Aceleração (eixo Y)", "acceleration", PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
+        new PhysicsObjectValueGetter("Aceleração (módulo)", "acceleration", PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK),
+        new PhysicsObjectValueGetter("Velocidade (eixo X)", "velocity", PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
+        new PhysicsObjectValueGetter("Velocidade (eixo Y)", "velocity", PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
+        new PhysicsObjectValueGetter("Velocidade (módulo)", "velocity", PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK),
+        new PhysicsObjectValueGetter("Deslocamento (eixo X)", "displacement", PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
+        new PhysicsObjectValueGetter("Deslocamento (eixo Y)", "displacement", PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
+        new PhysicsObjectValueGetter("Deslocamento (módulo)", "displacement", PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK)
     ];
     const graphConfigModal = Modal.getModalById("graph-config-modal");
     const graphConfigForm = documentElements_1.default.get("graph-config-form");

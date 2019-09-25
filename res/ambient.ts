@@ -7,7 +7,7 @@ import { PhysicsObject } from './physicsObjects';
 import { ObjectPosition } from './physicsProperties';
 import { Camera, CanvasRenderer } from './rendering/canvasRenderer';
 import Simulator from './simulator';
-import { PhysicsPropertyType, PropertyEditorRow, Renderable, Selectable, Simulatable } from './types';
+import { PhysicsPropertyName, PropertyEditorRow, Renderable, Selectable, Simulatable } from './types';
 import Vector2 from './vector2';
 
 export default class Ambient implements Selectable, Renderable, Simulatable {
@@ -99,6 +99,10 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
         return undefined;
     }
 
+    getAllProperties(): undefined{
+        return undefined;
+    }
+
     draw(canvasRenderer: CanvasRenderer): void {
         this.objects.forEach(obj => obj.draw(canvasRenderer));
     }
@@ -162,7 +166,7 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
         } else if (this.draggingObject && !Vector2.equals(cursorCoordinates, this.lastCursosPos)) {
             canvas.style.cursor = "pointer";
 
-            const objPos = <ObjectPosition>this.draggingObject.getProperty(PhysicsPropertyType.ObjectPosition)!;
+            const objPos = <ObjectPosition>this.draggingObject.getProperty("position")!;
             const cursorPos = new Vector2(cursorCoordinates.x, -cursorCoordinates.y);
             const cursorWorldPos = camera.getWorldPosFromCanvas(cursorPos);
             const newPos = (this.snapToGrid) ? new Vector2(Math.round(cursorWorldPos.x), Math.round(cursorWorldPos.y)) : cursorWorldPos;

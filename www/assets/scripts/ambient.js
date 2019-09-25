@@ -1,7 +1,7 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./document/documentUtilities", "./document/propertyEditor", "./physicsObjects", "./types", "./vector2"], function (require, exports, documentUtilities_1, propertyEditor_1, physicsObjects_1, types_1, vector2_1) {
+define(["require", "exports", "./document/documentUtilities", "./document/propertyEditor", "./physicsObjects", "./vector2"], function (require, exports, documentUtilities_1, propertyEditor_1, physicsObjects_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_1 = __importDefault(vector2_1);
@@ -63,6 +63,9 @@ define(["require", "exports", "./document/documentUtilities", "./document/proper
         getProperty() {
             return undefined;
         }
+        getAllProperties() {
+            return undefined;
+        }
         draw(canvasRenderer) {
             this.objects.forEach(obj => obj.draw(canvasRenderer));
         }
@@ -115,7 +118,7 @@ define(["require", "exports", "./document/documentUtilities", "./document/proper
             }
             else if (this.draggingObject && !vector2_1.default.equals(cursorCoordinates, this.lastCursosPos)) {
                 canvas.style.cursor = "pointer";
-                const objPos = this.draggingObject.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
+                const objPos = this.draggingObject.getProperty("position");
                 const cursorPos = new vector2_1.default(cursorCoordinates.x, -cursorCoordinates.y);
                 const cursorWorldPos = camera.getWorldPosFromCanvas(cursorPos);
                 const newPos = (this.snapToGrid) ? new vector2_1.default(Math.round(cursorWorldPos.x), Math.round(cursorWorldPos.y)) : cursorWorldPos;

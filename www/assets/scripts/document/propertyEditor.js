@@ -88,7 +88,7 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
             this._active = changeable;
             this.element = document.createElement("li");
             this.element.setAttribute("class", changeable ? "active-row" : "inactive-row");
-            if (descriptionId) {
+            if (descriptionId != undefined) {
                 const descriptionButton = buttons_1.Button.createButtonElement({
                     buttonName: `open-${descriptionId}-description-button`,
                     buttonColor: types_1.ButtonColor.Dark,
@@ -112,51 +112,61 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
             target.appendChild(this.element);
         }
     }
-    class PropertyEditorInput extends BasicPropertyEditorRow {
-        constructor(target, name, unit, regExp, category, layoutOrder, changeable, initialValue, title, descriptionId) {
+    class PropertyEditorForm extends BasicPropertyEditorRow {
+        constructor(target, name, category, layoutOrder, changeable, toggleable, title, descriptionId) {
             super(category, layoutOrder, changeable, descriptionId);
             this.target = target;
-            this.regExp = regExp;
+            this.inputList = [];
             this.element.classList.add("input-row");
-            this.input = document.createElement("input");
-            this.lastValue = this.formatValue(initialValue);
+            this.formElement = document.createElement("form");
             this.nameLabel = document.createElement("label");
-            const unitLabel = document.createElement("label");
             this.nameLabel.innerHTML = name;
             this.nameLabel.title = title;
-            unitLabel.innerHTML = unit;
-            const inputId = `${name}-input`;
-            this.nameLabel.setAttribute("for", inputId);
-            this.input.disabled = !changeable;
-            this.input.id = inputId;
-            this.input.value = this.lastValue;
-            this.element.append(this.nameLabel, this.input, unitLabel);
+            if (toggleable) {
+                this.toggleElement = document.createElement("input");
+                this.toggleElement.type = "checkbox";
+                this.toggleElement.classList.add("toggle-input");
+                this._toggled = true;
+                this.element.appendChild(this.toggleElement);
+            }
+            this.element.append(this.nameLabel, this.formElement);
         }
         get active() {
             return super.active;
         }
         set active(v) {
             super.active = v;
-            this.input.disabled = !v || !this.changeable;
+            this.inputList.forEach(input => input.active = v && this.changeable);
+            if (this.toggleElement)
+                this.toggleElement.disabled = !v || !this.changeable;
         }
-        updateValue(v) {
-            const formattedValue = this.formatValue(v);
-            this.input.value = formattedValue;
-            this.lastValue = formattedValue;
+        get toggled() {
+            return this._toggled;
         }
-        onChanged() {
-            let match = this.input.value.match(this.regExp);
-            if (!match) {
-                this.resetToLastValue();
-                return;
+        set toggled(v) {
+            this._toggled = v;
+            this.toggleElement.checked = v || false;
+        }
+        addInput(input) {
+            this.inputList.push(input);
+            input.appendTo(this.formElement);
+        }
+        getInput(name) {
+            if (name)
+                return this.inputList.find(el => el.name == name);
+            return this.inputList.length > 0 ? this.inputList[0] : undefined;
+        }
+        onChanged(ev) {
+            const tgt = ev.target;
+            if (tgt.classList.contains("toggle-input")) {
+                this.toggled = tgt.checked;
+                if (this.target.onUserToggle)
+                    this.target.onUserToggle(this.toggled);
             }
-            match = match.filter(el => { return el != ""; });
-            const matchResult = this.processMatch(match);
-            if (!matchResult) {
-                this.resetToLastValue();
-                return;
+            else {
+                const map = this.inputList.map(input => input.onChanged());
+                this.target.onUserInput(map);
             }
-            this.target.onUserInput(matchResult);
         }
         onMouseOver(ev) {
             this.target.doDrawGizmos = true;
@@ -164,8 +174,59 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
         onMouseOut(ev) {
             this.target.doDrawGizmos = false;
         }
+    }
+    exports.PropertyEditorForm = PropertyEditorForm;
+    class FormInput {
+        constructor(name, unit, initialValue, regExp, changeable, createNameLabel) {
+            this.name = name;
+            this.regExp = regExp;
+            this.changeable = changeable;
+            this._active = changeable;
+            this.lastValue = initialValue;
+            this.element = document.createElement("div");
+            this.input = document.createElement("input");
+            const unitLabel = document.createElement("label");
+            unitLabel.innerHTML = unit;
+            this.input.value = this.formatValue(initialValue);
+            this.active = changeable;
+            if (createNameLabel) {
+                const nameLabel = document.createElement("label");
+                nameLabel.innerHTML = name;
+                this.element.appendChild(nameLabel);
+            }
+            this.element.append(this.input, unitLabel);
+        }
+        get active() {
+            return this._active;
+        }
+        set active(v) {
+            this._active = v && this.changeable;
+            this.input.disabled = !v || !this.changeable;
+        }
+        appendTo(element) {
+            element.appendChild(this.element);
+        }
         resetToLastValue() {
-            this.input.value = this.lastValue;
+            this.input.value = this.formatValue(this.lastValue);
+        }
+        onChanged() {
+            const reset = () => {
+                const lastValue = this.lastValue;
+                this.resetToLastValue();
+                return lastValue;
+            };
+            let match = this.input.value.match(this.regExp);
+            if (!match)
+                return reset();
+            match = match.filter(el => { return el != ""; });
+            const matchResult = this.processMatch(match);
+            if (!matchResult)
+                return reset();
+            return matchResult;
+        }
+        updateValue(v) {
+            this.lastValue = v;
+            this.input.value = this.formatValue(v);
         }
         formatValue(value) {
             return "NaN";
@@ -174,16 +235,16 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
             return undefined;
         }
     }
-    exports.PropertyEditorInput = PropertyEditorInput;
-    class Vector2PropertyEditorInput extends PropertyEditorInput {
-        constructor(target, name, unit, category, layoutOrder, changeable, initialValue, title, descriptionId, modulusUnit) {
-            super(target, name, unit, /\-?\d*\.?\d*/g, category, layoutOrder, changeable, initialValue, title, descriptionId);
+    exports.FormInput = FormInput;
+    class Vector2FormInput extends FormInput {
+        constructor(name, unit, initialValue, changeable, createNameLabel, modulusUnit) {
+            super(name, unit, initialValue, /\-?\d*\.?\d*/g, changeable, createNameLabel);
             this.modulusUnit = modulusUnit;
-            this.updateInputTitle(initialValue);
         }
         updateValue(v) {
             super.updateValue(v);
-            this.updateInputTitle(this.target.value);
+            if (this.modulusUnit)
+                this.input.title = `Módulo: ${v.magnitude()} ${this.modulusUnit}`;
         }
         formatValue(value) {
             return `(${value.x.toFixed(2)}, ${value.y.toFixed(2)})`;
@@ -195,15 +256,11 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
             }
             return new vector2_1.default(Number(match[0]), Number(match[1]));
         }
-        updateInputTitle(value) {
-            if (this.modulusUnit)
-                this.input.title = `Módulo: ${vector2_1.default.distance(vector2_1.default.zero, value)} ${this.modulusUnit}`;
-        }
     }
-    exports.Vector2PropertyEditorInput = Vector2PropertyEditorInput;
-    class NumberPropertyEditorInput extends PropertyEditorInput {
-        constructor(target, name, unit, category, layoutOrder, changeable, initialValue, title, descriptionId) {
-            super(target, name, unit, /\-?\d*\.?\d*/i, category, layoutOrder, changeable, initialValue, title, descriptionId);
+    exports.Vector2FormInput = Vector2FormInput;
+    class NumberFormInput extends FormInput {
+        constructor(name, unit, initialValue, changeable, createNameLabel) {
+            super(name, unit, initialValue, /\-?\d*\.?\d*/i, changeable, createNameLabel);
         }
         formatValue(value) {
             return value.toFixed(2);
@@ -216,7 +273,7 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
             return Number(match[0]);
         }
     }
-    exports.NumberPropertyEditorInput = NumberPropertyEditorInput;
+    exports.NumberFormInput = NumberFormInput;
     class ObjectLocatorPropertyEditorRow extends BasicPropertyEditorRow {
         constructor(target, category, layoutOrder, descriptionId) {
             super(category, layoutOrder, true, descriptionId);

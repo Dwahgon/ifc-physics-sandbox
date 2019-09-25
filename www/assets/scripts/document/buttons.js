@@ -119,15 +119,13 @@ define(["require", "exports"], function (require, exports) {
         if (!target || !target.getAttribute("button-name"))
             return;
         const buttonObject = exports.getButtonById(target.getAttribute("button-name"));
+        const buttonElement = document.querySelector(`button#${target.getAttribute("button-name")}`);
         if (buttonObject && buttonObject.onClick)
             buttonObject.click();
-        else {
-            const buttonElement = document.querySelector(`button#${target.getAttribute("button-name")}`);
-            if (buttonElement && buttonElement.getAttribute("func")) {
-                const func = exports.predefinedClickEvents.get(buttonElement.getAttribute("func"));
-                if (func)
-                    func(buttonElement.getAttribute("args"));
-            }
+        if (buttonElement && buttonElement.getAttribute("func")) {
+            const func = exports.predefinedClickEvents.get(buttonElement.getAttribute("func"));
+            if (func)
+                func(buttonElement.getAttribute("args"));
         }
     });
 });

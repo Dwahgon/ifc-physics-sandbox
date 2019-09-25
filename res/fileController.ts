@@ -1,4 +1,4 @@
-import { PhysicsObjectType, PhysicsPropertyType } from "./types";
+import { PhysicsObjectType, PhysicsPropertyName } from "./types";
 
 export interface AmbientJSON {
     objects: PhysicsObjectJSON[];
@@ -10,7 +10,7 @@ export interface PhysicsObjectJSON {
 }
 
 export interface PhysicsPropertyJSON<T> {
-    kind: PhysicsPropertyType;
+    kind: PhysicsPropertyName;
     iValue: T;
 }
 

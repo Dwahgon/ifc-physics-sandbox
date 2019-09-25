@@ -9,6 +9,14 @@ export default class Vector2 {
         return new Vector2(this.x, this.y);
     }
 
+    magnitude(): number {
+        return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+    }
+
+    unit(): Vector2 {
+        return Vector2.div(this, this.magnitude());
+    }
+
     toString() {
         return "(" + this.x + ", " + this.y + ")";
     }

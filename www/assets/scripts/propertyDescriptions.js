@@ -1,8 +1,8 @@
-define(["require", "exports", "./types"], function (require, exports, types_1) {
+define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const propertyDescriptions = new Map();
-    propertyDescriptions.set(types_1.PhysicsPropertyType.ObjectPosition, `
+    propertyDescriptions.set(0, `
     <h1>
         Posição
     </h1>

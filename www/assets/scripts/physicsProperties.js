@@ -1,7 +1,7 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./document/propertyEditor", "./genericCalulator", "./rendering/gizmos", "./types", "./vector2"], function (require, exports, propertyEditor_1, genericCalulator_1, gizmos_1, types_1, vector2_1) {
+define(["require", "exports", "./document/propertyEditor", "./genericCalulator", "./rendering/gizmos", "./vector2"], function (require, exports, propertyEditor_1, genericCalulator_1, gizmos_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     gizmos_1 = __importDefault(gizmos_1);
@@ -18,7 +18,6 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
             this.simulationPriority = simulationPriority;
             this.propertyEditorInput = null;
             this.active = true;
-            this.onValueChangedCallbacks = [];
             this.doDrawGizmos = false;
         }
         get initialValue() {
@@ -26,19 +25,17 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         }
         set initialValue(value) {
             this.iValue = value;
-            this.propertyEditorInput.updateValue(this.value);
-            this.onValueChangedCallbacks.forEach(callback => callback());
+            this.updateInputValue(this.value);
         }
         get value() {
             return this.genericCalculator.sum(this.iValue, this.oValue);
         }
         set value(value) {
             this.oValue = this.genericCalculator.sub(value, this.iValue);
-            this.propertyEditorInput.updateValue(this.value);
-            this.onValueChangedCallbacks.forEach(callback => callback());
+            this.updateInputValue(this.value);
         }
-        onUserInput(value) {
-            this.initialValue = value;
+        onUserInput(formData) {
+            this.initialValue = formData[0];
         }
         drawGizmos(canvasRenderer) {
         }
@@ -53,12 +50,17 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
                 iValue: this.iValue
             });
         }
+        updateInputValue(value) {
+            if (this.propertyEditorInput)
+                this.propertyEditorInput.getInput().updateValue(value);
+        }
     }
     exports.default = PhysicsProperty;
     class ObjectPosition extends PhysicsProperty {
         constructor(initialPosition, object) {
-            super(types_1.PhysicsPropertyType.ObjectPosition, true, object, initialPosition, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "pos<sub>(x, y)</sub>", "m", "Localização", 0, true, initialPosition, "Posição", this.kind);
+            super("position", true, object, initialPosition, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorForm(this, "pos<sub>(x, y)</sub>", "Localização", 0, true, false, "Posição", 0);
+            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2FormInput("position", "m", initialPosition, true, false));
             this.updateSpritePosition();
         }
         updateSpritePosition() {
@@ -86,9 +88,10 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     exports.ObjectPosition = ObjectPosition;
     class ObjectSize extends PhysicsProperty {
         constructor(initialSize, object) {
-            super(types_1.PhysicsPropertyType.ObjectSize, true, object, initialSize, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "tam<sub>(x, y)</sub>", "m", "Dimensões", 1, true, initialSize, "Tamanho", this.kind);
-            this.objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
+            super("size", true, object, initialSize, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorForm(this, "tam<sub>(x, y)</sub>", "Dimensões", 1, true, false, "Tamanho", 1);
+            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2FormInput("size", "m", initialSize, true, false));
+            this.objectPosition = this.object.getProperty("position");
             this.updateSpriteSize();
         }
         updateSpriteSize() {
@@ -98,7 +101,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
             super.initialValue = value;
             this.updateSpriteSize();
             // Change area
-            const objArea = this.object.getProperty(types_1.PhysicsPropertyType.ObjectArea);
+            const objArea = this.object.getProperty("area");
             if (objArea)
                 objArea.initialValue = this.value.x * this.value.y;
         }
@@ -123,20 +126,22 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     exports.ObjectSize = ObjectSize;
     class ObjectArea extends PhysicsProperty {
         constructor(object) {
-            super(types_1.PhysicsPropertyType.ObjectArea, false, object, 0, 0, genericCalulator_1.NumberCalculator.instance);
-            this.propertyEditorInput = new propertyEditor_1.NumberPropertyEditorInput(this, "área", "m", "Dimensões", 2, false, 0, "Área", this.kind);
-            const objectSize = object.getProperty(types_1.PhysicsPropertyType.ObjectSize);
+            super("area", false, object, 0, 0, genericCalulator_1.NumberCalculator.instance);
+            const objectSize = object.getProperty("size");
             const sizeVector2 = (objectSize) ? objectSize.initialValue : vector2_1.default.zero;
             this.initialValue = sizeVector2.x * sizeVector2.y;
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorForm(this, "área", "Dimensões", 2, false, false, "Área", 2);
+            this.propertyEditorInput.addInput(new propertyEditor_1.NumberFormInput("area", "m", this.initialValue, false, false));
         }
     }
     exports.ObjectArea = ObjectArea;
     class ObjectVelocity extends PhysicsProperty {
         constructor(object) {
-            super(types_1.PhysicsPropertyType.ObjectVelocity, true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance, 1);
-            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "vel", "<sup>m</sup>&frasl;<sub>s</sub>", "Cinemática", 2, true, vector2_1.default.zero, "Vetor velocidade", this.kind, "m/s");
-            this.objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
-            this.objectAcceleration = this.object.getProperty(types_1.PhysicsPropertyType.ObjectAcceleration);
+            super("velocity", true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance, 1);
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorForm(this, "vel", "Cinemática", 2, true, false, "Vetor velocidade", 3);
+            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2FormInput("velocity", "<sup>m</sup>&frasl;<sub>s</sub>", this.initialValue, true, false, "m/s"));
+            this.objectPosition = this.object.getProperty("position");
+            this.objectAcceleration = this.object.getProperty("acceleration");
         }
         simulate(step) {
             const currentVel = this.value;
@@ -157,9 +162,10 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     exports.ObjectVelocity = ObjectVelocity;
     class ObjectDisplacement extends PhysicsProperty {
         constructor(object) {
-            super(types_1.PhysicsPropertyType.ObjectDisplacement, false, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "des", "m", "Cinemática", 4, false, vector2_1.default.zero, "Vetor deslocamento", this.kind, "m");
-            this.objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
+            super("displacement", false, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorForm(this, "des", "Cinemática", 5, false, false, "Vetor deslocamento", 4);
+            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2FormInput("displacement", "m", this.initialValue, false, false, "m"));
+            this.objectPosition = this.object.getProperty("position");
         }
         simulate(step) {
             if (this.objectPosition)
@@ -176,9 +182,10 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     exports.ObjectDisplacement = ObjectDisplacement;
     class ObjectAcceleration extends PhysicsProperty {
         constructor(object) {
-            super(types_1.PhysicsPropertyType.ObjectAcceleration, true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyEditorInput = new propertyEditor_1.Vector2PropertyEditorInput(this, "acel", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", "Cinemática", 3, true, this.initialValue, "Vetor aceleração", this.kind, "m/s²");
-            this.objectPosition = this.object.getProperty(types_1.PhysicsPropertyType.ObjectPosition);
+            super("acceleration", true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorForm(this, "acel", "Cinemática", 3, true, false, "Vetor aceleração", 5);
+            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2FormInput("acceleration", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue, true, false, "m/s²"));
+            this.objectPosition = this.object.getProperty("position");
         }
         drawGizmos(canvasRenderer) {
             if (this.doDrawGizmos && this.objectPosition) {
@@ -189,4 +196,42 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         }
     }
     exports.ObjectAcceleration = ObjectAcceleration;
+    class ObjectCentripetalAcceleration extends PhysicsProperty {
+        constructor(object, active) {
+            super("centripetalAcceleration", true, object, { vector: vector2_1.default.zero, modulus: 0 }, { vector: vector2_1.default.zero, modulus: 0 }, genericCalulator_1.VectorModulusCalculator.instance, 2);
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorForm(this, "a<sub>c</sub>", "Cinemática", 4, true, true, "Vetor aceleração centrípeta", 6);
+            this.propertyEditorInput.addInput(new propertyEditor_1.NumberFormInput("módulo", "m", 0, true, true));
+            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2FormInput("ponto", "m", vector2_1.default.zero, true, true));
+            this.objectPosition = this.object.getProperty("position");
+            this.objectAcceleration = this.object.getProperty("acceleration");
+            this.active = active;
+        }
+        simulate() {
+            if (this.objectAcceleration && this.active)
+                this.objectAcceleration.value = vector2_1.default.sub(vector2_1.default.mult(this.value.vector.unit(), this.value.modulus), this.objectAcceleration.initialValue);
+        }
+        onUserInput(formData) {
+            this.initialValue = {
+                modulus: formData[0],
+                vector: formData[1]
+            };
+        }
+        onUserToggle(v) {
+            this.active = v;
+        }
+        drawGizmos(canvasRenderer) {
+            if (this.doDrawGizmos && this.objectPosition) {
+                const from = this.objectPosition.value;
+                const to = vector2_1.default.sum(from, vector2_1.default.mult(vector2_1.default.sub(this.value.vector, from).unit(), this.value.modulus));
+                gizmos_1.default.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+            }
+        }
+        updateInputValue(value) {
+            if (this.propertyEditorInput) {
+                this.propertyEditorInput.getInput("módulo").updateValue(value.modulus);
+                this.propertyEditorInput.getInput("ponto").updateValue(value.vector);
+            }
+        }
+    }
+    exports.ObjectCentripetalAcceleration = ObjectCentripetalAcceleration;
 });

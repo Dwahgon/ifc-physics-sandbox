@@ -7,7 +7,7 @@ import * as Main from "../main";
 import { PhysicsObject } from "../physicsObjects";
 import PhysicsProperty from "../physicsProperties";
 import Simulator from "../simulator";
-import { PhysicsPropertyType, Renderable, Simulatable, ValueGetter } from "../types";
+import { PhysicsPropertyName, Renderable, Simulatable, ValueGetter } from "../types";
 import Vector2 from "../vector2";
 import { CanvasRenderer } from "./canvasRenderer";
 import documentElements from "../document/documentElements";
@@ -24,27 +24,27 @@ class PhysicsObjectValueGetter implements ValueGetter {
 
     private static getValueCallbacks: Function[];
 
-    constructor(public name: string, public readonly propertyType: PhysicsPropertyType, private getValueCallbackIndex: number) {
+    constructor(public name: string, public readonly propertyType: PhysicsPropertyName, private getValueCallbackIndex: number) {
     }
 
     static initialize() {
         this.getValueCallbacks = [];
-        this.getValueCallbacks[this.NUMBER_CALLBACK] = function (target: PhysicsObject, propertyType: PhysicsPropertyType) {
+        this.getValueCallbacks[this.NUMBER_CALLBACK] = function (target: PhysicsObject, propertyType: PhysicsPropertyName) {
             const property = <PhysicsProperty<Number>>target.getProperty(propertyType);
             return property.value;
         }
 
-        this.getValueCallbacks[this.VECTOR2X_CALLBACK] = function (target: PhysicsObject, propertyType: PhysicsPropertyType) {
+        this.getValueCallbacks[this.VECTOR2X_CALLBACK] = function (target: PhysicsObject, propertyType: PhysicsPropertyName) {
             const property = <PhysicsProperty<Vector2>>target.getProperty(propertyType);
             return property.value.x;
         };
 
-        this.getValueCallbacks[this.VECTOR2Y_CALLBACK] = function (target: PhysicsObject, propertyType: PhysicsPropertyType) {
+        this.getValueCallbacks[this.VECTOR2Y_CALLBACK] = function (target: PhysicsObject, propertyType: PhysicsPropertyName) {
             const property = <PhysicsProperty<Vector2>>target.getProperty(propertyType);
             return property.value.y;
         };
 
-        this.getValueCallbacks[this.VECTOR2_MODULUS_CALLBACK] = function (target: PhysicsObject, propertyType: PhysicsPropertyType) {
+        this.getValueCallbacks[this.VECTOR2_MODULUS_CALLBACK] = function (target: PhysicsObject, propertyType: PhysicsPropertyName) {
             const property = <PhysicsProperty<Vector2>>target.getProperty(propertyType);
             return Vector2.distance(Vector2.zero, property.value);
         };
@@ -141,6 +141,7 @@ export class Graph implements Renderable, Simulatable {
                 if (pointFinish) {
                     const canvasFinish = cam.getCanvasPosFromWorld(pointFinish);
                     this.drawLine(ctx, canvasStart, canvasFinish, 5, "black");
+                    ctx.lineCap = "round";
                     this.drawLine(ctx, canvasStart, canvasFinish, 3, "orange");
                 }
             }
@@ -180,20 +181,20 @@ export class Graph implements Renderable, Simulatable {
 
 const valueGetters: ValueGetter[] = [
     new SimulatorValueGetter("Tempo", SimulatorValueGetter.TIME_CALLBACK),
-    new PhysicsObjectValueGetter("Posição (eixo X)", PhysicsPropertyType.ObjectPosition, PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
-    new PhysicsObjectValueGetter("Posição (eixo Y)", PhysicsPropertyType.ObjectPosition, PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
-    new PhysicsObjectValueGetter("Tamanho (eixo X)", PhysicsPropertyType.ObjectSize, PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
-    new PhysicsObjectValueGetter("Tamanho (eixo Y)", PhysicsPropertyType.ObjectSize, PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
-    new PhysicsObjectValueGetter("Área", PhysicsPropertyType.ObjectArea, PhysicsObjectValueGetter.NUMBER_CALLBACK),
-    new PhysicsObjectValueGetter("Aceleração (eixo X)", PhysicsPropertyType.ObjectAcceleration, PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
-    new PhysicsObjectValueGetter("Aceleração (eixo Y)", PhysicsPropertyType.ObjectAcceleration, PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
-    new PhysicsObjectValueGetter("Aceleração (módulo)", PhysicsPropertyType.ObjectAcceleration, PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK),
-    new PhysicsObjectValueGetter("Velocidade (eixo X)", PhysicsPropertyType.ObjectVelocity, PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
-    new PhysicsObjectValueGetter("Velocidade (eixo Y)", PhysicsPropertyType.ObjectVelocity, PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
-    new PhysicsObjectValueGetter("Velocidade (módulo)", PhysicsPropertyType.ObjectVelocity, PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK),
-    new PhysicsObjectValueGetter("Deslocamento (eixo X)", PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
-    new PhysicsObjectValueGetter("Deslocamento (eixo Y)", PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
-    new PhysicsObjectValueGetter("Deslocamento (módulo)", PhysicsPropertyType.ObjectDisplacement, PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK)
+    new PhysicsObjectValueGetter("Posição (eixo X)", "position", PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
+    new PhysicsObjectValueGetter("Posição (eixo Y)", "position", PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
+    new PhysicsObjectValueGetter("Tamanho (eixo X)", "size", PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
+    new PhysicsObjectValueGetter("Tamanho (eixo Y)", "size", PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
+    new PhysicsObjectValueGetter("Área", "area", PhysicsObjectValueGetter.NUMBER_CALLBACK),
+    new PhysicsObjectValueGetter("Aceleração (eixo X)", "acceleration", PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
+    new PhysicsObjectValueGetter("Aceleração (eixo Y)", "acceleration", PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
+    new PhysicsObjectValueGetter("Aceleração (módulo)", "acceleration", PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK),
+    new PhysicsObjectValueGetter("Velocidade (eixo X)", "velocity", PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
+    new PhysicsObjectValueGetter("Velocidade (eixo Y)", "velocity", PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
+    new PhysicsObjectValueGetter("Velocidade (módulo)", "velocity", PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK),
+    new PhysicsObjectValueGetter("Deslocamento (eixo X)", "displacement", PhysicsObjectValueGetter.VECTOR2X_CALLBACK),
+    new PhysicsObjectValueGetter("Deslocamento (eixo Y)", "displacement", PhysicsObjectValueGetter.VECTOR2Y_CALLBACK),
+    new PhysicsObjectValueGetter("Deslocamento (módulo)", "displacement", PhysicsObjectValueGetter.VECTOR2_MODULUS_CALLBACK)
 ];
 
 const graphConfigModal = Modal.getModalById("graph-config-modal")!;

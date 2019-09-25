@@ -33,10 +33,10 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
             this.setElementVisible(false);
         }
     }
-    exports.PropertyDescriptionUI = PropertyDescriptionUI;
     PropertyDescriptionUI.modal = Modals.getModalById("property-description-modal");
+    exports.PropertyDescriptionUI = PropertyDescriptionUI;
     class GraphPanel {
-        static initialize(element) {
+        static initialize(element, closeGraphButton) {
             this.panel = element;
             this.title = this.panel.querySelector("h1");
             const canvas = document.createElement("canvas");
@@ -47,6 +47,7 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
             this.canvasRenderer.camera.pos = new vector2_1.default(150, 150);
             this.cartesianPlane = new cartesianPlane_1.CartesianPlane(1);
             this.canvasRenderer.add(this.cartesianPlane);
+            closeGraphButton.onClick = () => this.stopRenderingGraph();
         }
         static setElementVisible(v, title = "Gráfico") {
             this.panel.style.display = v ? "flex" : "none";
@@ -90,9 +91,9 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
             return this._objectCreatable;
         }
     }
-    exports.ObjectCreationController = ObjectCreationController;
     ObjectCreationController._objectCreatable = true;
     ObjectCreationController.objectListElement = null;
+    exports.ObjectCreationController = ObjectCreationController;
     /**
      * Controlls the selection of Selectable objects
      */
@@ -128,8 +129,8 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
             destroyButton.enabled = object.destroy != undefined && main_1.simulator.time == 0;
         }
     }
-    exports.ObjectSelectionController = ObjectSelectionController;
     ObjectSelectionController._selectedObject = null;
+    exports.ObjectSelectionController = ObjectSelectionController;
     class Alert {
         static initialize(element) {
             this.element = element;
@@ -140,11 +141,11 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
             this.element.style.display = "flex";
         }
     }
-    exports.Alert = Alert;
     Alert.WARNING = "alert-warning";
     Alert.ERROR = "alert-error";
+    exports.Alert = Alert;
     //Initialize static classes
-    GraphPanel.initialize(documentElements_1.default.get("graph-panel"));
+    GraphPanel.initialize(documentElements_1.default.get("graph-panel"), Buttons.getButtonById("close-graph-panel-button"));
     Alert.initialize(documentElements_1.default.get("alert"));
     ObjectSelectionController.initialize(new propertyEditor_1.PropertyEditor(documentElements_1.default.get("property-list")));
 });

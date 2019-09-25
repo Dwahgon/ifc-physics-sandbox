@@ -1,7 +1,7 @@
 console.log("Loading propertyEditor");
 
 import { PhysicsObject } from "../physicsObjects";
-import { ButtonColor, PropertyEditorRow, Selectable } from "../types";
+import { ButtonColor, PropertyEditorRow, Selectable, PropertyEditorFormTarget, PropertyEditorFormInput } from "../types";
 import Vector2 from "../vector2";
 import { Button } from "./buttons";
 
@@ -114,7 +114,7 @@ abstract class BasicPropertyEditorRow implements PropertyEditorRow {
 
         this.element.setAttribute("class", changeable ? "active-row" : "inactive-row");
 
-        if (descriptionId) {
+        if (descriptionId != undefined) {
             const descriptionButton = Button.createButtonElement({
                 buttonName: `open-${descriptionId}-description-button`,
                 buttonColor: ButtonColor.Dark,
@@ -143,31 +143,36 @@ abstract class BasicPropertyEditorRow implements PropertyEditorRow {
     }
 }
 
-export abstract class PropertyEditorInput<T> extends BasicPropertyEditorRow {
-    protected readonly input: HTMLInputElement;
-
+export class PropertyEditorForm extends BasicPropertyEditorRow {
     private nameLabel: HTMLLabelElement;
-    private lastValue: string;
+    private formElement: HTMLFormElement;
+    private toggleElement?: HTMLInputElement;
+    private _toggled?: boolean;
 
-    constructor(protected readonly target: { doDrawGizmos: boolean, onUserInput(value: T): void; value: T }, name: string, unit: string, private readonly regExp: RegExp, category: string, layoutOrder: number, changeable: boolean, initialValue: T, title: string, descriptionId?: number) {
+    private inputList: PropertyEditorFormInput<any>[];
+
+    constructor(protected readonly target: PropertyEditorFormTarget, name: string, category: string, layoutOrder: number, changeable: boolean, toggleable: boolean, title: string, descriptionId?: number) {
         super(category, layoutOrder, changeable, descriptionId);
 
+        this.inputList = [];
+
         this.element.classList.add("input-row");
-        this.input = document.createElement("input");
-        this.lastValue = this.formatValue(initialValue);
+        this.formElement = document.createElement("form");
         this.nameLabel = document.createElement("label");
-        const unitLabel = document.createElement("label");
 
         this.nameLabel.innerHTML = name;
         this.nameLabel.title = title;
-        unitLabel.innerHTML = unit;
-        const inputId = `${name}-input`;
-        this.nameLabel.setAttribute("for", inputId);
-        this.input.disabled = !changeable;
-        this.input.id = inputId;
-        this.input.value = this.lastValue;
 
-        this.element.append(this.nameLabel, this.input, unitLabel);
+        if(toggleable){
+            this.toggleElement = document.createElement("input");
+            this.toggleElement.type = "checkbox";
+            this.toggleElement.classList.add("toggle-input");
+            this._toggled = true;
+
+            this.element.appendChild(this.toggleElement);
+        }
+
+        this.element.append(this.nameLabel, this.formElement);
     }
 
     get active(): boolean {
@@ -176,33 +181,44 @@ export abstract class PropertyEditorInput<T> extends BasicPropertyEditorRow {
 
     set active(v: boolean) {
         super.active = v;
-        this.input.disabled = !v || !this.changeable;
+
+        this.inputList.forEach(input => input.active = v && this.changeable);
+        if(this.toggleElement)
+            this.toggleElement.disabled = !v || !this.changeable;
     }
 
-    updateValue(v: T): void {
-        const formattedValue = this.formatValue(v);
-        this.input.value = formattedValue;
-        this.lastValue = formattedValue;
+    get toggled(){
+        return this._toggled;
     }
 
-    onChanged(): void {
-        let match = this.input.value.match(this.regExp);
+    set toggled(v: boolean | undefined){
+        this._toggled = v;
+        this.toggleElement!.checked = v || false;
+    }
 
-        if (!match) {
-            this.resetToLastValue();
-            return;
+    addInput(input: PropertyEditorFormInput<any>) {
+        this.inputList.push(input);
+        input.appendTo(this.formElement);
+    }
+
+    getInput(name?: string): PropertyEditorFormInput<any> | undefined {
+        if(name)        
+            return this.inputList.find(el => el.name == name);
+        
+        return this.inputList.length > 0 ? this.inputList[0] : undefined;
+    }
+
+    onChanged(ev: Event): void {
+        const tgt = <HTMLInputElement>ev.target;
+        if(tgt.classList.contains("toggle-input")){
+            this.toggled = tgt.checked;
+            if(this.target.onUserToggle)
+                this.target.onUserToggle(this.toggled);
+        }else{
+            const map = this.inputList.map(input => input.onChanged());
+
+            this.target.onUserInput(map);
         }
-
-        match = match.filter(el => { return el != "" });
-
-        const matchResult = this.processMatch(match);
-
-        if (!matchResult) {
-            this.resetToLastValue();
-            return;
-        }
-
-        this.target.onUserInput(matchResult);
     }
 
     onMouseOver(ev: MouseEvent): void {
@@ -212,12 +228,81 @@ export abstract class PropertyEditorInput<T> extends BasicPropertyEditorRow {
     onMouseOut(ev: MouseEvent): void {
         this.target.doDrawGizmos = false;
     }
+}
 
-    protected resetToLastValue(): void {
-        this.input.value = this.lastValue;
+export class FormInput<T> implements PropertyEditorFormInput<T> {
+    private _active: boolean;
+    private element: HTMLElement;
+    protected input: HTMLInputElement;
+    private lastValue: T;
+
+    constructor(public readonly name: string, unit: string, initialValue: T, private regExp: RegExp, private changeable: boolean, createNameLabel: boolean){
+        this._active = changeable;
+        this.lastValue = initialValue;
+
+        this.element = document.createElement("div");
+        this.input = document.createElement("input");
+        const unitLabel = document.createElement("label");
+
+        unitLabel.innerHTML = unit;
+        this.input.value = this.formatValue(initialValue);
+        this.active = changeable;
+
+        if(createNameLabel){
+            const nameLabel = document.createElement("label");
+            nameLabel.innerHTML = name;
+
+            this.element.appendChild(nameLabel);
+        }
+
+        this.element.append(this.input, unitLabel);
+    }
+    
+    get active() {
+        return this._active;
     }
 
-    protected formatValue(value: T): string {
+    set active(v: boolean){
+        this._active = v && this.changeable;
+        this.input.disabled = !v || !this.changeable;
+    }
+
+    appendTo(element: HTMLElement){
+        element.appendChild(this.element);
+    }
+
+    resetToLastValue(){
+        this.input.value = this.formatValue(this.lastValue);
+    }
+
+    onChanged(): T{
+        const reset = () => {
+            const lastValue = this.lastValue;
+            this.resetToLastValue();
+            return lastValue;
+        }
+        let match = this.input.value.match(this.regExp);
+
+
+        if (!match)
+            return reset();
+
+        match = match.filter(el => { return el != "" });
+
+        const matchResult = this.processMatch(match);
+
+        if (!matchResult) 
+            return reset();
+
+        return matchResult;
+    }
+
+    updateValue(v: T) {
+        this.lastValue = v;
+        this.input.value = this.formatValue(v)
+    }
+
+    protected formatValue(value: T): string{
         return "NaN";
     }
 
@@ -226,15 +311,16 @@ export abstract class PropertyEditorInput<T> extends BasicPropertyEditorRow {
     }
 }
 
-export class Vector2PropertyEditorInput extends PropertyEditorInput<Vector2>{
-    constructor(target: { doDrawGizmos: boolean, onUserInput(value: Vector2): void, value: Vector2 }, name: string, unit: string, category: string, layoutOrder: number, changeable: boolean, initialValue: Vector2, title: string, descriptionId?: number, private modulusUnit?: string) {
-        super(target, name, unit, /\-?\d*\.?\d*/g, category, layoutOrder, changeable, initialValue, title, descriptionId);
-        this.updateInputTitle(initialValue);
+export class Vector2FormInput extends FormInput<Vector2>{
+    constructor(name: string, unit: string, initialValue: Vector2, changeable: boolean, createNameLabel: boolean, private modulusUnit?: string){
+        super(name, unit, initialValue, /\-?\d*\.?\d*/g, changeable, createNameLabel);
     }
 
-    updateValue(v: Vector2) {
+    updateValue(v: Vector2){
         super.updateValue(v);
-        this.updateInputTitle(this.target.value);
+
+        if (this.modulusUnit)
+            this.input.title = `Módulo: ${v.magnitude()} ${this.modulusUnit}`;
     }
 
     protected formatValue(value: Vector2): string {
@@ -249,16 +335,11 @@ export class Vector2PropertyEditorInput extends PropertyEditorInput<Vector2>{
 
         return new Vector2(Number(match[0]), Number(match[1]));
     }
-
-    private updateInputTitle(value: Vector2) {
-        if (this.modulusUnit)
-            this.input.title = `Módulo: ${Vector2.distance(Vector2.zero, value)} ${this.modulusUnit}`;
-    }
 }
 
-export class NumberPropertyEditorInput extends PropertyEditorInput<number>{
-    constructor(target: { doDrawGizmos: boolean, onUserInput(value: number): void, value: number }, name: string, unit: string, category: string, layoutOrder: number, changeable: boolean, initialValue: number, title: string, descriptionId?: number) {
-        super(target, name, unit, /\-?\d*\.?\d*/i, category, layoutOrder, changeable, initialValue, title, descriptionId);
+export class NumberFormInput extends FormInput<number>{
+    constructor(name: string, unit: string, initialValue: number, changeable: boolean, createNameLabel: boolean){
+        super(name, unit, initialValue, /\-?\d*\.?\d*/i, changeable, createNameLabel);
     }
 
     protected formatValue(value: number): string {

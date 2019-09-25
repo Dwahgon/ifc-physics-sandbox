@@ -1,12 +1,12 @@
 console.log("Loading physicsobjects");
 
 import Ambient from './ambient';
-import { PropertyEditorInput } from './document/propertyEditor';
+import { PropertyEditorForm } from './document/propertyEditor';
 import { PhysicsObjectJSON, PhysicsPropertyJSON } from './fileController';
 import PhysicsProperty, * as PhysicsProperties from './physicsProperties';
 import { CanvasRenderer } from './rendering/canvasRenderer';
 import { Sprite } from './rendering/sprite';
-import { Followable, PhysicsObjectConfig, PhysicsObjectType, PhysicsPropertyType, PropertyEditorRow, Renderable, Selectable, Simulatable } from './types';
+import { Followable, PhysicsObjectConfig, PhysicsObjectType, PropertyEditorRow, Renderable, Selectable, Simulatable, PhysicsPropertyName } from './types';
 import Vector2 from './vector2';
 import { ObjectSelectionController } from './document/documentUtilities';
 import Gizmos from './rendering/gizmos';
@@ -16,10 +16,11 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
 
     public name: string;
     
-    private objectProperties: PhysicsProperty<any>[];
+    private readonly properties: Map<PhysicsPropertyName, PhysicsProperty<any>>;
 
     constructor(public readonly kind: PhysicsObjectType, public readonly sprite: Sprite, protected ambient: Ambient, name?: string) {
-        this.objectProperties = [];
+        this.properties = new Map<PhysicsPropertyName, PhysicsProperty<any>>();
+
         this.name = name || this.generateName();
         this.ambient.addObject(this);
     }
@@ -55,32 +56,32 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
 
     draw(canvasRenderer: CanvasRenderer): void {
         this.sprite.draw(canvasRenderer);
-        this.objectProperties.forEach(property => property.drawGizmos(canvasRenderer));
+        this.properties.forEach(property => property.drawGizmos(canvasRenderer));
 
         if(ObjectSelectionController.selectedObject == this){
-            const pos = <PhysicsProperties.ObjectPosition>this.getProperty(PhysicsPropertyType.ObjectPosition)!;
-            const size = <PhysicsProperties.ObjectSize>this.getProperty(PhysicsPropertyType.ObjectSize)!;
+            const pos = <PhysicsProperties.ObjectPosition>this.getProperty("position")!;
+            const size = <PhysicsProperties.ObjectSize>this.getProperty("size")!;
             const drawPos = Vector2.sub(pos.value, Vector2.div(size.value, new Vector2(2, -2)));
 
             Gizmos.drawSelection(canvasRenderer, drawPos, size.value, {style: "MediumSeaGreen", lineThickness: 4, offset: 6, lineDash: [8, 3]});
         }
     }
 
-    addProperties(...properties: PhysicsProperty<any>[]): void {
-        properties.forEach(property => this.objectProperties.push(property));
-        this.objectProperties.sort((a, b) => { return b.simulationPriority - a.simulationPriority; });
+    addProperty(name: PhysicsPropertyName, property: PhysicsProperty<any>): void {
+        this.properties.set(name, property);
     }
 
     simulate(step: number): void {
-        this.objectProperties.forEach(property => property.simulate(step))
+        const sorted = Array.from(this.properties.values()).sort((a, b) => { return b.simulationPriority - a.simulationPriority; });
+        sorted.forEach(property => property.simulate(step))
     }
 
     reset(): void {
-        this.objectProperties.forEach(property => property.reset())
+        this.properties.forEach(property => property.reset())
     }
 
     locate(): Vector2 {
-        return (<PhysicsProperties.ObjectPosition>this.getProperty(PhysicsPropertyType.ObjectPosition)).value;
+        return (<PhysicsProperties.ObjectPosition>this.getProperty("position")).value;
     }
 
     generateName(): string{
@@ -102,8 +103,8 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
      * @param position 
      */
     isPositionInsideObject(position: Vector2): boolean {
-        const objPos = (<PhysicsProperties.ObjectPosition>this.getProperty(PhysicsPropertyType.ObjectPosition)).value;
-        let objSize = (<PhysicsProperties.ObjectSize>this.getProperty(PhysicsPropertyType.ObjectSize)).value;
+        const objPos = (<PhysicsProperties.ObjectPosition>this.getProperty("position")).value;
+        let objSize = (<PhysicsProperties.ObjectSize>this.getProperty("size")).value;
         objSize = Vector2.div(objSize, 2);
 
         return position.x >= objPos.x - objSize.x &&
@@ -112,19 +113,21 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
             position.y <= objPos.y + objSize.y
     }
 
-    getProperty(type: PhysicsPropertyType): PhysicsProperty<any>[] | PhysicsProperty<any> | undefined {
-        switch (type) {
-            case PhysicsPropertyType.All:
-                return this.objectProperties;
-            default:
-                return this.objectProperties.find(physicsProperty => { return physicsProperty.kind == type });
-        }
+    getProperty(property: PhysicsPropertyName): PhysicsProperty<any> | undefined {
+        if(typeof property == "number")
+            return Array.from(this.properties.values()).find(el => el.kind == property);
+        else
+            return this.properties.get(property);
+    }
+
+    getAllProperties(): PhysicsProperty<any>[]{
+        return Array.from( this.properties.values() );
     }
 
     getPropertyEditorRows(): PropertyEditorRow[] {
-        const rows: PropertyEditorInput<any>[] = [];
+        const rows: PropertyEditorForm[] = [];
 
-        this.objectProperties.forEach(el => {
+        this.properties.forEach(el => {
             if (el.propertyEditorInput)
                 rows.push(el.propertyEditorInput);
         });
@@ -139,7 +142,7 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
 
     toJSON(): PhysicsObjectJSON {
         const properties: PhysicsPropertyJSON<any>[] = [];
-        this.objectProperties.forEach(prop => properties.push(prop.toJSON()));
+        this.properties.forEach(prop => properties.push(prop.toJSON()));
         return Object.assign({}, {
             kind: this.kind,
             properties: properties
@@ -163,11 +166,12 @@ class Solid extends PhysicsObject {
             ambient,
             properties ? properties.name : undefined);
 
-        this.addProperties(new PhysicsProperties.ObjectPosition(properties ? properties.position : Vector2.zero, this));
-        this.addProperties(new PhysicsProperties.ObjectAcceleration(this));
-        this.addProperties(new PhysicsProperties.ObjectVelocity(this));
-        this.addProperties(new PhysicsProperties.ObjectSize(properties ? properties.size : Vector2.zero, this));
-        this.addProperties(new PhysicsProperties.ObjectArea(this));
-        this.addProperties(new PhysicsProperties.ObjectDisplacement(this));
+        this.addProperty("position", new PhysicsProperties.ObjectPosition(properties ? properties.position : Vector2.zero, this));
+        this.addProperty("acceleration", new PhysicsProperties.ObjectAcceleration(this));
+        this.addProperty("velocity", new PhysicsProperties.ObjectVelocity(this));
+        this.addProperty("size", new PhysicsProperties.ObjectSize(properties ? properties.size : Vector2.zero, this));
+        this.addProperty("area", new PhysicsProperties.ObjectArea(this));
+        this.addProperty("displacement", new PhysicsProperties.ObjectDisplacement(this));
+        this.addProperty("centripetalAcceleration", new PhysicsProperties.ObjectCentripetalAcceleration(this, false));
     }
 }
