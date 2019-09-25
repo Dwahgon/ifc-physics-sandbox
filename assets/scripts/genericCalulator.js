@@ -6,8 +6,7 @@ define(["require", "exports", "./vector2"], function (require, exports, vector2_
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_1 = __importDefault(vector2_1);
     class Vector2Calculator {
-        constructor() {
-        }
+        constructor() { }
         sum(a, b) {
             return vector2_1.default.sum(a, b);
         }
@@ -21,11 +20,10 @@ define(["require", "exports", "./vector2"], function (require, exports, vector2_
             return vector2_1.default.div(a, b);
         }
     }
-    exports.Vector2Calculator = Vector2Calculator;
     Vector2Calculator.instance = new Vector2Calculator();
+    exports.Vector2Calculator = Vector2Calculator;
     class NumberCalculator {
-        constructor() {
-        }
+        constructor() { }
         sum(a, b) {
             return a + b;
         }
@@ -39,6 +37,35 @@ define(["require", "exports", "./vector2"], function (require, exports, vector2_
             return a / b;
         }
     }
-    exports.NumberCalculator = NumberCalculator;
     NumberCalculator.instance = new NumberCalculator();
+    exports.NumberCalculator = NumberCalculator;
+    class VectorModulusCalculator {
+        constructor() { }
+        sum(a, b) {
+            return {
+                modulus: a.modulus + b.modulus,
+                vector: vector2_1.default.sum(a.vector, b.vector)
+            };
+        }
+        sub(a, b) {
+            return {
+                modulus: a.modulus - b.modulus,
+                vector: vector2_1.default.sub(a.vector, b.vector)
+            };
+        }
+        mult(a, b) {
+            return {
+                modulus: a.modulus * b.modulus,
+                vector: vector2_1.default.mult(a.vector, b.vector)
+            };
+        }
+        div(a, b) {
+            return {
+                modulus: a.modulus / b.modulus,
+                vector: vector2_1.default.div(a.vector, b.vector)
+            };
+        }
+    }
+    VectorModulusCalculator.instance = new VectorModulusCalculator();
+    exports.VectorModulusCalculator = VectorModulusCalculator;
 });

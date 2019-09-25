@@ -12,6 +12,12 @@ define(["require", "exports"], function (require, exports) {
         clone() {
             return new Vector2(this.x, this.y);
         }
+        magnitude() {
+            return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+        }
+        unit() {
+            return Vector2.div(this, this.magnitude());
+        }
         toString() {
             return "(" + this.x + ", " + this.y + ")";
         }
