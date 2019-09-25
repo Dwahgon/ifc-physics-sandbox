@@ -52,9 +52,9 @@ define(["require", "exports", "./document/documentUtilities", "./document/proper
             }
             return null;
         }
-        getPropertyEditorRows() {
+        getPropertyEditorOptions() {
             const rows = [];
-            this.objects.forEach(obj => rows.push(new propertyEditor_1.ObjectLocatorPropertyEditorRow(obj, "Objetos", 0)));
+            this.objects.forEach(obj => rows.push(new propertyEditor_1.ObjectLocatorPropertyEditorOption(obj, "Objetos", 0)));
             return rows;
         }
         addObject(obj) {

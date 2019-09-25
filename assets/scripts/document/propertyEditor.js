@@ -22,16 +22,16 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
         }
         build(object) {
             this.clear();
-            if (!object.getPropertyEditorRows)
+            if (!object.getPropertyEditorOptions)
                 return;
             //Get categories from the propertyPalleteRows of object, and store them on an array of {name, layoutOrder}. Then remove all of categories with the same name, leaving the ones with the minimal layoutOrder
-            const propertyEditorRows = object.getPropertyEditorRows();
-            let categories = propertyEditorRows.map(el => { return { name: el.category, layoutOrder: el.layoutOrder }; });
+            const PropertyEditorOptions = object.getPropertyEditorOptions();
+            let categories = PropertyEditorOptions.map(el => { return { name: el.category, layoutOrder: el.layoutOrder }; });
             categories = categories.sort((cat1, cat2) => cat1.layoutOrder - cat2.layoutOrder);
             categories = categories.filter((v) => categories.find(c => c.name == v.name) == v);
-            //Append categories as h1 and propertyEditorRows
+            //Append categories as h1 and PropertyEditorOptions
             categories.forEach(category => {
-                let rowWithCategory = propertyEditorRows.filter(ppr => ppr.category == category.name);
+                let rowWithCategory = PropertyEditorOptions.filter(ppr => ppr.category == category.name);
                 rowWithCategory = rowWithCategory.sort((row1, row2) => row1.layoutOrder - row2.layoutOrder);
                 const categoryH1 = document.createElement("h1");
                 categoryH1.innerHTML = category.name;
@@ -42,7 +42,7 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
                 });
             });
             this.htmlElement.style.display = this.htmlElement.childElementCount > 0 ? "block" : "none";
-            this.rows = propertyEditorRows;
+            this.rows = PropertyEditorOptions;
         }
         clear() {
             while (this.htmlElement.firstChild)
@@ -80,7 +80,7 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
         }
     }
     exports.PropertyEditor = PropertyEditor;
-    class BasicPropertyEditorRow {
+    class BasicPropertyEditorOption {
         constructor(category, layoutOrder, changeable, descriptionId) {
             this.category = category;
             this.layoutOrder = layoutOrder;
@@ -112,13 +112,13 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
             target.appendChild(this.element);
         }
     }
-    class PropertyEditorForm extends BasicPropertyEditorRow {
+    class PropertyEditorInputList extends BasicPropertyEditorOption {
         constructor(target, name, category, layoutOrder, changeable, toggleable, title, descriptionId) {
             super(category, layoutOrder, changeable, descriptionId);
             this.target = target;
             this.inputList = [];
             this.element.classList.add("input-row");
-            this.formElement = document.createElement("form");
+            this.inputWrapper = document.createElement("div");
             this.nameLabel = document.createElement("label");
             this.nameLabel.innerHTML = name;
             this.nameLabel.title = title;
@@ -129,7 +129,7 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
                 this._toggled = true;
                 this.element.appendChild(this.toggleElement);
             }
-            this.element.append(this.nameLabel, this.formElement);
+            this.element.append(this.nameLabel, this.inputWrapper);
         }
         get active() {
             return super.active;
@@ -149,7 +149,7 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
         }
         addInput(input) {
             this.inputList.push(input);
-            input.appendTo(this.formElement);
+            input.appendTo(this.inputWrapper);
         }
         getInput(name) {
             if (name)
@@ -175,8 +175,8 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
             this.target.doDrawGizmos = false;
         }
     }
-    exports.PropertyEditorForm = PropertyEditorForm;
-    class FormInput {
+    exports.PropertyEditorInputList = PropertyEditorInputList;
+    class InputListRow {
         constructor(name, unit, initialValue, regExp, changeable, createNameLabel) {
             this.name = name;
             this.regExp = regExp;
@@ -188,6 +188,7 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
             const unitLabel = document.createElement("label");
             unitLabel.innerHTML = unit;
             this.input.value = this.formatValue(initialValue);
+            this.input.type = "text";
             this.active = changeable;
             if (createNameLabel) {
                 const nameLabel = document.createElement("label");
@@ -220,7 +221,7 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
                 return reset();
             match = match.filter(el => { return el != ""; });
             const matchResult = this.processMatch(match);
-            if (!matchResult)
+            if (matchResult == undefined)
                 return reset();
             return matchResult;
         }
@@ -235,16 +236,16 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
             return undefined;
         }
     }
-    exports.FormInput = FormInput;
-    class Vector2FormInput extends FormInput {
+    exports.InputListRow = InputListRow;
+    class Vector2InputListRow extends InputListRow {
         constructor(name, unit, initialValue, changeable, createNameLabel, modulusUnit) {
             super(name, unit, initialValue, /\-?\d*\.?\d*/g, changeable, createNameLabel);
             this.modulusUnit = modulusUnit;
+            this.updateInputTitle(initialValue);
         }
         updateValue(v) {
             super.updateValue(v);
-            if (this.modulusUnit)
-                this.input.title = `Módulo: ${v.magnitude()} ${this.modulusUnit}`;
+            this.updateInputTitle(v);
         }
         formatValue(value) {
             return `(${value.x.toFixed(2)}, ${value.y.toFixed(2)})`;
@@ -256,9 +257,13 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
             }
             return new vector2_1.default(Number(match[0]), Number(match[1]));
         }
+        updateInputTitle(v) {
+            if (this.modulusUnit)
+                this.input.title = `Módulo: ${v.magnitude()} ${this.modulusUnit}`;
+        }
     }
-    exports.Vector2FormInput = Vector2FormInput;
-    class NumberFormInput extends FormInput {
+    exports.Vector2InputListRow = Vector2InputListRow;
+    class NumberInputListRow extends InputListRow {
         constructor(name, unit, initialValue, changeable, createNameLabel) {
             super(name, unit, initialValue, /\-?\d*\.?\d*/i, changeable, createNameLabel);
         }
@@ -273,8 +278,8 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
             return Number(match[0]);
         }
     }
-    exports.NumberFormInput = NumberFormInput;
-    class ObjectLocatorPropertyEditorRow extends BasicPropertyEditorRow {
+    exports.NumberInputListRow = NumberInputListRow;
+    class ObjectLocatorPropertyEditorOption extends BasicPropertyEditorOption {
         constructor(target, category, layoutOrder, descriptionId) {
             super(category, layoutOrder, true, descriptionId);
             this.element.classList.add("object-locator-row");
@@ -292,5 +297,5 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
             this.element.append(nameLabel, this.locateButton);
         }
     }
-    exports.ObjectLocatorPropertyEditorRow = ObjectLocatorPropertyEditorRow;
+    exports.ObjectLocatorPropertyEditorOption = ObjectLocatorPropertyEditorOption;
 });

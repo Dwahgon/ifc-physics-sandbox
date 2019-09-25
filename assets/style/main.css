@@ -455,23 +455,23 @@ main {
     margin: auto;
 }
 
-#property-list>li>form {
+#property-list>li>div {
     display: flex;
     flex-flow: column;
     flex-grow: 1;
 }
 
-#property-list>li>form>div {
+#property-list>li>div>div {
     width: 100%;
     height: var(--property-li-height);
     display: flex;
 }
 
-#property-list>li>form>div>label {
+#property-list>li>div>div>label {
     margin: auto 4px auto 0;
 }
 
-#property-list>li>form>div>input {
+#property-list>li>div>div>input {
     width: 0;
     min-width: 0;
     flex-grow: 1;
