@@ -25,7 +25,7 @@ export type PhysicsPropertyName = "position" | "size" | "velocity" | "accelerati
 
 export interface Selectable {
     name: string;
-    getPropertyEditorRows?(): PropertyEditorRow[];
+    getPropertyEditorOptions?(): PropertyEditorOption[];
     getProperty(name: PhysicsPropertyName): PhysicsProperty<any> | undefined;
     getAllProperties(): PhysicsProperty<any>[] | undefined;
     destroy?(): void;
@@ -111,7 +111,7 @@ export interface SelectionGizmosStyle extends GizmosStyle {
     offset: number;
 }
 
-export interface PropertyEditorRow {
+export interface PropertyEditorOption {
     readonly element: HTMLElement;
     readonly category: string;
     readonly layoutOrder: number;
@@ -129,7 +129,7 @@ export interface PropertyEditorFormTarget {
     onUserToggle?(v: boolean): void;
 }
 
-export interface PropertyEditorFormInput<T> {
+export interface PropertyEditorInputListRow<T> {
     name: string;
     active: boolean;
     appendTo(target: HTMLElement): void;

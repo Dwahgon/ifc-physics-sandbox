@@ -1,12 +1,12 @@
 console.log("Loading physicsobjects");
 
 import Ambient from './ambient';
-import { PropertyEditorForm } from './document/propertyEditor';
+import { PropertyEditorInputList } from './document/propertyEditor';
 import { PhysicsObjectJSON, PhysicsPropertyJSON } from './fileController';
 import PhysicsProperty, * as PhysicsProperties from './physicsProperties';
 import { CanvasRenderer } from './rendering/canvasRenderer';
 import { Sprite } from './rendering/sprite';
-import { Followable, PhysicsObjectConfig, PhysicsObjectType, PropertyEditorRow, Renderable, Selectable, Simulatable, PhysicsPropertyName } from './types';
+import { Followable, PhysicsObjectConfig, PhysicsObjectType, PropertyEditorOption, Renderable, Selectable, Simulatable, PhysicsPropertyName } from './types';
 import Vector2 from './vector2';
 import { ObjectSelectionController } from './document/documentUtilities';
 import Gizmos from './rendering/gizmos';
@@ -124,8 +124,8 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
         return Array.from( this.properties.values() );
     }
 
-    getPropertyEditorRows(): PropertyEditorRow[] {
-        const rows: PropertyEditorForm[] = [];
+    getPropertyEditorOptions(): PropertyEditorOption[] {
+        const rows: PropertyEditorInputList[] = [];
 
         this.properties.forEach(el => {
             if (el.propertyEditorInput)
@@ -172,6 +172,6 @@ class Solid extends PhysicsObject {
         this.addProperty("size", new PhysicsProperties.ObjectSize(properties ? properties.size : Vector2.zero, this));
         this.addProperty("area", new PhysicsProperties.ObjectArea(this));
         this.addProperty("displacement", new PhysicsProperties.ObjectDisplacement(this));
-        this.addProperty("centripetalAcceleration", new PhysicsProperties.ObjectCentripetalAcceleration(this, false));
+        this.addProperty("centripetalAcceleration", new PhysicsProperties.ObjectCentripetalAcceleration(this));
     }
 }

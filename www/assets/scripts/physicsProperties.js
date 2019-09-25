@@ -59,8 +59,8 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     class ObjectPosition extends PhysicsProperty {
         constructor(initialPosition, object) {
             super("position", true, object, initialPosition, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyEditorInput = new propertyEditor_1.PropertyEditorForm(this, "pos<sub>(x, y)</sub>", "Localização", 0, true, false, "Posição", 0);
-            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2FormInput("position", "m", initialPosition, true, false));
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorInputList(this, "pos<sub>(x, y)</sub>", "Localização", 0, true, false, "Posição", 0);
+            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2InputListRow("position", "m", initialPosition, true, false));
             this.updateSpritePosition();
         }
         updateSpritePosition() {
@@ -89,8 +89,8 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     class ObjectSize extends PhysicsProperty {
         constructor(initialSize, object) {
             super("size", true, object, initialSize, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyEditorInput = new propertyEditor_1.PropertyEditorForm(this, "tam<sub>(x, y)</sub>", "Dimensões", 1, true, false, "Tamanho", 1);
-            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2FormInput("size", "m", initialSize, true, false));
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorInputList(this, "tam<sub>(x, y)</sub>", "Dimensões", 1, true, false, "Tamanho", 1);
+            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2InputListRow("size", "m", initialSize, true, false));
             this.objectPosition = this.object.getProperty("position");
             this.updateSpriteSize();
         }
@@ -130,16 +130,16 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
             const objectSize = object.getProperty("size");
             const sizeVector2 = (objectSize) ? objectSize.initialValue : vector2_1.default.zero;
             this.initialValue = sizeVector2.x * sizeVector2.y;
-            this.propertyEditorInput = new propertyEditor_1.PropertyEditorForm(this, "área", "Dimensões", 2, false, false, "Área", 2);
-            this.propertyEditorInput.addInput(new propertyEditor_1.NumberFormInput("area", "m", this.initialValue, false, false));
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorInputList(this, "área", "Dimensões", 2, false, false, "Área", 2);
+            this.propertyEditorInput.addInput(new propertyEditor_1.NumberInputListRow("area", "m", this.initialValue, false, false));
         }
     }
     exports.ObjectArea = ObjectArea;
     class ObjectVelocity extends PhysicsProperty {
         constructor(object) {
             super("velocity", true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance, 1);
-            this.propertyEditorInput = new propertyEditor_1.PropertyEditorForm(this, "vel", "Cinemática", 2, true, false, "Vetor velocidade", 3);
-            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2FormInput("velocity", "<sup>m</sup>&frasl;<sub>s</sub>", this.initialValue, true, false, "m/s"));
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorInputList(this, "vel", "Cinemática", 2, true, false, "Vetor velocidade", 3);
+            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2InputListRow("velocity", "<sup>m</sup>&frasl;<sub>s</sub>", this.initialValue, true, false, "m/s"));
             this.objectPosition = this.object.getProperty("position");
             this.objectAcceleration = this.object.getProperty("acceleration");
         }
@@ -163,8 +163,8 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     class ObjectDisplacement extends PhysicsProperty {
         constructor(object) {
             super("displacement", false, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyEditorInput = new propertyEditor_1.PropertyEditorForm(this, "des", "Cinemática", 5, false, false, "Vetor deslocamento", 4);
-            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2FormInput("displacement", "m", this.initialValue, false, false, "m"));
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorInputList(this, "des", "Cinemática", 5, false, false, "Vetor deslocamento", 4);
+            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2InputListRow("displacement", "m", this.initialValue, false, false, "m"));
             this.objectPosition = this.object.getProperty("position");
         }
         simulate(step) {
@@ -183,8 +183,8 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     class ObjectAcceleration extends PhysicsProperty {
         constructor(object) {
             super("acceleration", true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
-            this.propertyEditorInput = new propertyEditor_1.PropertyEditorForm(this, "acel", "Cinemática", 3, true, false, "Vetor aceleração", 5);
-            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2FormInput("acceleration", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue, true, false, "m/s²"));
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorInputList(this, "acel", "Cinemática", 3, true, false, "Vetor aceleração", 5);
+            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2InputListRow("acceleration", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue, true, false, "m/s²"));
             this.objectPosition = this.object.getProperty("position");
         }
         drawGizmos(canvasRenderer) {
@@ -197,18 +197,24 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     }
     exports.ObjectAcceleration = ObjectAcceleration;
     class ObjectCentripetalAcceleration extends PhysicsProperty {
-        constructor(object, active) {
+        constructor(object) {
             super("centripetalAcceleration", true, object, { vector: vector2_1.default.zero, modulus: 0 }, { vector: vector2_1.default.zero, modulus: 0 }, genericCalulator_1.VectorModulusCalculator.instance, 2);
-            this.propertyEditorInput = new propertyEditor_1.PropertyEditorForm(this, "a<sub>c</sub>", "Cinemática", 4, true, true, "Vetor aceleração centrípeta", 6);
-            this.propertyEditorInput.addInput(new propertyEditor_1.NumberFormInput("módulo", "m", 0, true, true));
-            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2FormInput("ponto", "m", vector2_1.default.zero, true, true));
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorInputList(this, "acel<sub>c</sub>", "Cinemática", 4, true, false, "Vetor aceleração centrípeta", 6);
+            this.propertyEditorInput.addInput(new propertyEditor_1.NumberInputListRow("módulo", "m", 0, true, true));
+            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2InputListRow("ponto", "m", vector2_1.default.zero, true, true));
             this.objectPosition = this.object.getProperty("position");
             this.objectAcceleration = this.object.getProperty("acceleration");
-            this.active = active;
+            this.objectVelocity = this.object.getProperty("velocity");
         }
-        simulate() {
-            if (this.objectAcceleration && this.active)
-                this.objectAcceleration.value = vector2_1.default.sub(vector2_1.default.mult(this.value.vector.unit(), this.value.modulus), this.objectAcceleration.initialValue);
+        simulate(step) {
+            if (this.objectAcceleration && this.objectPosition && this.objectVelocity && this.active) {
+                const r = vector2_1.default.div(vector2_1.default.mult(this.objectVelocity.value, this.objectVelocity.value), this.value.modulus);
+                const pos = this.objectPosition.value;
+                const acxr = vector2_1.default.mult(this.value.modulus, pos);
+                const sqrtACxR = new vector2_1.default(Math.sqrt(acxr.x), Math.sqrt(acxr.x));
+                const dir = vector2_1.default.sub(this.value.vector, pos).unit();
+                this.objectAcceleration.value = vector2_1.default.sum(this.objectAcceleration.initialValue, vector2_1.default.mult(dir, this.value.modulus));
+            }
         }
         onUserInput(formData) {
             this.initialValue = {
@@ -222,7 +228,8 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         drawGizmos(canvasRenderer) {
             if (this.doDrawGizmos && this.objectPosition) {
                 const from = this.objectPosition.value;
-                const to = vector2_1.default.sum(from, vector2_1.default.mult(vector2_1.default.sub(this.value.vector, from).unit(), this.value.modulus));
+                const dir = vector2_1.default.sub(this.value.vector, from).unit();
+                const to = vector2_1.default.sum(from, vector2_1.default.mult(dir, this.value.modulus));
                 gizmos_1.default.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
             }
         }

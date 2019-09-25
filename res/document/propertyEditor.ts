@@ -1,12 +1,12 @@
 console.log("Loading propertyEditor");
 
 import { PhysicsObject } from "../physicsObjects";
-import { ButtonColor, PropertyEditorRow, Selectable, PropertyEditorFormTarget, PropertyEditorFormInput } from "../types";
+import { ButtonColor, PropertyEditorOption, Selectable, PropertyEditorFormTarget, PropertyEditorInputListRow } from "../types";
 import Vector2 from "../vector2";
 import { Button } from "./buttons";
 
 export class PropertyEditor {
-    private rows: PropertyEditorRow[];
+    private rows: PropertyEditorOption[];
     private enabled: boolean;
 
     constructor(private htmlElement: HTMLElement) {
@@ -27,18 +27,18 @@ export class PropertyEditor {
     build(object: Selectable): void {
         this.clear();
 
-        if (!object.getPropertyEditorRows)
+        if (!object.getPropertyEditorOptions)
             return;
 
         //Get categories from the propertyPalleteRows of object, and store them on an array of {name, layoutOrder}. Then remove all of categories with the same name, leaving the ones with the minimal layoutOrder
-        const propertyEditorRows = object.getPropertyEditorRows();
-        let categories: { name: string, layoutOrder: number }[] = propertyEditorRows.map(el => { return { name: el.category, layoutOrder: el.layoutOrder } });
+        const PropertyEditorOptions = object.getPropertyEditorOptions();
+        let categories: { name: string, layoutOrder: number }[] = PropertyEditorOptions.map(el => { return { name: el.category, layoutOrder: el.layoutOrder } });
         categories = categories.sort((cat1, cat2) => cat1.layoutOrder - cat2.layoutOrder);
         categories = categories.filter((v) => categories.find(c => c.name == v.name) == v);
 
-        //Append categories as h1 and propertyEditorRows
+        //Append categories as h1 and PropertyEditorOptions
         categories.forEach(category => {
-            let rowWithCategory = propertyEditorRows.filter(ppr => ppr.category == category.name);
+            let rowWithCategory = PropertyEditorOptions.filter(ppr => ppr.category == category.name);
             rowWithCategory = rowWithCategory.sort((row1, row2) => row1.layoutOrder - row2.layoutOrder);
 
             const categoryH1 = document.createElement("h1");
@@ -53,7 +53,7 @@ export class PropertyEditor {
 
         this.htmlElement.style.display = this.htmlElement.childElementCount > 0 ? "block" : "none";
 
-        this.rows = propertyEditorRows;
+        this.rows = PropertyEditorOptions;
     }
 
     clear() {
@@ -63,7 +63,7 @@ export class PropertyEditor {
         this.rows = [];
     }
 
-    private getRowFromEvent(ev: Event): PropertyEditorRow | undefined {
+    private getRowFromEvent(ev: Event): PropertyEditorOption | undefined {
         const tgt = <HTMLElement>ev.target;
         if (!tgt) return;
 
@@ -103,7 +103,7 @@ export class PropertyEditor {
     }
 }
 
-abstract class BasicPropertyEditorRow implements PropertyEditorRow {
+abstract class BasicPropertyEditorOption implements PropertyEditorOption {
     readonly element: HTMLElement;
 
     private _active: boolean;
@@ -143,13 +143,13 @@ abstract class BasicPropertyEditorRow implements PropertyEditorRow {
     }
 }
 
-export class PropertyEditorForm extends BasicPropertyEditorRow {
+export class PropertyEditorInputList extends BasicPropertyEditorOption {
     private nameLabel: HTMLLabelElement;
-    private formElement: HTMLFormElement;
+    private inputWrapper: HTMLDivElement;
     private toggleElement?: HTMLInputElement;
     private _toggled?: boolean;
 
-    private inputList: PropertyEditorFormInput<any>[];
+    private inputList: PropertyEditorInputListRow<any>[];
 
     constructor(protected readonly target: PropertyEditorFormTarget, name: string, category: string, layoutOrder: number, changeable: boolean, toggleable: boolean, title: string, descriptionId?: number) {
         super(category, layoutOrder, changeable, descriptionId);
@@ -157,7 +157,7 @@ export class PropertyEditorForm extends BasicPropertyEditorRow {
         this.inputList = [];
 
         this.element.classList.add("input-row");
-        this.formElement = document.createElement("form");
+        this.inputWrapper = document.createElement("div");
         this.nameLabel = document.createElement("label");
 
         this.nameLabel.innerHTML = name;
@@ -172,7 +172,7 @@ export class PropertyEditorForm extends BasicPropertyEditorRow {
             this.element.appendChild(this.toggleElement);
         }
 
-        this.element.append(this.nameLabel, this.formElement);
+        this.element.append(this.nameLabel, this.inputWrapper);
     }
 
     get active(): boolean {
@@ -196,12 +196,12 @@ export class PropertyEditorForm extends BasicPropertyEditorRow {
         this.toggleElement!.checked = v || false;
     }
 
-    addInput(input: PropertyEditorFormInput<any>) {
+    addInput(input: PropertyEditorInputListRow<any>) {
         this.inputList.push(input);
-        input.appendTo(this.formElement);
+        input.appendTo(this.inputWrapper);
     }
 
-    getInput(name?: string): PropertyEditorFormInput<any> | undefined {
+    getInput(name?: string): PropertyEditorInputListRow<any> | undefined {
         if(name)        
             return this.inputList.find(el => el.name == name);
         
@@ -230,7 +230,7 @@ export class PropertyEditorForm extends BasicPropertyEditorRow {
     }
 }
 
-export class FormInput<T> implements PropertyEditorFormInput<T> {
+export class InputListRow<T> implements PropertyEditorInputListRow<T> {
     private _active: boolean;
     private element: HTMLElement;
     protected input: HTMLInputElement;
@@ -246,6 +246,7 @@ export class FormInput<T> implements PropertyEditorFormInput<T> {
 
         unitLabel.innerHTML = unit;
         this.input.value = this.formatValue(initialValue);
+        this.input.type = "text";
         this.active = changeable;
 
         if(createNameLabel){
@@ -291,7 +292,7 @@ export class FormInput<T> implements PropertyEditorFormInput<T> {
 
         const matchResult = this.processMatch(match);
 
-        if (!matchResult) 
+        if (matchResult == undefined) 
             return reset();
 
         return matchResult;
@@ -311,16 +312,15 @@ export class FormInput<T> implements PropertyEditorFormInput<T> {
     }
 }
 
-export class Vector2FormInput extends FormInput<Vector2>{
+export class Vector2InputListRow extends InputListRow<Vector2>{
     constructor(name: string, unit: string, initialValue: Vector2, changeable: boolean, createNameLabel: boolean, private modulusUnit?: string){
         super(name, unit, initialValue, /\-?\d*\.?\d*/g, changeable, createNameLabel);
+        this.updateInputTitle(initialValue);
     }
 
     updateValue(v: Vector2){
         super.updateValue(v);
-
-        if (this.modulusUnit)
-            this.input.title = `Módulo: ${v.magnitude()} ${this.modulusUnit}`;
+        this.updateInputTitle(v);
     }
 
     protected formatValue(value: Vector2): string {
@@ -335,9 +335,14 @@ export class Vector2FormInput extends FormInput<Vector2>{
 
         return new Vector2(Number(match[0]), Number(match[1]));
     }
+
+    private updateInputTitle(v: Vector2){
+        if (this.modulusUnit)
+            this.input.title = `Módulo: ${v.magnitude()} ${this.modulusUnit}`;
+    }
 }
 
-export class NumberFormInput extends FormInput<number>{
+export class NumberInputListRow extends InputListRow<number>{
     constructor(name: string, unit: string, initialValue: number, changeable: boolean, createNameLabel: boolean){
         super(name, unit, initialValue, /\-?\d*\.?\d*/i, changeable, createNameLabel);
     }
@@ -356,7 +361,7 @@ export class NumberFormInput extends FormInput<number>{
     }
 }
 
-export class ObjectLocatorPropertyEditorRow extends BasicPropertyEditorRow {
+export class ObjectLocatorPropertyEditorOption extends BasicPropertyEditorOption {
     private locateButton: HTMLElement;
 
     constructor(target: PhysicsObject, category: string, layoutOrder: number, descriptionId?: number) {

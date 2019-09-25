@@ -1,13 +1,13 @@
 console.log("Loading ambient");
 
 import { ObjectSelectionController } from './document/documentUtilities';
-import { ObjectLocatorPropertyEditorRow } from './document/propertyEditor';
+import { ObjectLocatorPropertyEditorOption } from './document/propertyEditor';
 import { AmbientJSON, PhysicsObjectJSON } from './fileController';
 import { PhysicsObject } from './physicsObjects';
 import { ObjectPosition } from './physicsProperties';
 import { Camera, CanvasRenderer } from './rendering/canvasRenderer';
 import Simulator from './simulator';
-import { PhysicsPropertyName, PropertyEditorRow, Renderable, Selectable, Simulatable } from './types';
+import { PropertyEditorOption, Renderable, Selectable, Simulatable } from './types';
 import Vector2 from './vector2';
 
 export default class Ambient implements Selectable, Renderable, Simulatable {
@@ -83,10 +83,10 @@ export default class Ambient implements Selectable, Renderable, Simulatable {
         return null;
     }
 
-    getPropertyEditorRows(): PropertyEditorRow[] {
-        const rows: PropertyEditorRow[] = [];
+    getPropertyEditorOptions(): PropertyEditorOption[] {
+        const rows: PropertyEditorOption[] = [];
 
-        this.objects.forEach(obj => rows.push(new ObjectLocatorPropertyEditorRow(obj, "Objetos", 0)));
+        this.objects.forEach(obj => rows.push(new ObjectLocatorPropertyEditorOption(obj, "Objetos", 0)));
 
         return rows;
     }
