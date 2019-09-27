@@ -46,7 +46,7 @@ class PhysicsObjectValueGetter implements ValueGetter {
 
         this.getValueCallbacks[this.VECTOR2_MODULUS_CALLBACK] = function (target: PhysicsObject, propertyType: PhysicsPropertyName) {
             const property = <PhysicsProperty<Vector2>>target.getProperty(propertyType);
-            return Vector2.distance(Vector2.zero, property.value);
+            return property.value.magnitude();
         };
     }
 
@@ -125,8 +125,8 @@ export class Graph implements Renderable, Simulatable {
         this.points.push(newPoint);
     }
     reset(): void {
+        //this.simulate(0);
         this.points = [];
-        this.simulate(0);
     }
     draw(canvasRenderer: CanvasRenderer): void {
         const cam = canvasRenderer.camera;
@@ -140,14 +140,13 @@ export class Graph implements Renderable, Simulatable {
 
                 if (pointFinish) {
                     const canvasFinish = cam.getCanvasPosFromWorld(pointFinish);
-                    this.drawLine(ctx, canvasStart, canvasFinish, 5, "black");
                     ctx.lineCap = "round";
                     this.drawLine(ctx, canvasStart, canvasFinish, 3, "orange");
                 }
             }
 
-            this.drawCircle(ctx, cam.getCanvasPosFromWorld(this.points[0]), 4, 2, "orange", "black");
-            this.drawCircle(ctx, cam.getCanvasPosFromWorld(this.points[this.points.length - 1]), 4, 2, "orange", "black");
+            this.drawCircle(ctx, cam.getCanvasPosFromWorld(this.points[0]), 4, 2, "orange");
+            this.drawCircle(ctx, cam.getCanvasPosFromWorld(this.points[this.points.length - 1]), 4, 2, "orange");
         }
     }
 
@@ -162,9 +161,9 @@ export class Graph implements Renderable, Simulatable {
         con.stroke();
     }
 
-    private drawCircle(con: CanvasRenderingContext2D, centerPos: Vector2, radius: number, strokeWidth: number, fillStyle: string, strokeStyle: string) {
+    private drawCircle(con: CanvasRenderingContext2D, centerPos: Vector2, radius: number, strokeWidth: number, fillStyle: string, strokeStyle?: string) {
         con.lineWidth = strokeWidth;
-        con.strokeStyle = strokeStyle;
+        con.strokeStyle = strokeStyle || "";
         con.fillStyle = fillStyle;
 
         con.beginPath();

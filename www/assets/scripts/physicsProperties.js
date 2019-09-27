@@ -82,7 +82,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         }
         drawGizmos(canvasRenderer) {
             if (this.doDrawGizmos)
-                gizmos_1.default.drawPositionPoint(canvasRenderer, this.value, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, font: "italic 15px CMU Serif", pointRadius: 3 });
+                gizmos_1.default.drawVector(canvasRenderer, vector2_1.default.zero, this.value, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
         }
     }
     exports.ObjectPosition = ObjectPosition;
@@ -142,13 +142,20 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
             this.propertyEditorInput.addInput(new propertyEditor_1.Vector2InputListRow("velocity", "<sup>m</sup>&frasl;<sub>s</sub>", this.initialValue, true, false, "m/s"));
             this.objectPosition = this.object.getProperty("position");
             this.objectAcceleration = this.object.getProperty("acceleration");
+            this.objectCentripitalAcceleration = this.object.getProperty("centripetalAcceleration");
         }
         simulate(step) {
-            const currentVel = this.value;
-            if (this.objectAcceleration)
-                this.value = vector2_1.default.sum(this.value, vector2_1.default.mult(this.objectAcceleration.value, step));
-            if (this.objectPosition && this.objectAcceleration) {
-                this.objectPosition.value = vector2_1.default.sum(this.objectPosition.value, vector2_1.default.sum(vector2_1.default.mult(currentVel, step), vector2_1.default.div(vector2_1.default.mult(this.objectAcceleration.value, Math.pow(step, 2)), 2)));
+            if (this.objectPosition && this.objectAcceleration)
+                this.objectPosition.value = vector2_1.default.sum(this.objectPosition.value, vector2_1.default.sum(vector2_1.default.mult(this.value, step), vector2_1.default.div(vector2_1.default.mult(this.objectAcceleration.value, Math.pow(step, 2)), 2)));
+            if (this.objectAcceleration) {
+                const ai = this.objectAcceleration.value;
+                let af = this.objectAcceleration.value;
+                if (this.objectCentripitalAcceleration) {
+                    this.objectCentripitalAcceleration.simulate();
+                    af = this.objectAcceleration.value;
+                }
+                const avgA = vector2_1.default.div(vector2_1.default.sum(ai, af), 2);
+                this.value = vector2_1.default.sum(this.value, vector2_1.default.mult(avgA, step));
             }
         }
         drawGizmos(canvasRenderer) {
@@ -204,14 +211,10 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
             this.propertyEditorInput.addInput(new propertyEditor_1.Vector2InputListRow("ponto", "m", vector2_1.default.zero, true, true));
             this.objectPosition = this.object.getProperty("position");
             this.objectAcceleration = this.object.getProperty("acceleration");
-            this.objectVelocity = this.object.getProperty("velocity");
         }
-        simulate(step) {
-            if (this.objectAcceleration && this.objectPosition && this.objectVelocity && this.active) {
-                const r = vector2_1.default.div(vector2_1.default.mult(this.objectVelocity.value, this.objectVelocity.value), this.value.modulus);
+        simulate() {
+            if (this.objectAcceleration && this.objectPosition && this.value.modulus != 0) {
                 const pos = this.objectPosition.value;
-                const acxr = vector2_1.default.mult(this.value.modulus, pos);
-                const sqrtACxR = new vector2_1.default(Math.sqrt(acxr.x), Math.sqrt(acxr.x));
                 const dir = vector2_1.default.sub(this.value.vector, pos).unit();
                 this.objectAcceleration.value = vector2_1.default.sum(this.objectAcceleration.initialValue, vector2_1.default.mult(dir, this.value.modulus));
             }

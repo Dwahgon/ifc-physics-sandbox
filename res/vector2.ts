@@ -1,3 +1,5 @@
+import { VectorModulus } from "./types";
+
 export default class Vector2 {
     constructor(public x: number, public y: number) { }
 
@@ -10,7 +12,7 @@ export default class Vector2 {
     }
 
     magnitude(): number {
-        return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+        return Math.hypot(this.x, this.y);
     }
 
     unit(): Vector2 {
@@ -26,7 +28,8 @@ export default class Vector2 {
     }
 
     static distance(a: Vector2, b: Vector2): number {
-        return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+        console.log("here");
+        return Math.hypot(a.x - b.x, a.y - b.y);
     }
 
     static sum(a: Vector2, b: Vector2): Vector2 {
@@ -69,5 +72,18 @@ export default class Vector2 {
 
     static getVectorDeterminant(a: Vector2, b: Vector2, c: Vector2): number {
         return (a.x * b.y + a.y * c.x + b.x * c.y) - (b.y * c.x + a.x * c.y + a.y * b.x);
+    }
+
+    static dotProduct(a: Vector2, b: Vector2): number {
+        return a.x * b.x + a.y * b.y;
+    }
+
+    /**
+     * Returns the angle between two vectors in radians
+     * @param a Vector 1
+     * @param b Vector 2
+     */
+    static angleBetween(a: Vector2, b: Vector2): number {
+        return Math.acos(Vector2.dotProduct(a, b) / (a.magnitude() * b.magnitude()));
     }
 }
