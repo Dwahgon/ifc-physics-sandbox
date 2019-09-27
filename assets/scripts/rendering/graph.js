@@ -43,7 +43,7 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
             };
             this.getValueCallbacks[this.VECTOR2_MODULUS_CALLBACK] = function (target, propertyType) {
                 const property = target.getProperty(propertyType);
-                return vector2_1.default.distance(vector2_1.default.zero, property.value);
+                return property.value.magnitude();
             };
         }
         getTargetNames() {
@@ -109,8 +109,8 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
             this.points.push(newPoint);
         }
         reset() {
+            //this.simulate(0);
             this.points = [];
-            this.simulate(0);
         }
         draw(canvasRenderer) {
             const cam = canvasRenderer.camera;
@@ -122,13 +122,12 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
                     const canvasStart = cam.getCanvasPosFromWorld(pointStart);
                     if (pointFinish) {
                         const canvasFinish = cam.getCanvasPosFromWorld(pointFinish);
-                        this.drawLine(ctx, canvasStart, canvasFinish, 5, "black");
                         ctx.lineCap = "round";
                         this.drawLine(ctx, canvasStart, canvasFinish, 3, "orange");
                     }
                 }
-                this.drawCircle(ctx, cam.getCanvasPosFromWorld(this.points[0]), 4, 2, "orange", "black");
-                this.drawCircle(ctx, cam.getCanvasPosFromWorld(this.points[this.points.length - 1]), 4, 2, "orange", "black");
+                this.drawCircle(ctx, cam.getCanvasPosFromWorld(this.points[0]), 4, 2, "orange");
+                this.drawCircle(ctx, cam.getCanvasPosFromWorld(this.points[this.points.length - 1]), 4, 2, "orange");
             }
         }
         drawLine(con, canvasStart, canvasFinish, lineWidth, lineStyle) {
@@ -143,7 +142,7 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
         }
         drawCircle(con, centerPos, radius, strokeWidth, fillStyle, strokeStyle) {
             con.lineWidth = strokeWidth;
-            con.strokeStyle = strokeStyle;
+            con.strokeStyle = strokeStyle || "";
             con.fillStyle = fillStyle;
             con.beginPath();
             //@ts-ignore
