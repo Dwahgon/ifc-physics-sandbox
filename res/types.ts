@@ -19,7 +19,7 @@ export enum PhysicsObjectType {
 
 /* Types */
 
-export type PhysicsPropertyName = "position" | "size" | "velocity" | "acceleration" | "displacement" | "area" | "name" | "centripetalAcceleration";
+export type PhysicsPropertyName = "position" | "size" | "velocity" | "acceleration" | "displacement" | "area" | "name" | "centripetalAcceleration" | "mass";
 
 /* Interfaces */
 

@@ -385,3 +385,15 @@ export class ObjectLocatorPropertyEditorOption extends BasicPropertyEditorOption
         this.element.append(nameLabel, this.locateButton);
     }
 }
+
+export class PropertyEditorWrapperOption extends BasicPropertyEditorOption {
+    private propertyWrapper: HTMLDivElement;
+    
+    constructor(category: string, layoutOrder: number, changeable: boolean, public totalCalc?: Function, descriptionId?: number) {
+        super(category, layoutOrder, changeable, descriptionId);
+
+        this.propertyWrapper = document.createElement("div");
+
+        this.element.append(this.propertyWrapper);
+    }
+}

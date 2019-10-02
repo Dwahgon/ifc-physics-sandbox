@@ -333,3 +333,19 @@ export class ObjectCentripetalAcceleration extends PhysicsProperty<VectorModulus
         }
     }
 }
+
+export class ObjectMass extends PhysicsProperty<Number>{
+    constructor(object: PhysicsObject){
+        super("mass", true, object, 0, 0, NumberCalculator.instance);
+        this.propertyEditorInput = new PropertyEditorInputList(this, "massa", "Geral", 3,  true, false, "Massa");
+        this.propertyEditorInput.addInput(new NumberInputListRow("mass", "g", 0, true, false));
+    }
+}
+
+export class NetForce extends PhysicsProperty<Vector2>{
+    constructor(object: PhysicsObject){
+        super("mass", true, object, 0, 0, NumberCalculator.instance);
+        this.propertyEditorInput = new PropertyEditorInputList(this, "massa", "Geral", 3,  true, false, "Massa");
+        this.propertyEditorInput.addInput(new NumberInputListRow("mass", "g", 0, true, false));
+    }
+}
