@@ -394,6 +394,7 @@ export class PropertyEditorWrapperOption extends BasicPropertyEditorOption {
 
         this.propertyWrapper = document.createElement("div");
 
+        
         this.element.append(this.propertyWrapper);
     }
 }
