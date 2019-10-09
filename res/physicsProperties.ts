@@ -342,10 +342,10 @@ export class ObjectMass extends PhysicsProperty<Number>{
     }
 }
 
-export class NetForce extends PhysicsProperty<Vector2>{
-    constructor(object: PhysicsObject){
-        super("netForce", true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
-        this.propertyEditorInput = new PropertyEditorInputList(this, "força<sub>t</sub>", "Cinemática", 4, true, false, "Vetor aceleração centrípeta", 6);
-        this.propertyEditorInput.addInput(new NumberInputListRow("módulo", "m", 0, true, true));
-    }
-}
+// export class NetForce extends PhysicsProperty<Vector2>{
+//     constructor(object: PhysicsObject){
+//         super("netForce", true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
+//         this.propertyEditorInput = new PropertyEditorInputList(this, "força<sub>t</sub>", "Cinemática", 4, true, false, "Vetor aceleração centrípeta", 6);
+//         this.propertyEditorInput.addInput(new NumberInputListRow("módulo", "m", 0, true, true));
+//     }
+// }

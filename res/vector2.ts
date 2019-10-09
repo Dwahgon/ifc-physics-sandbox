@@ -19,6 +19,25 @@ export default class Vector2 {
         return Vector2.div(this, this.magnitude());
     }
 
+    invert(): Vector2 {
+        this.x = -this.x;
+        this.y = -this.y;
+
+        return this;
+    }
+
+    invertX(): Vector2 {
+        this.x = -this.x;
+
+        return this;
+    }
+
+    invertY(): Vector2 {
+        this.y = -this.y;
+
+        return this;
+    }
+
     toString() {
         return "(" + this.x + ", " + this.y + ")";
     }

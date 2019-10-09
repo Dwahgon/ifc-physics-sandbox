@@ -4,16 +4,19 @@ import * as Buttons from "../document/buttons";
 import { ObjectSelectionController } from "../document/documentUtilities";
 import { Followable, Renderable } from "../types";
 import Vector2 from "../vector2";
+import { DrawingTools } from "./drawingTools";
 
 export class CanvasRenderer {
+    public readonly camera: Camera;
+    public readonly drawingTools: DrawingTools;
     private isRunning: boolean;
     private renderables: Renderable[];
-    public readonly camera: Camera;
 
     constructor(public readonly context: CanvasRenderingContext2D, cameraPos: Vector2 = Vector2.zero, cameraZoom: number = 100, cameraMinZoom: number = 10, cameraMaxZoom: number = 500) {
         this.isRunning = false;
         this.renderables = [];
         this.camera = new Camera(this, cameraPos, cameraZoom, cameraMinZoom, cameraMaxZoom, 5);
+        this.drawingTools = new DrawingTools(context, this.camera);
 
         this.add({
             draw(canvasRenderer: CanvasRenderer) {
@@ -90,9 +93,9 @@ export class Camera {
         this.clickedPos = Vector2.zero;
         this.cameraPosOnMouseDown = Vector2.zero;
 
-        canvas.addEventListener("mousedown", ev => { this.onInputStart(new Vector2(ev.offsetX, -ev.offsetY)); });
+        canvas.addEventListener("mousedown", ev => { this.onInputStart(new Vector2(ev.offsetX, ev.offsetY)); });
         canvas.addEventListener("touchstart", ev => { this.onInputStart(this.getTouchPosition(ev)); });
-        canvas.addEventListener("mousemove", ev => { this.onMove(new Vector2(ev.offsetX, -ev.offsetY), canvas); });
+        canvas.addEventListener("mousemove", ev => { this.onMove(new Vector2(ev.offsetX, ev.offsetY), canvas); });
         canvas.addEventListener("touchmove", ev => { this.onMove(this.getTouchPosition(ev), canvas); });
         canvas.addEventListener("wheel", ev => { this.onWheel(ev) })
         document.addEventListener("mouseup", () => { this.onMouseUp(canvas) });
@@ -123,6 +126,8 @@ export class Camera {
             this.unfollowObject();
 
         this._pos = value;
+
+        console.log(this._pos);
     }
 
     get objectBeingFollowed() {
@@ -155,8 +160,8 @@ export class Camera {
     getWorldPosFromCanvas(canvasPos: Vector2): Vector2 {
         const canvas = this.canvasRenderer.context.canvas;
 
-        const posX = ((canvas.width / 2) - this.pos.x - canvasPos.x) / -this.zoom;
-        const posY = ((canvas.height / 2) + this.pos.y - canvasPos.y) / this.zoom;
+        const posX = this.pos.x - (canvas.width / 2 - canvasPos.x) / this.zoom;
+        const posY = this.pos.y + (canvas.height / 2 - canvasPos.y) / this.zoom;
 
         return new Vector2(posX, posY);
     }
@@ -164,8 +169,8 @@ export class Camera {
     getCanvasPosFromWorld(worldPos: Vector2): Vector2 {
         const canvas = this.canvasRenderer.context.canvas;
 
-        const posX = (canvas.width / 2) + worldPos.x * this.zoom - this.pos.x;
-        const posY = (canvas.height / 2) - worldPos.y * this.zoom + this.pos.y;
+        const posX = (worldPos.x - this.pos.x) * this.zoom + canvas.width / 2;
+        const posY = -((worldPos.y - this.pos.y) * this.zoom - canvas.height / 2);
 
         return new Vector2(posX, posY);
     }
@@ -193,7 +198,7 @@ export class Camera {
         const x = ev.targetTouches[0].pageX - rect.left;
         const y = ev.targetTouches[0].pageY - rect.top;
 
-        return new Vector2(x, -y);
+        return new Vector2(x, y);
     }
 
     private changeButtonText(isFollowing: boolean): void {
@@ -218,7 +223,7 @@ export class Camera {
     private onMove(cursorCoordinates: Vector2, canvas: HTMLCanvasElement) {
         if (this.isMouseDown) {
             if (this.allowMovement)
-                this.pos = Vector2.sum(this.cameraPosOnMouseDown, Vector2.sub(this.clickedPos, cursorCoordinates));
+                this.pos = Vector2.sum(this.cameraPosOnMouseDown, Vector2.div(Vector2.sub(this.clickedPos, cursorCoordinates), this.zoom).invertY());
 
             canvas.style.cursor = "move";
 

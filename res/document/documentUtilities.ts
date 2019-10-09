@@ -53,7 +53,7 @@ export abstract class GraphPanel {
         this.panel.querySelector(".panel-content")!.appendChild(canvas);
 
         this.canvasRenderer = new CanvasRenderer(canvas.getContext("2d")!);
-        this.canvasRenderer.camera.pos = new Vector2(150, 150);
+        this.canvasRenderer.camera.pos = new Vector2(0, 0);
         this.cartesianPlane = new CartesianPlane(1);
         this.canvasRenderer.add(this.cartesianPlane);
 

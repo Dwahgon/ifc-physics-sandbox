@@ -298,4 +298,13 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
         }
     }
     exports.ObjectLocatorPropertyEditorOption = ObjectLocatorPropertyEditorOption;
+    class PropertyEditorWrapperOption extends BasicPropertyEditorOption {
+        constructor(category, layoutOrder, changeable, totalCalc, descriptionId) {
+            super(category, layoutOrder, changeable, descriptionId);
+            this.totalCalc = totalCalc;
+            this.propertyWrapper = document.createElement("div");
+            this.element.append(this.propertyWrapper);
+        }
+    }
+    exports.PropertyEditorWrapperOption = PropertyEditorWrapperOption;
 });
