@@ -18,6 +18,19 @@ define(["require", "exports"], function (require, exports) {
         unit() {
             return Vector2.div(this, this.magnitude());
         }
+        invert() {
+            this.x = -this.x;
+            this.y = -this.y;
+            return this;
+        }
+        invertX() {
+            this.x = -this.x;
+            return this;
+        }
+        invertY() {
+            this.y = -this.y;
+            return this;
+        }
         toString() {
             return "(" + this.x + ", " + this.y + ")";
         }

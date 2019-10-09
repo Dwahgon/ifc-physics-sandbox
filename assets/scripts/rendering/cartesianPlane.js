@@ -23,7 +23,7 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             const startY = Math.floor(startPos.y / this.gridSize) * this.gridSize;
             const originPosOnCanvas = cam.getCanvasPosFromWorld(vector2_1.default.zero);
             for (let i = startX; i < finishPos.x; i += this.gridSize) {
-                const x = (canvas.width / 2) + i * cam.zoom - cam.pos.x;
+                const x = (i - cam.pos.x) * cam.zoom + canvas.width / 2;
                 if (i != 0) {
                     this.drawVerticalLine(ctx, x);
                     if (this.style.showMeasurements)
@@ -31,7 +31,7 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
                 }
             }
             for (let i = startY; i > finishPos.y; i -= this.gridSize) {
-                const y = (canvas.height / 2) - i * cam.zoom + cam.pos.y;
+                const y = -((i - cam.pos.y) * cam.zoom - canvas.height / 2);
                 if (i != 0) {
                     this.drawHorizontalLine(ctx, y);
                     if (this.style.showMeasurements)

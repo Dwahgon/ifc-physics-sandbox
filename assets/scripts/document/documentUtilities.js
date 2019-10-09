@@ -44,7 +44,7 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
             canvas.height = 10;
             this.panel.querySelector(".panel-content").appendChild(canvas);
             this.canvasRenderer = new canvasRenderer_1.CanvasRenderer(canvas.getContext("2d"));
-            this.canvasRenderer.camera.pos = new vector2_1.default(150, 150);
+            this.canvasRenderer.camera.pos = new vector2_1.default(0, 0);
             this.cartesianPlane = new cartesianPlane_1.CartesianPlane(1);
             this.canvasRenderer.add(this.cartesianPlane);
             closeGraphButton.onClick = () => this.stopRenderingGraph();

@@ -244,4 +244,19 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         }
     }
     exports.ObjectCentripetalAcceleration = ObjectCentripetalAcceleration;
+    class ObjectMass extends PhysicsProperty {
+        constructor(object) {
+            super("mass", true, object, 0, 0, genericCalulator_1.NumberCalculator.instance);
+            this.propertyEditorInput = new propertyEditor_1.PropertyEditorInputList(this, "massa", "Geral", 3, true, false, "Massa");
+            this.propertyEditorInput.addInput(new propertyEditor_1.NumberInputListRow("mass", "g", 0, true, false));
+        }
+    }
+    exports.ObjectMass = ObjectMass;
 });
+// export class NetForce extends PhysicsProperty<Vector2>{
+//     constructor(object: PhysicsObject){
+//         super("netForce", true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
+//         this.propertyEditorInput = new PropertyEditorInputList(this, "força<sub>t</sub>", "Cinemática", 4, true, false, "Vetor aceleração centrípeta", 6);
+//         this.propertyEditorInput.addInput(new NumberInputListRow("módulo", "m", 0, true, true));
+//     }
+// }
