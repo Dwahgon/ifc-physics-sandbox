@@ -126,8 +126,6 @@ export class Camera {
             this.unfollowObject();
 
         this._pos = value;
-
-        console.log(this._pos);
     }
 
     get objectBeingFollowed() {

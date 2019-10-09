@@ -124,8 +124,8 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
             });
         }
     }
-    PhysicsObject.DEFAULT_NAME = "";
     exports.PhysicsObject = PhysicsObject;
+    PhysicsObject.DEFAULT_NAME = "";
     class Solid extends PhysicsObject {
         constructor(ambient, properties) {
             super(types_1.PhysicsObjectType.Solid, new sprite_1.Sprite("./assets/images/solid.svg", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient, properties ? properties.name : undefined);

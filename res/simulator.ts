@@ -128,5 +128,6 @@ export default class Simulator {
 
         this.passTime(0.016);
         window.requestAnimationFrame(this.simulate.bind(this));
+
     }
 }
