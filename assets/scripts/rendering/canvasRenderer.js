@@ -105,7 +105,6 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
             if (this.targetObjectPosition)
                 this.unfollowObject();
             this._pos = value;
-            console.log(this._pos);
         }
         get objectBeingFollowed() {
             if (this.targetObjectPosition)

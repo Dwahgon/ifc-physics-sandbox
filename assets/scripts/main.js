@@ -37,5 +37,10 @@ define(["require", "exports", "./ambient", "./document/buttons", "./document/doc
     exports.canvasRenderer.add(new cartesianPlane_1.CartesianPlane(1, cartesianPlane_1.CartesianPlane.ENVIRONMENT_STYLE));
     exports.canvasRenderer.add(exports.ambient);
     exports.canvasRenderer.add(new fpsCounter_1.FPSCounter(100));
+    exports.canvasRenderer.add({ draw(cR) {
+            cR.context.beginPath();
+            cR.drawingTools.worldArc(new vector2_1.default(1, 1), 10, 0, 2 * Math.PI, true);
+            cR.context.fill();
+        } });
     exports.canvasRenderer.start();
 });
