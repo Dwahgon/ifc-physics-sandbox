@@ -9,7 +9,6 @@ import { Sprite } from './rendering/sprite';
 import { Followable, PhysicsObjectConfig, PhysicsObjectType, PropertyEditorOption, Renderable, Selectable, Simulatable, PhysicsPropertyName } from './types';
 import Vector2 from './vector2';
 import { ObjectSelectionController } from './document/documentUtilities';
-import Gizmos from './rendering/gizmos';
 
 export class PhysicsObject implements Selectable, Simulatable, Renderable, Followable {
     static DEFAULT_NAME: string = "";
@@ -58,13 +57,16 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
         this.sprite.draw(canvasRenderer);
         this.properties.forEach(property => property.drawGizmos(canvasRenderer));
 
-        if(ObjectSelectionController.selectedObject == this){
-            const pos = <PhysicsProperties.ObjectPosition>this.getProperty("position")!;
-            const size = <PhysicsProperties.ObjectSize>this.getProperty("size")!;
-            const drawPos = Vector2.sub(pos.value, Vector2.div(size.value, new Vector2(2, -2)));
+        // if(ObjectSelectionController.selectedObject == this){
+        //     const pos = <PhysicsProperties.ObjectPosition>this.getProperty("position")!;
+        //     const size = <PhysicsProperties.ObjectSize>this.getProperty("size")!;
+        //     const drawPos = Vector2.sub(pos.value, Vector2.div(size.value, new Vector2(2, -2)));
 
-            Gizmos.drawSelection(canvasRenderer, drawPos, size.value, {style: "MediumSeaGreen", lineThickness: 4, offset: 6, lineDash: [8, 3]});
-        }
+        //     canvasRenderer.context.setLineDash([8, 3]);
+        //     canvasRenderer.context.lineWidth = 4;
+        //     canvasRenderer.drawingTools.worldRect(drawPos, size.value);
+        //     Gizmos.drawSelection(canvasRenderer, drawPos, size.value, {style: "MediumSeaGreen", lineThickness: 4, offset: 6, lineDash: [8, 3]});
+        // }
     }
 
     addProperty(name: PhysicsPropertyName, property: PhysicsProperty<any>): void {

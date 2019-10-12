@@ -16,21 +16,9 @@ export class Sprite implements Renderable {
         this.drawSize = drawSize;
     }
 
-    getZoomedSize(zoom: number): Vector2 {
-        return Vector2.mult(this.drawSize, zoom);
-    }
-
     draw(canvasRenderer: CanvasRenderer): void {
-        const cam = canvasRenderer.camera;
-        const ctx = canvasRenderer.context;
-        const posInCanvas = Vector2.sub(cam.getCanvasPosFromWorld(this.drawPosition), Vector2.div(this.getZoomedSize(cam.zoom), 2));
+        const offsettedPos = Vector2.sub(this.drawPosition, Vector2.div(this.drawSize, new Vector2(2, -2)));
 
-        // @ts-ignore
-        ctx.drawImage(this.image,
-            ...this.copyPosition.toArray(),
-            ...this.copySize.toArray(),
-            ...posInCanvas.toArray(),
-            ...this.getZoomedSize(cam.zoom).toArray()
-        );
+        canvasRenderer.drawingTools.worldImage(this.image, offsettedPos, this.drawSize, 0, true, this.copyPosition, this.copySize);
     }
 }

@@ -11,6 +11,7 @@ import { PhysicsPropertyName, Renderable, Simulatable, ValueGetter } from "../ty
 import Vector2 from "../vector2";
 import { CanvasRenderer } from "./canvasRenderer";
 import documentElements from "../document/documentElements";
+import { DrawingTools } from "./drawingTools";
 
 /*
     Class definitions
@@ -100,11 +101,13 @@ class SimulatorValueGetter implements ValueGetter {
 
 export class Graph implements Renderable, Simulatable {
     private points: Vector2[];
+    private highlightedPoint: Vector2 | null;
     private onMouseMoved: ((ev: MouseEvent) => void) | null;
 
     constructor(private readonly targetX: string, private readonly targetY: string, public readonly valueGetterX: ValueGetter, public readonly valueGetterY: ValueGetter, private pointSize: number) {
         this.points = [];
         this.onMouseMoved = null;
+        this.highlightedPoint = null;
 
         this.simulate(0);
     }
@@ -124,53 +127,112 @@ export class Graph implements Renderable, Simulatable {
 
         this.points.push(newPoint);
     }
+
     reset(): void {
         //this.simulate(0);
         this.points = [];
     }
+
     draw(canvasRenderer: CanvasRenderer): void {
         const cam = canvasRenderer.camera;
         const ctx = canvasRenderer.context;
+        const dT = canvasRenderer.drawingTools;
 
         if (this.points.length > 0) {
-            for (let index = 0; index < this.points.length; index++) {
-                const pointStart = this.points[index];
-                const pointFinish = this.points[index + 1];
-                const canvasStart = cam.getCanvasPosFromWorld(pointStart);
+            ctx.beginPath();
 
-                if (pointFinish) {
-                    const canvasFinish = cam.getCanvasPosFromWorld(pointFinish);
-                    ctx.lineCap = "round";
-                    this.drawLine(ctx, canvasStart, canvasFinish, 3, "orange");
-                }
-            }
+            dT.worldMoveTo(this.points[0]);
+            for (let index = 1; index < this.points.length; index++)
+                dT.worldLineTo(this.points[index]);
+            
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "orange";
+            ctx.stroke();
+            ctx.closePath();
 
-            this.drawCircle(ctx, cam.getCanvasPosFromWorld(this.points[0]), 4, 2, "orange");
-            this.drawCircle(ctx, cam.getCanvasPosFromWorld(this.points[this.points.length - 1]), 4, 2, "orange");
+            this.drawCircle(dT, ctx, this.points[0], 4, "orange");
+            this.drawCircle(dT, ctx, this.points[this.points.length - 1], 4, "orange");
+        }
+
+        if(this.highlightedPoint){
+            this.drawCircle(dT, ctx, this.highlightedPoint, 4, "red");
+            
+            const text = `P(${this.highlightedPoint.x.toFixed(2)}, ${this.highlightedPoint.y.toFixed(2)})`;
+            const textPos = Vector2.sum(cam.getCanvasPosFromWorld(this.highlightedPoint), new Vector2(10, -10));
+            ctx.font = "italic 15px CMU Serif";
+            ctx.fillStyle = "red";
+            ctx.strokeStyle = "white"
+            ctx.lineWidth = 3;
+
+            //@ts-ignore
+            ctx.strokeText(text, ...textPos.toArray());
+            //@ts-ignore
+            ctx.fillText(text, ...textPos.toArray());
         }
     }
 
-    private drawLine(con: CanvasRenderingContext2D, canvasStart: Vector2, canvasFinish: Vector2, lineWidth: number, lineStyle: string) {
-        con.lineWidth = lineWidth;
-        con.strokeStyle = lineStyle;
-        con.beginPath();
-        //@ts-ignore
-        con.moveTo(...canvasStart.toArray());
-        //@ts-ignore
-        con.lineTo(...canvasFinish.toArray());
-        con.stroke();
+    onCanvasAdded(cR: CanvasRenderer){
+        this.onMouseMoved = (ev: MouseEvent) => this.highlightPoint(cR, ev);
+
+        cR.context.canvas.addEventListener("mousemove", this.onMouseMoved);
     }
 
-    private drawCircle(con: CanvasRenderingContext2D, centerPos: Vector2, radius: number, strokeWidth: number, fillStyle: string, strokeStyle?: string) {
-        con.lineWidth = strokeWidth;
-        con.strokeStyle = strokeStyle || "";
-        con.fillStyle = fillStyle;
+    
+    onCanvasRemoved(cR: CanvasRenderer){
+        if(this.onMouseMoved){
+            cR.context.canvas.removeEventListener("mousemove", this.onMouseMoved);
+            this.onMouseMoved = null;
+        }
+    }
 
-        con.beginPath();
-        //@ts-ignore
-        con.arc(...centerPos.toArray(), radius, 0, 2 * Math.PI);
-        con.fill();
-        con.stroke();
+    private drawCircle(dT: DrawingTools, ctx: CanvasRenderingContext2D, centerPos: Vector2, radius: number, fillStyle: string) {
+        ctx.fillStyle = fillStyle;
+
+        ctx.beginPath();
+        dT.worldArc(centerPos, radius, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    private highlightPoint(cR: CanvasRenderer, ev: MouseEvent){
+        if(this.points.length <= 1)
+            return;
+
+        const cam = cR.camera;
+
+        const cMousePos = new Vector2(ev.offsetX, ev.offsetY);
+        const wMousePos = cam.getWorldPosFromCanvas(new Vector2(ev.offsetX, ev.offsetY));
+        const pointListCopy = this.points.slice();
+        const orderedPointList = pointListCopy.sort((a, b) => Vector2.distanceSquared(wMousePos, a) - Vector2.distanceSquared(wMousePos, b));
+        const A = orderedPointList[0];
+        const indexA = this.points.indexOf(A);
+        const afterA = indexA < this.points.length ? this.points[indexA + 1] : null;
+        const beforeA = indexA > 0 ? this.points[indexA - 1] : null;
+        const distMouseAfterA = afterA ? Vector2.distanceSquared(wMousePos, afterA) : Infinity;
+        const distMouseBeforeA = beforeA ? Vector2.distanceSquared(wMousePos, beforeA) : Infinity;
+        const B = distMouseAfterA < distMouseBeforeA ? afterA : beforeA;
+
+        if(!B)
+            throw "B is null";
+
+        const AB = Vector2.sub(B, A);
+        const AP = Vector2.sub(wMousePos, A);
+
+        const magAB = AB.magnitude()*AB.magnitude();
+        const ABAPProduct = Vector2.dotProduct(AP, AB);
+        const dist = ABAPProduct / magAB;
+
+        let closestPointOnLineSegment;
+        if(dist<0)
+            closestPointOnLineSegment = A;
+        else if (dist > 1)
+            closestPointOnLineSegment = B;
+        else
+            closestPointOnLineSegment = Vector2.sum(A, Vector2.mult(AB, dist));
+
+        this.highlightedPoint = Vector2.distanceSquared(cam.getCanvasPosFromWorld(closestPointOnLineSegment), cMousePos) < 1000 ? closestPointOnLineSegment : null;
     }
 }
 

@@ -1,4 +1,4 @@
-import { VectorModulus } from "./types";
+import { VectorModulus, VectorStyle } from "./types";
 
 export default class Vector2 {
     constructor(public x: number, public y: number) { }
@@ -28,13 +28,11 @@ export default class Vector2 {
 
     invertX(): Vector2 {
         this.x = -this.x;
-
         return this;
     }
 
     invertY(): Vector2 {
         this.y = -this.y;
-
         return this;
     }
 
@@ -47,8 +45,12 @@ export default class Vector2 {
     }
 
     static distance(a: Vector2, b: Vector2): number {
-        console.log("here");
         return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    static distanceSquared(a: Vector2, b: Vector2){
+        const dif = Vector2.sub(a, b);
+        return dif.x * dif.x + dif.y * dif.y;
     }
 
     static sum(a: Vector2, b: Vector2): Vector2 {
@@ -104,5 +106,9 @@ export default class Vector2 {
      */
     static angleBetween(a: Vector2, b: Vector2): number {
         return Math.acos(Vector2.dotProduct(a, b) / (a.magnitude() * b.magnitude()));
+    }
+
+    static inverse(a: Vector2){
+        return Vector2.mult(a, -1);
     }
 }

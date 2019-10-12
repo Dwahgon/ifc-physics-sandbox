@@ -93,6 +93,7 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
             this.pointSize = pointSize;
             this.points = [];
             this.onMouseMoved = null;
+            this.highlightedPoint = null;
             this.simulate(0);
         }
         simulate(step) {
@@ -115,40 +116,82 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
         draw(canvasRenderer) {
             const cam = canvasRenderer.camera;
             const ctx = canvasRenderer.context;
+            const dT = canvasRenderer.drawingTools;
             if (this.points.length > 0) {
-                for (let index = 0; index < this.points.length; index++) {
-                    const pointStart = this.points[index];
-                    const pointFinish = this.points[index + 1];
-                    const canvasStart = cam.getCanvasPosFromWorld(pointStart);
-                    if (pointFinish) {
-                        const canvasFinish = cam.getCanvasPosFromWorld(pointFinish);
-                        ctx.lineCap = "round";
-                        this.drawLine(ctx, canvasStart, canvasFinish, 3, "orange");
-                    }
-                }
-                this.drawCircle(ctx, cam.getCanvasPosFromWorld(this.points[0]), 4, 2, "orange");
-                this.drawCircle(ctx, cam.getCanvasPosFromWorld(this.points[this.points.length - 1]), 4, 2, "orange");
+                ctx.beginPath();
+                dT.worldMoveTo(this.points[0]);
+                for (let index = 1; index < this.points.length; index++)
+                    dT.worldLineTo(this.points[index]);
+                ctx.lineCap = "round";
+                ctx.lineJoin = "round";
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = "orange";
+                ctx.stroke();
+                ctx.closePath();
+                this.drawCircle(dT, ctx, this.points[0], 4, "orange");
+                this.drawCircle(dT, ctx, this.points[this.points.length - 1], 4, "orange");
+            }
+            if (this.highlightedPoint) {
+                this.drawCircle(dT, ctx, this.highlightedPoint, 4, "red");
+                const text = `P(${this.highlightedPoint.x.toFixed(2)}, ${this.highlightedPoint.y.toFixed(2)})`;
+                const textPos = vector2_1.default.sum(cam.getCanvasPosFromWorld(this.highlightedPoint), new vector2_1.default(10, -10));
+                ctx.font = "italic 15px CMU Serif";
+                ctx.fillStyle = "red";
+                ctx.strokeStyle = "white";
+                ctx.lineWidth = 3;
+                //@ts-ignore
+                ctx.strokeText(text, ...textPos.toArray());
+                //@ts-ignore
+                ctx.fillText(text, ...textPos.toArray());
             }
         }
-        drawLine(con, canvasStart, canvasFinish, lineWidth, lineStyle) {
-            con.lineWidth = lineWidth;
-            con.strokeStyle = lineStyle;
-            con.beginPath();
-            //@ts-ignore
-            con.moveTo(...canvasStart.toArray());
-            //@ts-ignore
-            con.lineTo(...canvasFinish.toArray());
-            con.stroke();
+        onCanvasAdded(cR) {
+            this.onMouseMoved = (ev) => this.highlightPoint(cR, ev);
+            cR.context.canvas.addEventListener("mousemove", this.onMouseMoved);
         }
-        drawCircle(con, centerPos, radius, strokeWidth, fillStyle, strokeStyle) {
-            con.lineWidth = strokeWidth;
-            con.strokeStyle = strokeStyle || "";
-            con.fillStyle = fillStyle;
-            con.beginPath();
-            //@ts-ignore
-            con.arc(...centerPos.toArray(), radius, 0, 2 * Math.PI);
-            con.fill();
-            con.stroke();
+        onCanvasRemoved(cR) {
+            if (this.onMouseMoved) {
+                cR.context.canvas.removeEventListener("mousemove", this.onMouseMoved);
+                this.onMouseMoved = null;
+            }
+        }
+        drawCircle(dT, ctx, centerPos, radius, fillStyle) {
+            ctx.fillStyle = fillStyle;
+            ctx.beginPath();
+            dT.worldArc(centerPos, radius, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.closePath();
+        }
+        highlightPoint(cR, ev) {
+            if (this.points.length <= 1)
+                return;
+            const cam = cR.camera;
+            const cMousePos = new vector2_1.default(ev.offsetX, ev.offsetY);
+            const wMousePos = cam.getWorldPosFromCanvas(new vector2_1.default(ev.offsetX, ev.offsetY));
+            const pointListCopy = this.points.slice();
+            const orderedPointList = pointListCopy.sort((a, b) => vector2_1.default.distanceSquared(wMousePos, a) - vector2_1.default.distanceSquared(wMousePos, b));
+            const A = orderedPointList[0];
+            const indexA = this.points.indexOf(A);
+            const afterA = indexA < this.points.length ? this.points[indexA + 1] : null;
+            const beforeA = indexA > 0 ? this.points[indexA - 1] : null;
+            const distMouseAfterA = afterA ? vector2_1.default.distanceSquared(wMousePos, afterA) : Infinity;
+            const distMouseBeforeA = beforeA ? vector2_1.default.distanceSquared(wMousePos, beforeA) : Infinity;
+            const B = distMouseAfterA < distMouseBeforeA ? afterA : beforeA;
+            if (!B)
+                throw "B is null";
+            const AB = vector2_1.default.sub(B, A);
+            const AP = vector2_1.default.sub(wMousePos, A);
+            const magAB = AB.magnitude() * AB.magnitude();
+            const ABAPProduct = vector2_1.default.dotProduct(AP, AB);
+            const dist = ABAPProduct / magAB;
+            let closestPointOnLineSegment;
+            if (dist < 0)
+                closestPointOnLineSegment = A;
+            else if (dist > 1)
+                closestPointOnLineSegment = B;
+            else
+                closestPointOnLineSegment = vector2_1.default.sum(A, vector2_1.default.mult(AB, dist));
+            this.highlightedPoint = vector2_1.default.distanceSquared(cam.getCanvasPosFromWorld(closestPointOnLineSegment), cMousePos) < 1000 ? closestPointOnLineSegment : null;
         }
     }
     exports.Graph = Graph;

@@ -36,11 +36,11 @@ simulator.add(ambient);
 canvasRenderer.add(new CartesianPlane(1, CartesianPlane.ENVIRONMENT_STYLE));
 canvasRenderer.add(ambient);
 canvasRenderer.add(new FPSCounter(100));
-canvasRenderer.add({ draw(cR: CanvasRenderer){
-    cR.context.beginPath();
-    cR.drawingTools.worldArc(new Vector2(1, 1), 10, 0, 2*Math.PI, true); 
-    cR.context.fill();
-} });
+// canvasRenderer.add({ draw(cR: CanvasRenderer){
+//     cR.context.beginPath();
+//     cR.drawingTools.worldArc(new Vector2(1, 1), 10, 0, 2*Math.PI, true); 
+//     cR.context.fill();
+// } });
 
 canvasRenderer.start();
 

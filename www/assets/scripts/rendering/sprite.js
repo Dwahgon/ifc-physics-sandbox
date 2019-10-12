@@ -16,15 +16,9 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             this.image = imgElement;
             this.drawSize = drawSize;
         }
-        getZoomedSize(zoom) {
-            return vector2_1.default.mult(this.drawSize, zoom);
-        }
         draw(canvasRenderer) {
-            const cam = canvasRenderer.camera;
-            const ctx = canvasRenderer.context;
-            const posInCanvas = vector2_1.default.sub(cam.getCanvasPosFromWorld(this.drawPosition), vector2_1.default.div(this.getZoomedSize(cam.zoom), 2));
-            // @ts-ignore
-            ctx.drawImage(this.image, ...this.copyPosition.toArray(), ...this.copySize.toArray(), ...posInCanvas.toArray(), ...this.getZoomedSize(cam.zoom).toArray());
+            const offsettedPos = vector2_1.default.sub(this.drawPosition, vector2_1.default.div(this.drawSize, new vector2_1.default(2, -2)));
+            canvasRenderer.drawingTools.worldImage(this.image, offsettedPos, this.drawSize, 0, true, this.copyPosition, this.copySize);
         }
     }
     exports.Sprite = Sprite;

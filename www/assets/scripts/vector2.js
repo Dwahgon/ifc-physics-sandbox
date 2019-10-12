@@ -38,8 +38,11 @@ define(["require", "exports"], function (require, exports) {
             return new Vector2(0, 0);
         }
         static distance(a, b) {
-            console.log("here");
             return Math.hypot(a.x - b.x, a.y - b.y);
+        }
+        static distanceSquared(a, b) {
+            const dif = Vector2.sub(a, b);
+            return dif.x * dif.x + dif.y * dif.y;
         }
         static sum(a, b) {
             return new Vector2(a.x + b.x, a.y + b.y);
@@ -81,6 +84,9 @@ define(["require", "exports"], function (require, exports) {
          */
         static angleBetween(a, b) {
             return Math.acos(Vector2.dotProduct(a, b) / (a.magnitude() * b.magnitude()));
+        }
+        static inverse(a) {
+            return Vector2.mult(a, -1);
         }
     }
     exports.default = Vector2;

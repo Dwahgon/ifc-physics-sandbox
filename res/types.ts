@@ -88,27 +88,30 @@ export interface Followable {
     locate(): Vector2;
 }
 
-interface GizmosStyle {
-    style: string;
-    strokeStyle?: string;
+export interface StrokeStyle {
+    strokeWidth?: number,
+    strokeStyle?: string,
+    strokeWidthResizeOnZoom?: boolean
 }
 
-export interface VectorGizmosStyle extends GizmosStyle {
-    lineThickness: number;
-    strokeThickness?: number;
+export interface LineStyle extends StrokeStyle{
+    lineWidth: number,
+    style: string,
+    lineWidthResizeOnZoom?: boolean,
+}
+
+export interface ArrowStyle extends LineStyle {
     headLength: number;
+    headAngle: number;
+    resizeHeadlengthOnZoom?: boolean;
 }
 
-export interface PositionPointGizmosStyle extends GizmosStyle {
-    font: string;
-    pointRadius: number;
-    strokeThickness?: number;
-}
-
-export interface SelectionGizmosStyle extends GizmosStyle {
-    lineThickness: number;
-    lineDash: number[];
-    offset: number;
+export interface VectorStyle extends ArrowStyle{
+    rectDashOffset: number[],
+    rectStyle: string,
+    rectThickness: number,
+    
+    rectThicknessResizeOnZoom?: boolean
 }
 
 export interface PropertyEditorOption {

@@ -5,14 +5,27 @@ import { PhysicsPropertyJSON } from './fileController';
 import GenericCalculator, { NumberCalculator, Vector2Calculator, VectorModulusCalculator } from './genericCalulator';
 import { PhysicsObject } from './physicsObjects';
 import { CanvasRenderer } from './rendering/canvasRenderer';
-import Gizmos from './rendering/gizmos';
-import { Simulatable, PhysicsPropertyName, VectorModulus } from './types';
+import { Simulatable, PhysicsPropertyName, VectorModulus, VectorStyle } from './types';
 import Vector2 from './vector2';
 
 export default abstract class PhysicsProperty<T> implements Simulatable {
     public active: boolean;
     public propertyEditorInput: PropertyEditorInputList | null = null;
     public doDrawGizmos: boolean;
+
+    protected static readonly DEFAULT_VECTOR_STYLE: VectorStyle = {
+        style: "lightblue",
+        strokeStyle: "black",
+        strokeWidth: 2,
+        
+        lineWidth: 3,
+        headAngle: Math.PI / 6,
+        headLength: 10,
+        
+        rectDashOffset: [5, 5],
+        rectStyle: "grey",
+        rectThickness: 2
+    }
 
     constructor(
         public readonly kind: PhysicsPropertyName,
@@ -109,7 +122,7 @@ export class ObjectPosition extends PhysicsProperty<Vector2>{
 
     drawGizmos(canvasRenderer: CanvasRenderer) {
         if (this.doDrawGizmos)
-            Gizmos.drawVector(canvasRenderer, Vector2.zero, this.value, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+            canvasRenderer.drawingTools.drawVector(Vector2.zero, this.value, PhysicsProperty.DEFAULT_VECTOR_STYLE);
     }
 }
 
@@ -160,7 +173,7 @@ export class ObjectSize extends PhysicsProperty<Vector2>{
         if (this.doDrawGizmos && this.objectPosition) {
             const from = Vector2.sub(this.objectPosition.value, Vector2.div(this.value, 2));
             const to = Vector2.sum(this.objectPosition.value, Vector2.div(this.value, 2));
-            Gizmos.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+            canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
         }
     }
 }
@@ -230,7 +243,7 @@ export class ObjectVelocity extends PhysicsProperty<Vector2>{
         if (this.doDrawGizmos && this.objectPosition) {
             const from = this.objectPosition.value;
             const to = Vector2.sum(from, this.value);
-            Gizmos.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+            canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
         }
     }
 }
@@ -256,7 +269,7 @@ export class ObjectDisplacement extends PhysicsProperty<Vector2>{
         if (this.doDrawGizmos && this.objectPosition) {
             const from = this.objectPosition.initialValue;
             const to = Vector2.sum(from, this.value);
-            Gizmos.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+            canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
         }
     }
 }
@@ -277,7 +290,7 @@ export class ObjectAcceleration extends PhysicsProperty<Vector2>{
         if (this.doDrawGizmos && this.objectPosition) {
             const from = this.objectPosition.value;
             const to = Vector2.sum(from, this.value);
-            Gizmos.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+            canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
         }
     }
 }
@@ -322,7 +335,7 @@ export class ObjectCentripetalAcceleration extends PhysicsProperty<VectorModulus
             const from = this.objectPosition.value;
             const dir = Vector2.sub(this.value.vector, from).unit();
             const to = Vector2.sum(from, Vector2.mult(dir, this.value.modulus));
-            Gizmos.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+            canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
         }
     }
 

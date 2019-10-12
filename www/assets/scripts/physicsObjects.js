@@ -8,12 +8,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./types", "./vector2", "./document/documentUtilities", "./rendering/gizmos"], function (require, exports, PhysicsProperties, sprite_1, types_1, vector2_1, documentUtilities_1, gizmos_1) {
+define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./types", "./vector2"], function (require, exports, PhysicsProperties, sprite_1, types_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     PhysicsProperties = __importStar(PhysicsProperties);
     vector2_1 = __importDefault(vector2_1);
-    gizmos_1 = __importDefault(gizmos_1);
     console.log("Loading physicsobjects");
     class PhysicsObject {
         constructor(kind, sprite, ambient, name) {
@@ -50,12 +49,15 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
         draw(canvasRenderer) {
             this.sprite.draw(canvasRenderer);
             this.properties.forEach(property => property.drawGizmos(canvasRenderer));
-            if (documentUtilities_1.ObjectSelectionController.selectedObject == this) {
-                const pos = this.getProperty("position");
-                const size = this.getProperty("size");
-                const drawPos = vector2_1.default.sub(pos.value, vector2_1.default.div(size.value, new vector2_1.default(2, -2)));
-                gizmos_1.default.drawSelection(canvasRenderer, drawPos, size.value, { style: "MediumSeaGreen", lineThickness: 4, offset: 6, lineDash: [8, 3] });
-            }
+            // if(ObjectSelectionController.selectedObject == this){
+            //     const pos = <PhysicsProperties.ObjectPosition>this.getProperty("position")!;
+            //     const size = <PhysicsProperties.ObjectSize>this.getProperty("size")!;
+            //     const drawPos = Vector2.sub(pos.value, Vector2.div(size.value, new Vector2(2, -2)));
+            //     canvasRenderer.context.setLineDash([8, 3]);
+            //     canvasRenderer.context.lineWidth = 4;
+            //     canvasRenderer.drawingTools.worldRect(drawPos, size.value);
+            //     Gizmos.drawSelection(canvasRenderer, drawPos, size.value, {style: "MediumSeaGreen", lineThickness: 4, offset: 6, lineDash: [8, 3]});
+            // }
         }
         addProperty(name, property) {
             this.properties.set(name, property);
@@ -124,8 +126,8 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
             });
         }
     }
-    exports.PhysicsObject = PhysicsObject;
     PhysicsObject.DEFAULT_NAME = "";
+    exports.PhysicsObject = PhysicsObject;
     class Solid extends PhysicsObject {
         constructor(ambient, properties) {
             super(types_1.PhysicsObjectType.Solid, new sprite_1.Sprite("./assets/images/solid.svg", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient, properties ? properties.name : undefined);
