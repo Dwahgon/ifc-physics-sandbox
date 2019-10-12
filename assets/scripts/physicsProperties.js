@@ -1,10 +1,9 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./document/propertyEditor", "./genericCalulator", "./rendering/gizmos", "./vector2"], function (require, exports, propertyEditor_1, genericCalulator_1, gizmos_1, vector2_1) {
+define(["require", "exports", "./document/propertyEditor", "./genericCalulator", "./vector2"], function (require, exports, propertyEditor_1, genericCalulator_1, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    gizmos_1 = __importDefault(gizmos_1);
     vector2_1 = __importDefault(vector2_1);
     console.log("Loading physicsProperties");
     class PhysicsProperty {
@@ -55,6 +54,17 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
                 this.propertyEditorInput.getInput().updateValue(value);
         }
     }
+    PhysicsProperty.DEFAULT_VECTOR_STYLE = {
+        style: "lightblue",
+        strokeStyle: "black",
+        strokeWidth: 2,
+        lineWidth: 3,
+        headAngle: Math.PI / 6,
+        headLength: 10,
+        rectDashOffset: [5, 5],
+        rectStyle: "grey",
+        rectThickness: 2
+    };
     exports.default = PhysicsProperty;
     class ObjectPosition extends PhysicsProperty {
         constructor(initialPosition, object) {
@@ -82,7 +92,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         }
         drawGizmos(canvasRenderer) {
             if (this.doDrawGizmos)
-                gizmos_1.default.drawVector(canvasRenderer, vector2_1.default.zero, this.value, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+                canvasRenderer.drawingTools.drawVector(vector2_1.default.zero, this.value, PhysicsProperty.DEFAULT_VECTOR_STYLE);
         }
     }
     exports.ObjectPosition = ObjectPosition;
@@ -119,7 +129,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
             if (this.doDrawGizmos && this.objectPosition) {
                 const from = vector2_1.default.sub(this.objectPosition.value, vector2_1.default.div(this.value, 2));
                 const to = vector2_1.default.sum(this.objectPosition.value, vector2_1.default.div(this.value, 2));
-                gizmos_1.default.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+                canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
             }
         }
     }
@@ -162,7 +172,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
             if (this.doDrawGizmos && this.objectPosition) {
                 const from = this.objectPosition.value;
                 const to = vector2_1.default.sum(from, this.value);
-                gizmos_1.default.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+                canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
             }
         }
     }
@@ -182,7 +192,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
             if (this.doDrawGizmos && this.objectPosition) {
                 const from = this.objectPosition.initialValue;
                 const to = vector2_1.default.sum(from, this.value);
-                gizmos_1.default.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+                canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
             }
         }
     }
@@ -198,7 +208,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
             if (this.doDrawGizmos && this.objectPosition) {
                 const from = this.objectPosition.value;
                 const to = vector2_1.default.sum(from, this.value);
-                gizmos_1.default.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+                canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
             }
         }
     }
@@ -233,7 +243,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
                 const from = this.objectPosition.value;
                 const dir = vector2_1.default.sub(this.value.vector, from).unit();
                 const to = vector2_1.default.sum(from, vector2_1.default.mult(dir, this.value.modulus));
-                gizmos_1.default.drawVector(canvasRenderer, from, to, { style: "lightblue", strokeStyle: "black", strokeThickness: 2, lineThickness: 2, headLength: 10 });
+                canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
             }
         }
         updateInputValue(value) {
