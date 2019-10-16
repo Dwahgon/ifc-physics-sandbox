@@ -18,7 +18,7 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
         }
         draw(canvasRenderer) {
             const offsettedPos = vector2_1.default.sub(this.drawPosition, vector2_1.default.div(this.drawSize, new vector2_1.default(2, -2)));
-            canvasRenderer.drawingTools.worldImage(this.image, offsettedPos, this.drawSize, 0, true, this.copyPosition, this.copySize);
+            canvasRenderer.drawingTools.worldImage(this.image, offsettedPos, this.drawSize, 0, true);
         }
     }
     exports.Sprite = Sprite;

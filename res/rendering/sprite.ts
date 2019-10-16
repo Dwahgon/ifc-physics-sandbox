@@ -19,6 +19,6 @@ export class Sprite implements Renderable {
     draw(canvasRenderer: CanvasRenderer): void {
         const offsettedPos = Vector2.sub(this.drawPosition, Vector2.div(this.drawSize, new Vector2(2, -2)));
 
-        canvasRenderer.drawingTools.worldImage(this.image, offsettedPos, this.drawSize, 0, true, this.copyPosition, this.copySize);
+        canvasRenderer.drawingTools.worldImage(this.image, offsettedPos, this.drawSize, 0, true);
     }
 }
