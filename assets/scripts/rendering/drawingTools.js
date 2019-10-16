@@ -20,23 +20,43 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             this.ctx.lineTo(...this.worldToCanvas(pos).toArray());
         }
         worldRect(pos, size, angleRad = 0, resizeOnZoom) {
-            this.ctx.save();
-            this.ctx.rotate(angleRad);
+            if (angleRad > 0) {
+                this.ctx.save();
+                this.ctx.rotate(angleRad);
+                this.ctx.restore();
+            }
             //@ts-ignore
             this.ctx.rect(...this.worldToCanvas(pos).toArray(), ...vector2_1.default.mult(size, resizeOnZoom ? this.cam.zoom : 1).toArray());
-            this.ctx.restore();
+        }
+        worldRectWithOffset(pos, size, offset, isWorldOffset, angleRad = 0) {
+            if (angleRad > 0) {
+                this.ctx.save();
+                this.ctx.rotate(angleRad);
+                this.ctx.restore();
+            }
+            const wOffset = new vector2_1.default(offset, -offset);
+            const cOffset = new vector2_1.default(offset, offset);
+            const drawPos = isWorldOffset ? this.worldToCanvas(vector2_1.default.sub(pos, wOffset)) :
+                vector2_1.default.sub(this.worldToCanvas(pos), cOffset);
+            const drawSize = isWorldOffset ?
+                vector2_1.default.mult(vector2_1.default.sum(size, vector2_1.default.mult(cOffset, 2)), this.cam.zoom) :
+                vector2_1.default.sum(vector2_1.default.mult(size, this.cam.zoom), vector2_1.default.mult(cOffset, 2));
+            //@ts-ignore
+            this.ctx.rect(...drawPos.toArray(), ...drawSize.toArray());
         }
         worldArc(pos, radius, startAngle, endAngle, resizeOnZoom, anticlockwise) {
             //@ts-ignore
             this.ctx.arc(...this.worldToCanvas(pos).toArray(), resizeOnZoom ? (radius * this.cam.zoom) : radius, startAngle, endAngle, anticlockwise);
         }
         worldText(text, pos, angleRad = 0) {
-            this.ctx.save();
-            const textMeasurement = this.ctx.measureText(text);
-            this.rotateAroundCenterpoint(this.worldToCanvas(pos), new vector2_1.default(textMeasurement.width, parseInt(this.ctx.font)), angleRad);
+            if (angleRad > 0) {
+                this.ctx.save();
+                const textMeasurement = this.ctx.measureText(text);
+                this.rotateAroundCenterpoint(this.worldToCanvas(pos), new vector2_1.default(textMeasurement.width, parseInt(this.ctx.font)), angleRad);
+                this.ctx.restore();
+            }
             //@ts-ignore
             this.ctx.fillText(text, ...this.worldToCanvas(pos).toArray());
-            this.ctx.restore();
         }
         worldImage(imgElement, pos, size, angleRad = 0, resizeOnZoom, clipPos, clipSize) {
             this.ctx.save();
@@ -101,8 +121,8 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             this.ctx.restore();
         }
         drawVector(from, to, vectorStyle = DrawingTools.DEFAULT_VECTOR_STYLE, isWorldPos = true) {
-            this.ctx.save();
             this.drawArrow(from, to, vectorStyle, isWorldPos);
+            this.ctx.save();
             const rectPos = new vector2_1.default(Math.min(from.x, to.x), isWorldPos ? Math.max(from.y, to.y) : Math.min(from.y, to.y));
             const rectSize = new vector2_1.default(Math.abs(to.x - from.x), Math.abs(to.y - from.y));
             ;
@@ -142,6 +162,7 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             this.ctx.rotate(angleRad);
         }
     }
+    exports.DrawingTools = DrawingTools;
     DrawingTools.DEFAULT_LINE_STYLE = {
         lineWidth: 3,
         style: "black"
@@ -161,5 +182,4 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
         rectStyle: "grey",
         rectThickness: 2
     };
-    exports.DrawingTools = DrawingTools;
 });

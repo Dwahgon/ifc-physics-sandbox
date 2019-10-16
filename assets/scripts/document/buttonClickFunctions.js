@@ -97,6 +97,6 @@ define(["require", "exports", "../ambient", "../fileController", "../main", "../
             return;
         const cam = Main.canvasRenderer.camera;
         documentUtilities_1.ObjectSelectionController.selectObject(obj);
-        cam.pos = vector2_1.default.mult(obj.locate(), cam.zoom);
+        cam.pos = obj.locate();
     });
 });
