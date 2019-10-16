@@ -53,20 +53,36 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
         }
     }
 
-    draw(canvasRenderer: CanvasRenderer): void {
-        this.sprite.draw(canvasRenderer);
-        this.properties.forEach(property => property.drawGizmos(canvasRenderer));
+    draw(cR: CanvasRenderer): void {
+        const ctx = cR.context;
+        const cam = cR.camera;
 
-        // if(ObjectSelectionController.selectedObject == this){
-        //     const pos = <PhysicsProperties.ObjectPosition>this.getProperty("position")!;
-        //     const size = <PhysicsProperties.ObjectSize>this.getProperty("size")!;
-        //     const drawPos = Vector2.sub(pos.value, Vector2.div(size.value, new Vector2(2, -2)));
+        ctx.save();
+        this.sprite.draw(cR);
+        ctx.restore();
 
-        //     canvasRenderer.context.setLineDash([8, 3]);
-        //     canvasRenderer.context.lineWidth = 4;
-        //     canvasRenderer.drawingTools.worldRect(drawPos, size.value);
-        //     Gizmos.drawSelection(canvasRenderer, drawPos, size.value, {style: "MediumSeaGreen", lineThickness: 4, offset: 6, lineDash: [8, 3]});
-        // }
+        ctx.save();
+        this.properties.forEach(property => property.drawGizmos(cR));
+        ctx.restore();
+
+        if(ObjectSelectionController.selectedObject == this){
+            const pos = (<PhysicsProperties.ObjectPosition>this.getProperty("position"))!.value;
+            const size = (<PhysicsProperties.ObjectSize>this.getProperty("size"))!.value;
+
+            const drawPos = Vector2.sub(pos, Vector2.div(size, new Vector2(2, -2)));                //drawPos = pos - size/(2, -2)
+
+
+            //ctx.setLineDash([8, 3]);
+            ctx.lineWidth = 4;
+            ctx.fillStyle = "rgba(241, 196, 15, 0.2)"
+            ctx.strokeStyle = "#f1c40f";
+            ctx.beginPath();
+            cR.drawingTools.worldRectWithOffset(drawPos, size, 5);
+            ctx.fill();
+            ctx.stroke();
+            ctx.closePath();
+            // Gizmos.drawSelection(canvasRenderer, drawPos, size.value, {style: "MediumSeaGreen", lineThickness: 4, offset: 6, lineDash: [8, 3]});
+        }
     }
 
     addProperty(name: PhysicsPropertyName, property: PhysicsProperty<any>): void {

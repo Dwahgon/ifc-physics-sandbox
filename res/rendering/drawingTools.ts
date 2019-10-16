@@ -42,13 +42,32 @@ export class DrawingTools {
     }
 
     worldRect(pos: Vector2, size: Vector2, angleRad: number = 0, resizeOnZoom?: boolean) {
-        this.ctx.save();
+        if(angleRad > 0){
+            this.ctx.save();
+            this.ctx.rotate(angleRad);
+            this.ctx.restore();
+        }
 
-        this.ctx.rotate(angleRad);
         //@ts-ignore
-        this.ctx.rect(...this.worldToCanvas(pos).toArray(), ...Vector2.mult(size, resizeOnZoom ? this.cam.zoom : 1).toArray());
+        this.ctx.rect(...this.worldToCanvas(pos).toArray(), ...Vector2.mult(size, resizeOnZoom ? this.cam.zoom : 1).toArray());        
+    }
 
-        this.ctx.restore();
+    worldRectWithOffset(pos: Vector2, size: Vector2, offset: number, isWorldOffset?: boolean, angleRad: number = 0){
+        if(angleRad > 0){
+            this.ctx.save();
+            this.ctx.rotate(angleRad);
+            this.ctx.restore();
+        }
+
+        const wOffset = new Vector2(offset, -offset);
+        const cOffset = new Vector2(offset, offset);
+        const drawPos = isWorldOffset ? this.worldToCanvas(Vector2.sub(pos, wOffset)) : 
+                            Vector2.sub(this.worldToCanvas(pos), cOffset);
+        const drawSize = isWorldOffset ? 
+                            Vector2.mult(Vector2.sum(size, Vector2.mult(cOffset, 2)), this.cam.zoom) :
+                            Vector2.sum(Vector2.mult(size, this.cam.zoom), Vector2.mult(cOffset, 2));
+        //@ts-ignore
+        this.ctx.rect(...drawPos.toArray(), ...drawSize.toArray());
     }
 
     worldArc(pos: Vector2, radius: number, startAngle: number, endAngle: number, resizeOnZoom?: boolean, anticlockwise?: boolean) {
@@ -57,14 +76,15 @@ export class DrawingTools {
     }
 
     worldText(text: string, pos: Vector2, angleRad: number = 0) {
-        this.ctx.save();
-
-        const textMeasurement = this.ctx.measureText(text);
-        this.rotateAroundCenterpoint(this.worldToCanvas(pos), new Vector2(textMeasurement.width, parseInt(this.ctx.font)), angleRad);
+        if(angleRad > 0){
+            this.ctx.save();
+            const textMeasurement = this.ctx.measureText(text);
+            this.rotateAroundCenterpoint(this.worldToCanvas(pos), new Vector2(textMeasurement.width, parseInt(this.ctx.font)), angleRad);
+            this.ctx.restore();
+        }
+        
         //@ts-ignore
         this.ctx.fillText(text, ...this.worldToCanvas(pos).toArray());
-
-        this.ctx.restore();
     }
 
     worldImage(imgElement: HTMLImageElement, pos: Vector2, size: Vector2, angleRad: number = 0, resizeOnZoom?: boolean, clipPos?: Vector2, clipSize?: Vector2) {
@@ -150,9 +170,9 @@ export class DrawingTools {
     }
 
     drawVector(from: Vector2, to: Vector2, vectorStyle: VectorStyle = DrawingTools.DEFAULT_VECTOR_STYLE, isWorldPos: boolean = true) {
-        this.ctx.save();
-
         this.drawArrow(from, to, vectorStyle, isWorldPos);
+        
+        this.ctx.save();
 
         const rectPos = new Vector2(Math.min(from.x, to.x), isWorldPos ? Math.max(from.y, to.y) : Math.min(from.y, to.y));
         const rectSize = new Vector2(Math.abs(to.x - from.x), Math.abs(to.y - from.y));;

@@ -116,7 +116,7 @@ export class Camera {
 
     get pos() {
         if (this.targetObjectPosition)
-            return Vector2.mult(this.targetObjectPosition.locate(), this.zoom);
+            return this.targetObjectPosition.locate();
 
         return this._pos;
     }
@@ -230,6 +230,12 @@ export class Camera {
                 this.unfollowObject();
             }
         }
+
+        //DEBUG: Display cursos canvas position
+        //console.log(cursorCoordinates);
+
+        //DEBUG: Display cursos world position
+        //console.log();
     }
 
     private onMouseUp(canvas: HTMLCanvasElement) {

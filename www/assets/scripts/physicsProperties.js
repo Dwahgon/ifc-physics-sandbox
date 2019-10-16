@@ -54,6 +54,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
                 this.propertyEditorInput.getInput().updateValue(value);
         }
     }
+    exports.default = PhysicsProperty;
     PhysicsProperty.DEFAULT_VECTOR_STYLE = {
         style: "lightblue",
         strokeStyle: "black",
@@ -65,7 +66,6 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         rectStyle: "grey",
         rectThickness: 2
     };
-    exports.default = PhysicsProperty;
     class ObjectPosition extends PhysicsProperty {
         constructor(initialPosition, object) {
             super("position", true, object, initialPosition, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);

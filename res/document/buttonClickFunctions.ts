@@ -110,5 +110,5 @@ Buttons.predefinedClickEvents.set("locateObject", (args: string) => {
     const cam = Main.canvasRenderer.camera;
 
     ObjectSelectionController.selectObject(obj);
-    cam.pos = Vector2.mult(obj.locate(), cam.zoom);
+    cam.pos = obj.locate();
 })

@@ -98,7 +98,7 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
         }
         get pos() {
             if (this.targetObjectPosition)
-                return vector2_1.default.mult(this.targetObjectPosition.locate(), this.zoom);
+                return this.targetObjectPosition.locate();
             return this._pos;
         }
         set pos(value) {
@@ -183,6 +183,10 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
                     this.unfollowObject();
                 }
             }
+            //DEBUG: Display cursos canvas position
+            //console.log(cursorCoordinates);
+            //DEBUG: Display cursos world position
+            //console.log();
         }
         onMouseUp(canvas) {
             if (!this.isMouseDown)
