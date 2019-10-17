@@ -221,7 +221,8 @@ export class Camera {
     private onMove(cursorCoordinates: Vector2, canvas: HTMLCanvasElement) {
         if (this.isMouseDown) {
             if (this.allowMovement)
-                this.pos = Vector2.sum(this.cameraPosOnMouseDown, Vector2.div(Vector2.sub(this.clickedPos, cursorCoordinates), this.zoom).invertY());
+                //this.cameraPosOnMouseDown + inverseY(this.clickedPos - cursorCoordinates) / this.zoom
+                this.pos = this.cameraPosOnMouseDown.add(this.clickedPos.sub(cursorCoordinates).inverseY().div(this.zoom));
 
             canvas.style.cursor = "move";
 

@@ -14,16 +14,16 @@ export class Vector2Calculator implements GenericCalculator<Vector2>{
     private constructor() { }
 
     sum(a: Vector2, b: Vector2): Vector2 {
-        return Vector2.sum(a, b);
+        return a.add(b);
     }
     sub(a: Vector2, b: Vector2): Vector2 {
-        return Vector2.sub(a, b);
+        return a.sub(b);
     }
     mult(a: Vector2, b: Vector2): Vector2 {
-        return Vector2.mult(a, b);
+        return a.mult(b);
     }
     div(a: Vector2, b: Vector2): Vector2 {
-        return Vector2.div(a, b);
+        return a.div(b);
     }
 }
 
@@ -54,25 +54,25 @@ export class VectorModulusCalculator implements GenericCalculator<VectorModulus>
     sum(a: VectorModulus, b: VectorModulus): VectorModulus {
         return {
             modulus: a.modulus + b.modulus,
-            vector: Vector2.sum(a.vector, b.vector)
+            vector: a.vector.add(b.vector)
         };
     }
     sub(a: VectorModulus, b: VectorModulus): VectorModulus {
         return {
             modulus: a.modulus - b.modulus,
-            vector: Vector2.sub(a.vector, b.vector)
+            vector: a.vector.sub(b.vector)
         };
     }
     mult(a: VectorModulus, b: VectorModulus): VectorModulus {
         return {
             modulus: a.modulus * b.modulus,
-            vector: Vector2.mult(a.vector, b.vector)
+            vector: a.vector.mult(b.vector)
         };
     }
     div(a: VectorModulus, b: VectorModulus): VectorModulus {
         return {
             modulus: a.modulus / b.modulus,
-            vector: Vector2.div(a.vector, b.vector)
+            vector: a.vector.div(b.vector)
         };
     }
 }

@@ -1,6 +1,6 @@
-import { Camera } from "./canvasRenderer";
+import { ArrowStyle, LineStyle, VectorStyle } from "../types";
 import Vector2 from "../vector2";
-import { LineStyle, ArrowStyle, VectorStyle } from "../types";
+import { Camera } from "./canvasRenderer";
 
 export class DrawingTools {
     public static readonly DEFAULT_LINE_STYLE: LineStyle = {
@@ -42,18 +42,18 @@ export class DrawingTools {
     }
 
     worldRect(pos: Vector2, size: Vector2, angleRad: number = 0, resizeOnZoom?: boolean) {
-        if(angleRad > 0){
+        if (angleRad > 0) {
             this.ctx.save();
             this.ctx.rotate(angleRad);
             this.ctx.restore();
         }
 
         //@ts-ignore
-        this.ctx.rect(...this.worldToCanvas(pos).toArray(), ...Vector2.mult(size, resizeOnZoom ? this.cam.zoom : 1).toArray());        
+        this.ctx.rect(...this.worldToCanvas(pos).toArray(), ...size.mult(resizeOnZoom ? this.cam.zoom : 1).toArray());
     }
 
-    worldRectWithOffset(pos: Vector2, size: Vector2, offset: number, isWorldOffset?: boolean, angleRad: number = 0){
-        if(angleRad > 0){
+    worldRectWithOffset(pos: Vector2, size: Vector2, offset: number, isWorldOffset?: boolean, angleRad: number = 0) {
+        if (angleRad > 0) {
             this.ctx.save();
             this.ctx.rotate(angleRad);
             this.ctx.restore();
@@ -61,11 +61,12 @@ export class DrawingTools {
 
         const wOffset = new Vector2(offset, -offset);
         const cOffset = new Vector2(offset, offset);
-        const drawPos = isWorldOffset ? this.worldToCanvas(Vector2.sub(pos, wOffset)) : 
-                            Vector2.sub(this.worldToCanvas(pos), cOffset);
-        const drawSize = isWorldOffset ? 
-                            Vector2.mult(Vector2.sum(size, Vector2.mult(cOffset, 2)), this.cam.zoom) :
-                            Vector2.sum(Vector2.mult(size, this.cam.zoom), Vector2.mult(cOffset, 2));
+        const drawPos = isWorldOffset ?
+            this.worldToCanvas(pos.sub(wOffset)) :                  //worldToCanvas( pos - wOffset )
+            this.worldToCanvas(pos).sub(cOffset);                   //worldToCanvas(pos) - cOffset
+        const drawSize = isWorldOffset ?
+            size.add(cOffset.mult(2)).mult(this.cam.zoom) :         //(size + cOffset * 2) * zoom
+            size.mult(this.cam.zoom).add(cOffset.mult(2));          //size * zoom + cOffset * 2
         //@ts-ignore
         this.ctx.rect(...drawPos.toArray(), ...drawSize.toArray());
     }
@@ -76,13 +77,13 @@ export class DrawingTools {
     }
 
     worldText(text: string, pos: Vector2, angleRad: number = 0) {
-        if(angleRad > 0){
+        if (angleRad > 0) {
             this.ctx.save();
             const textMeasurement = this.ctx.measureText(text);
             this.rotateAroundCenterpoint(this.worldToCanvas(pos), new Vector2(textMeasurement.width, parseInt(this.ctx.font)), angleRad);
             this.ctx.restore();
         }
-        
+
         //@ts-ignore
         this.ctx.fillText(text, ...this.worldToCanvas(pos).toArray());
     }
@@ -90,8 +91,8 @@ export class DrawingTools {
     worldImage(imgElement: HTMLImageElement, pos: Vector2, size: Vector2, angleRad: number = 0, resizeOnZoom?: boolean, clipPos?: Vector2, clipSize?: Vector2) {
         this.ctx.save();
 
-        const drawSize = resizeOnZoom ? Vector2.mult(size, this.cam.zoom) : size;
-        const drawPos = Vector2.div(drawSize, 2).invert();
+        const drawSize = resizeOnZoom ? size.mult(this.cam.zoom) : size;
+        const drawPos = drawSize.div(2).inverse();
 
         this.rotateAroundCenterpoint(this.worldToCanvas(pos), drawSize, angleRad);
 
@@ -171,7 +172,7 @@ export class DrawingTools {
 
     drawVector(from: Vector2, to: Vector2, vectorStyle: VectorStyle = DrawingTools.DEFAULT_VECTOR_STYLE, isWorldPos: boolean = true) {
         this.drawArrow(from, to, vectorStyle, isWorldPos);
-        
+
         this.ctx.save();
 
         const rectPos = new Vector2(Math.min(from.x, to.x), isWorldPos ? Math.max(from.y, to.y) : Math.min(from.y, to.y));
@@ -188,7 +189,7 @@ export class DrawingTools {
             } else
                 //@ts-ignore  
                 this.ctx.rect(...rectPos.toArray(), ...rectSize.toArray());
-                
+
             this.ctx.stroke();
             this.ctx.closePath();
         }
@@ -214,7 +215,7 @@ export class DrawingTools {
     }
 
     private rotateAroundCenterpoint(pos: Vector2, size: Vector2, angleRad: number): void {
-        const pivotPos = Vector2.sum(pos, Vector2.div(size, 2));
+        const pivotPos = pos.add(size.div(2));    //pivotPos = pos + size / 2
 
         //@ts-ignore
         this.ctx.translate(...pivotPos.toArray());

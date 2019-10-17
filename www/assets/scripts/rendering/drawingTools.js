@@ -26,7 +26,7 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
                 this.ctx.restore();
             }
             //@ts-ignore
-            this.ctx.rect(...this.worldToCanvas(pos).toArray(), ...vector2_1.default.mult(size, resizeOnZoom ? this.cam.zoom : 1).toArray());
+            this.ctx.rect(...this.worldToCanvas(pos).toArray(), ...size.mult(resizeOnZoom ? this.cam.zoom : 1).toArray());
         }
         worldRectWithOffset(pos, size, offset, isWorldOffset, angleRad = 0) {
             if (angleRad > 0) {
@@ -36,11 +36,12 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             }
             const wOffset = new vector2_1.default(offset, -offset);
             const cOffset = new vector2_1.default(offset, offset);
-            const drawPos = isWorldOffset ? this.worldToCanvas(vector2_1.default.sub(pos, wOffset)) :
-                vector2_1.default.sub(this.worldToCanvas(pos), cOffset);
+            const drawPos = isWorldOffset ?
+                this.worldToCanvas(pos.sub(wOffset)) : //worldToCanvas( pos - wOffset )
+                this.worldToCanvas(pos).sub(cOffset); //worldToCanvas(pos) - cOffset
             const drawSize = isWorldOffset ?
-                vector2_1.default.mult(vector2_1.default.sum(size, vector2_1.default.mult(cOffset, 2)), this.cam.zoom) :
-                vector2_1.default.sum(vector2_1.default.mult(size, this.cam.zoom), vector2_1.default.mult(cOffset, 2));
+                size.add(cOffset.mult(2)).mult(this.cam.zoom) : //(size + cOffset * 2) * zoom
+                size.mult(this.cam.zoom).add(cOffset.mult(2)); //size * zoom + cOffset * 2
             //@ts-ignore
             this.ctx.rect(...drawPos.toArray(), ...drawSize.toArray());
         }
@@ -60,8 +61,8 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
         }
         worldImage(imgElement, pos, size, angleRad = 0, resizeOnZoom, clipPos, clipSize) {
             this.ctx.save();
-            const drawSize = resizeOnZoom ? vector2_1.default.mult(size, this.cam.zoom) : size;
-            const drawPos = vector2_1.default.div(drawSize, 2).invert();
+            const drawSize = resizeOnZoom ? size.mult(this.cam.zoom) : size;
+            const drawPos = drawSize.div(2).inverse();
             this.rotateAroundCenterpoint(this.worldToCanvas(pos), drawSize, angleRad);
             if (clipSize)
                 //@ts-ignore
@@ -156,13 +157,12 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             this.ctx.strokeStyle = style.style;
         }
         rotateAroundCenterpoint(pos, size, angleRad) {
-            const pivotPos = vector2_1.default.sum(pos, vector2_1.default.div(size, 2));
+            const pivotPos = pos.add(size.div(2)); //pivotPos = pos + size / 2
             //@ts-ignore
             this.ctx.translate(...pivotPos.toArray());
             this.ctx.rotate(angleRad);
         }
     }
-    exports.DrawingTools = DrawingTools;
     DrawingTools.DEFAULT_LINE_STYLE = {
         lineWidth: 3,
         style: "black"
@@ -182,4 +182,5 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
         rectStyle: "grey",
         rectThickness: 2
     };
+    exports.DrawingTools = DrawingTools;
 });

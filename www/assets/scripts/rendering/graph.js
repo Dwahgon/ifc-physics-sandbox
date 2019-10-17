@@ -134,7 +134,7 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
             if (this.highlightedPoint) {
                 this.drawCircle(dT, ctx, this.highlightedPoint, 4, "red");
                 const text = `P(${this.highlightedPoint.x.toFixed(2)}, ${this.highlightedPoint.y.toFixed(2)})`;
-                const textPos = vector2_1.default.sum(cam.getCanvasPosFromWorld(this.highlightedPoint), new vector2_1.default(10, -10));
+                const textPos = cam.getCanvasPosFromWorld(this.highlightedPoint).add(new vector2_1.default(10, -10)); //textPos = canvasHighlightedPos + V2(10, -10)
                 ctx.font = "italic 15px CMU Serif";
                 ctx.fillStyle = "red";
                 ctx.strokeStyle = "white";
@@ -179,8 +179,8 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
             const B = distMouseAfterA < distMouseBeforeA ? afterA : beforeA;
             if (!B)
                 throw "B is null";
-            const AB = vector2_1.default.sub(B, A);
-            const AP = vector2_1.default.sub(wMousePos, A);
+            const AB = B.sub(A);
+            const AP = wMousePos.sub(A);
             const magAB = AB.magnitude() * AB.magnitude();
             const ABAPProduct = vector2_1.default.dotProduct(AP, AB);
             const dist = ABAPProduct / magAB;
@@ -190,7 +190,7 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
             else if (dist > 1)
                 closestPointOnLineSegment = B;
             else
-                closestPointOnLineSegment = vector2_1.default.sum(A, vector2_1.default.mult(AB, dist));
+                closestPointOnLineSegment = A.add(AB.mult(dist)); //closestPointOnLineSegment = A + AB * dist
             this.highlightedPoint = vector2_1.default.distanceSquared(cam.getCanvasPosFromWorld(closestPointOnLineSegment), cMousePos) < 1000 ? closestPointOnLineSegment : null;
         }
     }

@@ -171,8 +171,8 @@ export class ObjectSize extends PhysicsProperty<Vector2>{
 
     drawGizmos(canvasRenderer: CanvasRenderer) {
         if (this.doDrawGizmos && this.objectPosition) {
-            const from = Vector2.sub(this.objectPosition.value, Vector2.div(this.value, 2));
-            const to = Vector2.sum(this.objectPosition.value, Vector2.div(this.value, 2));
+            const from = this.objectPosition.value.sub(this.value.div(2));    //from = objectPosition - objectSize / 2
+            const to = this.objectPosition.value.add(this.value.div(2));      //to = objectPosition + objectSize / 2
             canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
         }
     }
@@ -208,41 +208,33 @@ export class ObjectVelocity extends PhysicsProperty<Vector2>{
     }
 
     simulate(step: 0): void {
+        const posn = this.objectPosition ? this.objectPosition.value : null;
+        const vn = this.value
+        const an = this.objectAcceleration ? this.objectAcceleration.value : null;
+
         if (this.objectPosition && this.objectAcceleration)
-            this.objectPosition.value = Vector2.sum(
-                this.objectPosition.value,
-                Vector2.sum(
-                    Vector2.mult(this.value, step),
-                    Vector2.div(
-                        Vector2.mult(this.objectAcceleration.value, Math.pow(step, 2)),
-                        2
-                    )
-                )
-            );
+            //objectPosition = posn + vn * step + (an * step ^ 2 / 2)
+            this.objectPosition.value = posn!.add(vn.mult(step).add(an!.mult(step * step).div(2)));
+            
+            
         
         if (this.objectAcceleration){
-            const ai = this.objectAcceleration.value;
-            let af = this.objectAcceleration.value;
-
-            if(this.objectCentripitalAcceleration){
+            //Update the acceleration
+            if(this.objectCentripitalAcceleration)
                 this.objectCentripitalAcceleration.simulate();
-                af = this.objectAcceleration.value;
-            }
             
-            const avgA = Vector2.div(Vector2.sum(ai, af), 2);
+            const anplus1 = this.objectAcceleration.value;
+            const avgA = an!.add(anplus1).div(2);   //avgA = (an + anplus1) / 2
 
-            this.value = Vector2.sum(
-                this.value, Vector2.mult(
-                    avgA, step
-                )
-            );
+            //objectVelocity = vn + avgA * step
+            this.value = vn.add(avgA.mult(step));
         }
     }
 
     drawGizmos(canvasRenderer: CanvasRenderer) {
         if (this.doDrawGizmos && this.objectPosition) {
             const from = this.objectPosition.value;
-            const to = Vector2.sum(from, this.value);
+            const to = from.add(this.value);
             canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
         }
     }
@@ -262,13 +254,13 @@ export class ObjectDisplacement extends PhysicsProperty<Vector2>{
 
     simulate(step: 0): void {
         if (this.objectPosition)
-            this.value = Vector2.sub(this.objectPosition.value, this.objectPosition.initialValue);
+            this.value = this.objectPosition.value.sub(this.objectPosition.initialValue);
     }
 
     drawGizmos(canvasRenderer: CanvasRenderer) {
         if (this.doDrawGizmos && this.objectPosition) {
             const from = this.objectPosition.initialValue;
-            const to = Vector2.sum(from, this.value);
+            const to = from.add(this.value);
             canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
         }
     }
@@ -289,7 +281,7 @@ export class ObjectAcceleration extends PhysicsProperty<Vector2>{
     drawGizmos(canvasRenderer: CanvasRenderer) {
         if (this.doDrawGizmos && this.objectPosition) {
             const from = this.objectPosition.value;
-            const to = Vector2.sum(from, this.value);
+            const to = from.add(this.value);
             canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
         }
     }
@@ -313,9 +305,9 @@ export class ObjectCentripetalAcceleration extends PhysicsProperty<VectorModulus
     simulate() {
         if (this.objectAcceleration && this.objectPosition && this.value.modulus != 0) {
             const pos = this.objectPosition.value;
-            const dir = Vector2.sub(this.value.vector, pos).unit();
+            const dir = this.value.vector.sub(pos).unit();
 
-            this.objectAcceleration.value = Vector2.sum(this.objectAcceleration.initialValue, Vector2.mult(dir, this.value.modulus));
+            this.objectAcceleration.value = this.objectAcceleration.initialValue.add(dir.mult(this.value.modulus)); //objectAcceleration = objectAccelerationi + dir * modulus
         }
     }
 
@@ -333,8 +325,8 @@ export class ObjectCentripetalAcceleration extends PhysicsProperty<VectorModulus
     drawGizmos(canvasRenderer: CanvasRenderer) {
         if (this.doDrawGizmos && this.objectPosition) {
             const from = this.objectPosition.value;
-            const dir = Vector2.sub(this.value.vector, from).unit();
-            const to = Vector2.sum(from, Vector2.mult(dir, this.value.modulus));
+            const dir = this.value.vector.sub(from).unit();
+            const to = from.add(dir.mult(this.value.modulus));
             canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
         }
     }

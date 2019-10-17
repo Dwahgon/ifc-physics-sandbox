@@ -1,6 +1,7 @@
 define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    console.log("Loading vector2");
     class Vector2 {
         constructor(x, y) {
             this.x = x;
@@ -9,27 +10,40 @@ define(["require", "exports"], function (require, exports) {
         toArray() {
             return [this.x, this.y];
         }
-        clone() {
-            return new Vector2(this.x, this.y);
+        add(v) {
+            return new Vector2(this.x + v.x, this.y + v.y);
+        }
+        sub(v) {
+            return new Vector2(this.x - v.x, this.y - v.y);
+        }
+        mult(v) {
+            if (typeof (v) == "object")
+                return new Vector2(this.x * v.x, this.y * v.y);
+            if (typeof (v) == "number")
+                return new Vector2(this.x * v, this.y * v);
+            throw "v is not a number, neither a vector2";
+        }
+        div(v) {
+            if (typeof (v) == "object")
+                return new Vector2(this.x / v.x, this.y / v.y);
+            if (typeof (v) == "number")
+                return new Vector2(this.x / v, this.y / v);
+            throw "v is not a number, neither a vector2";
         }
         magnitude() {
             return Math.hypot(this.x, this.y);
         }
         unit() {
-            return Vector2.div(this, this.magnitude());
+            return this.div(this.magnitude());
         }
-        invert() {
-            this.x = -this.x;
-            this.y = -this.y;
-            return this;
+        inverse() {
+            return this.mult(-1);
         }
-        invertX() {
-            this.x = -this.x;
-            return this;
+        inverseX() {
+            return this.mult(new Vector2(-1, 1));
         }
-        invertY() {
-            this.y = -this.y;
-            return this;
+        inverseY() {
+            return this.mult(new Vector2(1, -1));
         }
         toString() {
             return "(" + this.x + ", " + this.y + ")";
@@ -41,32 +55,8 @@ define(["require", "exports"], function (require, exports) {
             return Math.hypot(a.x - b.x, a.y - b.y);
         }
         static distanceSquared(a, b) {
-            const dif = Vector2.sub(a, b);
+            const dif = a.sub(b);
             return dif.x * dif.x + dif.y * dif.y;
-        }
-        static sum(a, b) {
-            return new Vector2(a.x + b.x, a.y + b.y);
-        }
-        static sub(a, b) {
-            return new Vector2(a.x - b.x, a.y - b.y);
-        }
-        static mult(a, b) {
-            if (typeof (a) == "number" && typeof (b) == "object")
-                return new Vector2(a * b.x, a * b.y);
-            if (typeof (a) == "object" && typeof (b) == "number")
-                return new Vector2(a.x * b, a.y * b);
-            if (typeof (a) == "object" && typeof (b) == "object")
-                return new Vector2(a.x * b.x, a.y * b.y);
-            throw "arguments 'a' and 'b' are either both numbers";
-        }
-        static div(a, b) {
-            if (typeof (a) == "number" && typeof (b) == "object")
-                return new Vector2(a / b.x, a / b.y);
-            if (typeof (a) == "object" && typeof (b) == "number")
-                return new Vector2(a.x / b, a.y / b);
-            if (typeof (a) == "object" && typeof (b) == "object")
-                return new Vector2(a.x / b.x, a.y / b.y);
-            throw "arguments 'a' and 'b' are either both numbers";
         }
         static equals(a, b) {
             return a.x == b.x && a.y == b.y;
@@ -84,9 +74,6 @@ define(["require", "exports"], function (require, exports) {
          */
         static angleBetween(a, b) {
             return Math.acos(Vector2.dotProduct(a, b) / (a.magnitude() * b.magnitude()));
-        }
-        static inverse(a) {
-            return Vector2.mult(a, -1);
         }
     }
     exports.default = Vector2;

@@ -1,4 +1,4 @@
-import { VectorModulus, VectorStyle } from "./types";
+console.log("Loading vector2");
 
 export default class Vector2 {
     constructor(public x: number, public y: number) { }
@@ -7,8 +7,32 @@ export default class Vector2 {
         return [this.x, this.y];
     }
 
-    clone(): Vector2 {
-        return new Vector2(this.x, this.y);
+    add(v: Vector2): Vector2 {
+        return new Vector2(this.x + v.x, this.y + v.y);
+    }
+
+    sub(v: Vector2): Vector2 {
+        return new Vector2(this.x - v.x, this.y - v.y);
+    }
+
+    mult(v: Vector2 | number): Vector2 {
+        if (typeof (v) == "object")
+            return new Vector2(this.x * v.x, this.y * v.y);
+
+        if (typeof (v) == "number")
+            return new Vector2(this.x * v, this.y * v);
+
+        throw "v is not a number, neither a vector2";
+    }
+
+    div(v: Vector2 | number): Vector2 {
+        if (typeof (v) == "object")
+            return new Vector2(this.x / v.x, this.y / v.y);
+
+        if (typeof (v) == "number")
+            return new Vector2(this.x / v, this.y / v);
+
+        throw "v is not a number, neither a vector2";
     }
 
     magnitude(): number {
@@ -16,24 +40,19 @@ export default class Vector2 {
     }
 
     unit(): Vector2 {
-        return Vector2.div(this, this.magnitude());
+        return this.div(this.magnitude());
     }
 
-    invert(): Vector2 {
-        this.x = -this.x;
-        this.y = -this.y;
-
-        return this;
+    inverse(): Vector2 {
+        return this.mult(-1);
     }
 
-    invertX(): Vector2 {
-        this.x = -this.x;
-        return this;
+    inverseX(): Vector2 {
+        return this.mult(new Vector2(-1, 1));
     }
 
-    invertY(): Vector2 {
-        this.y = -this.y;
-        return this;
+    inverseY(): Vector2 {
+        return this.mult(new Vector2(1, -1));
     }
 
     toString() {
@@ -48,43 +67,9 @@ export default class Vector2 {
         return Math.hypot(a.x - b.x, a.y - b.y);
     }
 
-    static distanceSquared(a: Vector2, b: Vector2){
-        const dif = Vector2.sub(a, b);
+    static distanceSquared(a: Vector2, b: Vector2) {
+        const dif = a.sub(b);
         return dif.x * dif.x + dif.y * dif.y;
-    }
-
-    static sum(a: Vector2, b: Vector2): Vector2 {
-        return new Vector2(a.x + b.x, a.y + b.y);
-    }
-
-    static sub(a: Vector2, b: Vector2): Vector2 {
-        return new Vector2(a.x - b.x, a.y - b.y);
-    }
-
-    static mult(a: Vector2 | number, b: Vector2 | number): Vector2 {
-        if (typeof (a) == "number" && typeof (b) == "object")
-            return new Vector2(a * b.x, a * b.y);
-
-        if (typeof (a) == "object" && typeof (b) == "number")
-            return new Vector2(a.x * b, a.y * b);
-
-        if (typeof (a) == "object" && typeof (b) == "object")
-            return new Vector2(a.x * b.x, a.y * b.y);
-
-        throw "arguments 'a' and 'b' are either both numbers";
-    }
-
-    static div(a: Vector2 | number, b: Vector2 | number): Vector2 {
-        if (typeof (a) == "number" && typeof (b) == "object")
-            return new Vector2(a / b.x, a / b.y);
-
-        if (typeof (a) == "object" && typeof (b) == "number")
-            return new Vector2(a.x / b, a.y / b);
-
-        if (typeof (a) == "object" && typeof (b) == "object")
-            return new Vector2(a.x / b.x, a.y / b.y);
-
-        throw "arguments 'a' and 'b' are either both numbers";
     }
 
     static equals(a: Vector2, b: Vector2): boolean {
@@ -106,9 +91,5 @@ export default class Vector2 {
      */
     static angleBetween(a: Vector2, b: Vector2): number {
         return Math.acos(Vector2.dotProduct(a, b) / (a.magnitude() * b.magnitude()));
-    }
-
-    static inverse(a: Vector2){
-        return Vector2.mult(a, -1);
     }
 }

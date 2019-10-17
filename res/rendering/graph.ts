@@ -144,7 +144,7 @@ export class Graph implements Renderable, Simulatable {
             dT.worldMoveTo(this.points[0]);
             for (let index = 1; index < this.points.length; index++)
                 dT.worldLineTo(this.points[index]);
-            
+
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
             ctx.lineWidth = 3;
@@ -156,11 +156,11 @@ export class Graph implements Renderable, Simulatable {
             this.drawCircle(dT, ctx, this.points[this.points.length - 1], 4, "orange");
         }
 
-        if(this.highlightedPoint){
+        if (this.highlightedPoint) {
             this.drawCircle(dT, ctx, this.highlightedPoint, 4, "red");
-            
+
             const text = `P(${this.highlightedPoint.x.toFixed(2)}, ${this.highlightedPoint.y.toFixed(2)})`;
-            const textPos = Vector2.sum(cam.getCanvasPosFromWorld(this.highlightedPoint), new Vector2(10, -10));
+            const textPos = cam.getCanvasPosFromWorld(this.highlightedPoint).add(new Vector2(10, -10));    //textPos = canvasHighlightedPos + V2(10, -10)
             ctx.font = "italic 15px CMU Serif";
             ctx.fillStyle = "red";
             ctx.strokeStyle = "white"
@@ -173,15 +173,15 @@ export class Graph implements Renderable, Simulatable {
         }
     }
 
-    onCanvasAdded(cR: CanvasRenderer){
+    onCanvasAdded(cR: CanvasRenderer) {
         this.onMouseMoved = (ev: MouseEvent) => this.highlightPoint(cR, ev);
 
         cR.context.canvas.addEventListener("mousemove", this.onMouseMoved);
     }
 
-    
-    onCanvasRemoved(cR: CanvasRenderer){
-        if(this.onMouseMoved){
+
+    onCanvasRemoved(cR: CanvasRenderer) {
+        if (this.onMouseMoved) {
             cR.context.canvas.removeEventListener("mousemove", this.onMouseMoved);
             this.onMouseMoved = null;
         }
@@ -196,8 +196,8 @@ export class Graph implements Renderable, Simulatable {
         ctx.closePath();
     }
 
-    private highlightPoint(cR: CanvasRenderer, ev: MouseEvent){
-        if(this.points.length <= 1)
+    private highlightPoint(cR: CanvasRenderer, ev: MouseEvent) {
+        if (this.points.length <= 1)
             return;
 
         const cam = cR.camera;
@@ -214,23 +214,23 @@ export class Graph implements Renderable, Simulatable {
         const distMouseBeforeA = beforeA ? Vector2.distanceSquared(wMousePos, beforeA) : Infinity;
         const B = distMouseAfterA < distMouseBeforeA ? afterA : beforeA;
 
-        if(!B)
+        if (!B)
             throw "B is null";
 
-        const AB = Vector2.sub(B, A);
-        const AP = Vector2.sub(wMousePos, A);
+        const AB = B.sub(A);
+        const AP = wMousePos.sub(A);
 
-        const magAB = AB.magnitude()*AB.magnitude();
+        const magAB = AB.magnitude() * AB.magnitude();
         const ABAPProduct = Vector2.dotProduct(AP, AB);
         const dist = ABAPProduct / magAB;
 
         let closestPointOnLineSegment;
-        if(dist<0)
+        if (dist < 0)
             closestPointOnLineSegment = A;
         else if (dist > 1)
             closestPointOnLineSegment = B;
         else
-            closestPointOnLineSegment = Vector2.sum(A, Vector2.mult(AB, dist));
+            closestPointOnLineSegment = A.add(AB.mult(dist)); //closestPointOnLineSegment = A + AB * dist
 
         this.highlightedPoint = Vector2.distanceSquared(cam.getCanvasPosFromWorld(closestPointOnLineSegment), cMousePos) < 1000 ? closestPointOnLineSegment : null;
     }

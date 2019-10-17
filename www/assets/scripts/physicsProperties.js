@@ -54,7 +54,6 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
                 this.propertyEditorInput.getInput().updateValue(value);
         }
     }
-    exports.default = PhysicsProperty;
     PhysicsProperty.DEFAULT_VECTOR_STYLE = {
         style: "lightblue",
         strokeStyle: "black",
@@ -66,6 +65,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         rectStyle: "grey",
         rectThickness: 2
     };
+    exports.default = PhysicsProperty;
     class ObjectPosition extends PhysicsProperty {
         constructor(initialPosition, object) {
             super("position", true, object, initialPosition, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
@@ -127,8 +127,8 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         }
         drawGizmos(canvasRenderer) {
             if (this.doDrawGizmos && this.objectPosition) {
-                const from = vector2_1.default.sub(this.objectPosition.value, vector2_1.default.div(this.value, 2));
-                const to = vector2_1.default.sum(this.objectPosition.value, vector2_1.default.div(this.value, 2));
+                const from = this.objectPosition.value.sub(this.value.div(2)); //from = objectPosition - objectSize / 2
+                const to = this.objectPosition.value.add(this.value.div(2)); //to = objectPosition + objectSize / 2
                 canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
             }
         }
@@ -155,23 +155,26 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
             this.objectCentripitalAcceleration = this.object.getProperty("centripetalAcceleration");
         }
         simulate(step) {
+            const posn = this.objectPosition ? this.objectPosition.value : null;
+            const vn = this.value;
+            const an = this.objectAcceleration ? this.objectAcceleration.value : null;
             if (this.objectPosition && this.objectAcceleration)
-                this.objectPosition.value = vector2_1.default.sum(this.objectPosition.value, vector2_1.default.sum(vector2_1.default.mult(this.value, step), vector2_1.default.div(vector2_1.default.mult(this.objectAcceleration.value, Math.pow(step, 2)), 2)));
+                //objectPosition = posn + vn * step + (an * step ^ 2 / 2)
+                this.objectPosition.value = posn.add(vn.mult(step).add(an.mult(step * step).div(2)));
             if (this.objectAcceleration) {
-                const ai = this.objectAcceleration.value;
-                let af = this.objectAcceleration.value;
-                if (this.objectCentripitalAcceleration) {
+                //Update the acceleration
+                if (this.objectCentripitalAcceleration)
                     this.objectCentripitalAcceleration.simulate();
-                    af = this.objectAcceleration.value;
-                }
-                const avgA = vector2_1.default.div(vector2_1.default.sum(ai, af), 2);
-                this.value = vector2_1.default.sum(this.value, vector2_1.default.mult(avgA, step));
+                const anplus1 = this.objectAcceleration.value;
+                const avgA = an.add(anplus1).div(2); //avgA = (an + anplus1) / 2
+                //objectVelocity = vn + avgA * step
+                this.value = vn.add(avgA.mult(step));
             }
         }
         drawGizmos(canvasRenderer) {
             if (this.doDrawGizmos && this.objectPosition) {
                 const from = this.objectPosition.value;
-                const to = vector2_1.default.sum(from, this.value);
+                const to = from.add(this.value);
                 canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
             }
         }
@@ -186,12 +189,12 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         }
         simulate(step) {
             if (this.objectPosition)
-                this.value = vector2_1.default.sub(this.objectPosition.value, this.objectPosition.initialValue);
+                this.value = this.objectPosition.value.sub(this.objectPosition.initialValue);
         }
         drawGizmos(canvasRenderer) {
             if (this.doDrawGizmos && this.objectPosition) {
                 const from = this.objectPosition.initialValue;
-                const to = vector2_1.default.sum(from, this.value);
+                const to = from.add(this.value);
                 canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
             }
         }
@@ -207,7 +210,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         drawGizmos(canvasRenderer) {
             if (this.doDrawGizmos && this.objectPosition) {
                 const from = this.objectPosition.value;
-                const to = vector2_1.default.sum(from, this.value);
+                const to = from.add(this.value);
                 canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
             }
         }
@@ -225,8 +228,8 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         simulate() {
             if (this.objectAcceleration && this.objectPosition && this.value.modulus != 0) {
                 const pos = this.objectPosition.value;
-                const dir = vector2_1.default.sub(this.value.vector, pos).unit();
-                this.objectAcceleration.value = vector2_1.default.sum(this.objectAcceleration.initialValue, vector2_1.default.mult(dir, this.value.modulus));
+                const dir = this.value.vector.sub(pos).unit();
+                this.objectAcceleration.value = this.objectAcceleration.initialValue.add(dir.mult(this.value.modulus)); //objectAcceleration = objectAccelerationi + dir * modulus
             }
         }
         onUserInput(formData) {
@@ -241,8 +244,8 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         drawGizmos(canvasRenderer) {
             if (this.doDrawGizmos && this.objectPosition) {
                 const from = this.objectPosition.value;
-                const dir = vector2_1.default.sub(this.value.vector, from).unit();
-                const to = vector2_1.default.sum(from, vector2_1.default.mult(dir, this.value.modulus));
+                const dir = this.value.vector.sub(from).unit();
+                const to = from.add(dir.mult(this.value.modulus));
                 canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
             }
         }

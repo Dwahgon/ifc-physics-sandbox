@@ -69,7 +69,7 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
             const pos = (<PhysicsProperties.ObjectPosition>this.getProperty("position"))!.value;
             const size = (<PhysicsProperties.ObjectSize>this.getProperty("size"))!.value;
 
-            const drawPos = Vector2.sub(pos, Vector2.div(size, new Vector2(2, -2)));                //drawPos = pos - size/(2, -2)
+            const drawPos = pos.sub(size.div(new Vector2(2, -2)));                //drawPos = pos - size/(2, -2)
 
 
             //ctx.setLineDash([8, 3]);
@@ -123,7 +123,7 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
     isPositionInsideObject(position: Vector2): boolean {
         const objPos = (<PhysicsProperties.ObjectPosition>this.getProperty("position")).value;
         let objSize = (<PhysicsProperties.ObjectSize>this.getProperty("size")).value;
-        objSize = Vector2.div(objSize, 2);
+        objSize = objSize.div(2);
 
         return position.x >= objPos.x - objSize.x &&
             position.x <= objPos.x + objSize.x &&
