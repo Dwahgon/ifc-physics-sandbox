@@ -58,7 +58,7 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
             if (documentUtilities_1.ObjectSelectionController.selectedObject == this) {
                 const pos = this.getProperty("position").value;
                 const size = this.getProperty("size").value;
-                const drawPos = vector2_1.default.sub(pos, vector2_1.default.div(size, new vector2_1.default(2, -2))); //drawPos = pos - size/(2, -2)
+                const drawPos = pos.sub(size.div(new vector2_1.default(2, -2))); //drawPos = pos - size/(2, -2)
                 //ctx.setLineDash([8, 3]);
                 ctx.lineWidth = 4;
                 ctx.fillStyle = "rgba(241, 196, 15, 0.2)";
@@ -102,7 +102,7 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
         isPositionInsideObject(position) {
             const objPos = this.getProperty("position").value;
             let objSize = this.getProperty("size").value;
-            objSize = vector2_1.default.div(objSize, 2);
+            objSize = objSize.div(2);
             return position.x >= objPos.x - objSize.x &&
                 position.x <= objPos.x + objSize.x &&
                 position.y >= objPos.y - objSize.y &&
@@ -138,8 +138,8 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
             });
         }
     }
-    exports.PhysicsObject = PhysicsObject;
     PhysicsObject.DEFAULT_NAME = "";
+    exports.PhysicsObject = PhysicsObject;
     class Solid extends PhysicsObject {
         constructor(ambient, properties) {
             super(types_1.PhysicsObjectType.Solid, new sprite_1.Sprite("./assets/images/solid.svg", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient, properties ? properties.name : undefined);

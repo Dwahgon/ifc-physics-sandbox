@@ -17,7 +17,7 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             this.drawSize = drawSize;
         }
         draw(canvasRenderer) {
-            const offsettedPos = vector2_1.default.sub(this.drawPosition, vector2_1.default.div(this.drawSize, new vector2_1.default(2, -2)));
+            const offsettedPos = this.drawPosition.sub(this.drawSize.div(new vector2_1.default(2, -2))); //offsettedPos = drawPosition - drawSize/V(2, -2)
             canvasRenderer.drawingTools.worldImage(this.image, offsettedPos, this.drawSize, 0, true);
         }
     }

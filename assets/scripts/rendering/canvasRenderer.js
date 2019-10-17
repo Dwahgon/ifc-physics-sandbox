@@ -176,7 +176,8 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
         onMove(cursorCoordinates, canvas) {
             if (this.isMouseDown) {
                 if (this.allowMovement)
-                    this.pos = vector2_1.default.sum(this.cameraPosOnMouseDown, vector2_1.default.div(vector2_1.default.sub(this.clickedPos, cursorCoordinates), this.zoom).invertY());
+                    //this.cameraPosOnMouseDown + inverseY(this.clickedPos - cursorCoordinates) / this.zoom
+                    this.pos = this.cameraPosOnMouseDown.add(this.clickedPos.sub(cursorCoordinates).inverseY().div(this.zoom));
                 canvas.style.cursor = "move";
                 if (!vector2_1.default.equals(this.cameraPosOnMouseDown, this.pos)) {
                     this._mouseMoved = true;

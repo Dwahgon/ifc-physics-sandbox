@@ -1,31 +1,25 @@
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-define(["require", "exports", "./vector2"], function (require, exports, vector2_1) {
+define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    vector2_1 = __importDefault(vector2_1);
     class Vector2Calculator {
-        constructor() {
-        }
+        constructor() { }
         sum(a, b) {
-            return vector2_1.default.sum(a, b);
+            return a.add(b);
         }
         sub(a, b) {
-            return vector2_1.default.sub(a, b);
+            return a.sub(b);
         }
         mult(a, b) {
-            return vector2_1.default.mult(a, b);
+            return a.mult(b);
         }
         div(a, b) {
-            return vector2_1.default.div(a, b);
+            return a.div(b);
         }
     }
-    exports.Vector2Calculator = Vector2Calculator;
     Vector2Calculator.instance = new Vector2Calculator();
+    exports.Vector2Calculator = Vector2Calculator;
     class NumberCalculator {
-        constructor() {
-        }
+        constructor() { }
         sum(a, b) {
             return a + b;
         }
@@ -39,36 +33,35 @@ define(["require", "exports", "./vector2"], function (require, exports, vector2_
             return a / b;
         }
     }
-    exports.NumberCalculator = NumberCalculator;
     NumberCalculator.instance = new NumberCalculator();
+    exports.NumberCalculator = NumberCalculator;
     class VectorModulusCalculator {
-        constructor() {
-        }
+        constructor() { }
         sum(a, b) {
             return {
                 modulus: a.modulus + b.modulus,
-                vector: vector2_1.default.sum(a.vector, b.vector)
+                vector: a.vector.add(b.vector)
             };
         }
         sub(a, b) {
             return {
                 modulus: a.modulus - b.modulus,
-                vector: vector2_1.default.sub(a.vector, b.vector)
+                vector: a.vector.sub(b.vector)
             };
         }
         mult(a, b) {
             return {
                 modulus: a.modulus * b.modulus,
-                vector: vector2_1.default.mult(a.vector, b.vector)
+                vector: a.vector.mult(b.vector)
             };
         }
         div(a, b) {
             return {
                 modulus: a.modulus / b.modulus,
-                vector: vector2_1.default.div(a.vector, b.vector)
+                vector: a.vector.div(b.vector)
             };
         }
     }
-    exports.VectorModulusCalculator = VectorModulusCalculator;
     VectorModulusCalculator.instance = new VectorModulusCalculator();
+    exports.VectorModulusCalculator = VectorModulusCalculator;
 });
