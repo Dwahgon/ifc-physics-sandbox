@@ -24,7 +24,6 @@ export class DrawingTools {
         rectThickness: 2
     }
 
-
     private worldToCanvas: Function;
 
     constructor(private ctx: CanvasRenderingContext2D, private cam: Camera) {
@@ -42,23 +41,15 @@ export class DrawingTools {
     }
 
     worldRect(pos: Vector2, size: Vector2, angleRad: number = 0, resizeOnZoom?: boolean) {
-        if (angleRad > 0) {
-            this.ctx.save();
-            this.ctx.rotate(angleRad);
-            this.ctx.restore();
-        }
+        size = size.mult(resizeOnZoom ? this.cam.zoom : 1);
+        this.rotateAroundCenterpoint(this.worldToCanvas(pos), size, angleRad);
 
         //@ts-ignore
-        this.ctx.rect(...this.worldToCanvas(pos).toArray(), ...size.mult(resizeOnZoom ? this.cam.zoom : 1).toArray());
+        this.ctx.rect(...size.div(2).inverse().toArray(), ...size.toArray());
+        this.ctx.resetTransform();
     }
 
     worldRectWithOffset(pos: Vector2, size: Vector2, offset: number, isWorldOffset?: boolean, angleRad: number = 0) {
-        if (angleRad > 0) {
-            this.ctx.save();
-            this.ctx.rotate(angleRad);
-            this.ctx.restore();
-        }
-
         const wOffset = new Vector2(offset, -offset);
         const cOffset = new Vector2(offset, offset);
         const drawPos = isWorldOffset ?
@@ -67,8 +58,11 @@ export class DrawingTools {
         const drawSize = isWorldOffset ?
             size.add(cOffset.mult(2)).mult(this.cam.zoom) :         //(size + cOffset * 2) * zoom
             size.mult(this.cam.zoom).add(cOffset.mult(2));          //size * zoom + cOffset * 2
+        
+        this.rotateAroundCenterpoint(drawPos, drawSize, angleRad)
         //@ts-ignore
-        this.ctx.rect(...drawPos.toArray(), ...drawSize.toArray());
+        this.ctx.rect(...drawSize.div(2).inverse().toArray(), ...drawSize.toArray());
+        this.ctx.resetTransform();
     }
 
     worldArc(pos: Vector2, radius: number, startAngle: number, endAngle: number, resizeOnZoom?: boolean, anticlockwise?: boolean) {
@@ -76,21 +70,22 @@ export class DrawingTools {
         this.ctx.arc(...this.worldToCanvas(pos).toArray(), resizeOnZoom ? (radius * this.cam.zoom) : radius, startAngle, endAngle, anticlockwise);
     }
 
-    worldText(text: string, pos: Vector2, angleRad: number = 0) {
+    worldText(text: string, pos: Vector2, stroke?:boolean, angleRad: number = 0) {
         if (angleRad > 0) {
-            this.ctx.save();
             const textMeasurement = this.ctx.measureText(text);
             this.rotateAroundCenterpoint(this.worldToCanvas(pos), new Vector2(textMeasurement.width, parseInt(this.ctx.font)), angleRad);
-            this.ctx.restore();
         }
+
+        if(stroke)
+            //@ts-ignore
+            this.ctx.strokeText(text, ...this.worldToCanvas(pos).toArray());
 
         //@ts-ignore
         this.ctx.fillText(text, ...this.worldToCanvas(pos).toArray());
+        this.ctx.resetTransform();
     }
 
     worldImage(imgElement: HTMLImageElement, pos: Vector2, size: Vector2, angleRad: number = 0, resizeOnZoom?: boolean, clipPos?: Vector2, clipSize?: Vector2) {
-        this.ctx.save();
-
         const drawSize = resizeOnZoom ? size.mult(this.cam.zoom) : size;
         const drawPos = drawSize.div(2).inverse();
 
@@ -103,7 +98,7 @@ export class DrawingTools {
             //@ts-ignore
             this.ctx.drawImage(imgElement, ...drawPos.toArray(), ...drawSize.toArray());
 
-        this.ctx.restore();
+        this.ctx.resetTransform();
     }
 
     drawLine(sPos: Vector2, fPos: Vector2, lineStyle: LineStyle = DrawingTools.DEFAULT_LINE_STYLE, isWorldPos: boolean = true): void {
@@ -130,8 +125,6 @@ export class DrawingTools {
     }
 
     drawArrow(from: Vector2, to: Vector2, arrowStyle = DrawingTools.DEFAULT_ARROW_STYLE, isWorldPos: boolean = true) {
-        this.ctx.save();
-
         from = isWorldPos ? this.worldToCanvas(from) : from;
         to = isWorldPos ? this.worldToCanvas(to) : to;
 
@@ -166,8 +159,6 @@ export class DrawingTools {
         this.ctx.stroke();
 
         this.ctx.closePath();
-
-        this.ctx.restore();
     }
 
     drawVector(from: Vector2, to: Vector2, vectorStyle: VectorStyle = DrawingTools.DEFAULT_VECTOR_STYLE, isWorldPos: boolean = true) {

@@ -3,10 +3,11 @@ define(["require", "exports", "./document/documentUtilities"], function (require
     Object.defineProperty(exports, "__esModule", { value: true });
     console.log("Loading simulator");
     class Simulator {
-        constructor(playButton, resetButton, destroyButton) {
+        constructor(playButton, resetButton, destroyButton, stepButton) {
             this.playButton = playButton;
             this.resetButton = resetButton;
             this.destroyButton = destroyButton;
+            this.stepButton = stepButton;
             this._time = 0;
             this._isPlaying = false;
             const input = document.querySelector("#simulation-time");
@@ -31,6 +32,8 @@ define(["require", "exports", "./document/documentUtilities"], function (require
                 this.stop();
                 this.reset();
             };
+            if (this.stepButton)
+                this.stepButton.onClick = () => this.passTime(0.01);
         }
         get time() {
             return this._time;
@@ -78,9 +81,10 @@ define(["require", "exports", "./document/documentUtilities"], function (require
             this.simulatables.forEach(simulatable => simulatable.reset());
         }
         fastForwardTo(time) {
-            this.reset();
+            if (time < this.time)
+                this.reset();
             const step = 0.01;
-            let timePassed = 0;
+            let timePassed = this.time;
             while (timePassed + step < time) {
                 this.passTime(step);
                 timePassed += step;

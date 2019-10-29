@@ -185,11 +185,11 @@ class Solid extends PhysicsObject {
             properties ? properties.name : undefined);
 
         this.addProperty("position", new PhysicsProperties.ObjectPosition(properties ? properties.position : Vector2.zero, this));
+        this.addProperty("centripetalAcceleration", new PhysicsProperties.ObjectCentripetalAcceleration(this));
         this.addProperty("acceleration", new PhysicsProperties.ObjectAcceleration(this));
         this.addProperty("size", new PhysicsProperties.ObjectSize(properties ? properties.size : Vector2.zero, this));
         this.addProperty("area", new PhysicsProperties.ObjectArea(this));
         this.addProperty("displacement", new PhysicsProperties.ObjectDisplacement(this));
-        this.addProperty("centripetalAcceleration", new PhysicsProperties.ObjectCentripetalAcceleration(this));
         this.addProperty("velocity", new PhysicsProperties.ObjectVelocity(this));
     }
 }

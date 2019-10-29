@@ -10,7 +10,7 @@ export default class Simulator {
     private domInput: HTMLInputElement;
     private simulatables: Simulatable[];
 
-    constructor(private readonly playButton: Button, private readonly resetButton: Button, private readonly destroyButton: Button) {
+    constructor(private readonly playButton: Button, private readonly resetButton: Button, private readonly destroyButton: Button, private readonly stepButton?: Button) {
         this._time = 0;
         this._isPlaying = false;
 
@@ -42,6 +42,9 @@ export default class Simulator {
             this.stop();
             this.reset();
         };
+
+        if(this.stepButton)
+            this.stepButton.onClick = () => this.passTime(0.01);
     }
 
     get time(): number {
@@ -103,10 +106,11 @@ export default class Simulator {
     }
 
     fastForwardTo(time: number) {
-        this.reset();
+        if(time < this.time)
+            this.reset();
 
         const step = 0.01;
-        let timePassed = 0;
+        let timePassed = this.time;
 
         while (timePassed + step < time) {
             this.passTime(step);

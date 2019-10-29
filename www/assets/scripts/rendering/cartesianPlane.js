@@ -99,14 +99,14 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
         //Draw axis label
         drawXAxisLabel(ctx, y, text) {
             ctx.font = this.style.axisNameFont;
-            const textX = (ctx.canvas.width / 2) - (ctx.measureText(text).width / 2);
+            const textX = ctx.canvas.width - ctx.measureText(text).width - 35;
             const textY = y + 15;
             this.drawText(ctx, text, this.style.axisNameFont, this.style.xAxisStyle, textX, textY, true, "white", 3);
         }
         drawYAxisLabel(ctx, x, text) {
             ctx.save();
             ctx.font = this.style.axisNameFont;
-            ctx.translate(x - 7, (ctx.canvas.height / 2) + (ctx.measureText(text).width / 2));
+            ctx.translate(x - 7, ctx.measureText(text).width + 35);
             ctx.rotate(-Math.PI / 2);
             this.drawText(ctx, text, this.style.axisNameFont, this.style.yAxisStyle, 0, 0, true, "white", 3);
             ctx.restore();

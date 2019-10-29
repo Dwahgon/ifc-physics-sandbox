@@ -194,7 +194,6 @@ export class ObjectArea extends PhysicsProperty<number>{
 export class ObjectVelocity extends PhysicsProperty<Vector2>{
     private objectPosition: ObjectPosition | null;
     private objectAcceleration: ObjectAcceleration | null;
-    private objectCentripitalAcceleration: ObjectCentripetalAcceleration | null;
 
     constructor(object: PhysicsObject) {
         super("velocity", true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance, 1);
@@ -204,7 +203,6 @@ export class ObjectVelocity extends PhysicsProperty<Vector2>{
 
         this.objectPosition = <ObjectPosition>this.object.getProperty("position");
         this.objectAcceleration = <ObjectAcceleration>this.object.getProperty("acceleration");
-        this.objectCentripitalAcceleration = <ObjectCentripetalAcceleration>this.object.getProperty("centripetalAcceleration");
     }
 
     simulate(step: 0): void {
@@ -217,11 +215,8 @@ export class ObjectVelocity extends PhysicsProperty<Vector2>{
             this.objectPosition.value = posn!.add(vn.mult(step).add(an!.mult(step * step).div(2)));
             
             
-        
         if (this.objectAcceleration){
-            //Update the acceleration
-            if(this.objectCentripitalAcceleration)
-                this.objectCentripitalAcceleration.simulate();
+            this.objectAcceleration.simulate();
             
             const anplus1 = this.objectAcceleration.value;
             const avgA = an!.add(anplus1).div(2);   //avgA = (an + anplus1) / 2
@@ -268,14 +263,21 @@ export class ObjectDisplacement extends PhysicsProperty<Vector2>{
 
 export class ObjectAcceleration extends PhysicsProperty<Vector2>{
     private objectPosition: ObjectPosition | null;
+    private objectCentripitalAcceleration: ObjectCentripetalAcceleration | null;
+    
 
     constructor(object: PhysicsObject) {
-        super("acceleration", true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
+        super("acceleration", true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance, 2);
         this.propertyEditorInput = new PropertyEditorInputList(this, "acel", "Cinemática", 3, true, false, "Vetor aceleração", 5);
         this.propertyEditorInput.addInput(new Vector2InputListRow("acceleration", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue, true, false, "m/s²"));
 
-
+        this.objectCentripitalAcceleration = <ObjectCentripetalAcceleration>this.object.getProperty("centripetalAcceleration");
         this.objectPosition = <ObjectPosition>this.object.getProperty("position");
+    }
+
+    simulate(){
+        if(this.objectCentripitalAcceleration && this.objectPosition)
+            this.value = this.initialValue.add(this.objectCentripitalAcceleration.getAccelerationVectorOnPoint(this.objectPosition.value));
     }
 
     drawGizmos(canvasRenderer: CanvasRenderer) {
@@ -289,26 +291,22 @@ export class ObjectAcceleration extends PhysicsProperty<Vector2>{
 
 export class ObjectCentripetalAcceleration extends PhysicsProperty<VectorModulus> {
     private objectPosition: ObjectPosition | null;
-    private objectAcceleration: ObjectAcceleration | null;
 
     constructor(object: PhysicsObject) {
-        super("centripetalAcceleration", true, object, { vector: Vector2.zero, modulus: 0 }, { vector: Vector2.zero, modulus: 0 }, VectorModulusCalculator.instance, 2);
+        super("centripetalAcceleration", true, object, { vector: Vector2.zero, modulus: 0 }, { vector: Vector2.zero, modulus: 0 }, VectorModulusCalculator.instance);
 
         this.propertyEditorInput = new PropertyEditorInputList(this, "acel<sub>c</sub>", "Cinemática", 4, true, false, "Vetor aceleração centrípeta", 6);
         this.propertyEditorInput.addInput(new NumberInputListRow("módulo", "m", 0, true, true));
         this.propertyEditorInput.addInput(new Vector2InputListRow("ponto", "m", Vector2.zero, true, true));
 
         this.objectPosition = <ObjectPosition>this.object.getProperty("position");
-        this.objectAcceleration = <ObjectAcceleration>this.object.getProperty("acceleration");
     }
 
-    simulate() {
-        if (this.objectAcceleration && this.objectPosition && this.value.modulus != 0) {
-            const pos = this.objectPosition.value;
-            const dir = this.value.vector.sub(pos).unit();
-
-            this.objectAcceleration.value = this.objectAcceleration.initialValue.add(dir.mult(this.value.modulus)); //objectAcceleration = objectAccelerationi + dir * modulus
-        }
+    getAccelerationVectorOnPoint(p: Vector2){
+        const VP = this.value.vector.sub(p);
+        const dir = Vector2.equals(VP, Vector2.zero) ? Vector2.zero : VP.unit();
+        
+        return dir.mult(this.value.modulus);
     }
 
     onUserInput(formData: any[]): void {
@@ -325,8 +323,7 @@ export class ObjectCentripetalAcceleration extends PhysicsProperty<VectorModulus
     drawGizmos(canvasRenderer: CanvasRenderer) {
         if (this.doDrawGizmos && this.objectPosition) {
             const from = this.objectPosition.value;
-            const dir = this.value.vector.sub(from).unit();
-            const to = from.add(dir.mult(this.value.modulus));
+            const to = from.add(this.getAccelerationVectorOnPoint(from));
             canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
         }
     }
