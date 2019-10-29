@@ -163,35 +163,37 @@ define(["require", "exports", "../document/buttons", "../document/documentUtilit
             ctx.closePath();
         }
         highlightPoint(cR, ev) {
+            //console.time("Highlight point calculation");
             if (this.points.length <= 1)
                 return;
             const cam = cR.camera;
-            const cMousePos = new vector2_1.default(ev.offsetX, ev.offsetY);
             const wMousePos = cam.getWorldPosFromCanvas(new vector2_1.default(ev.offsetX, ev.offsetY));
-            const pointListCopy = this.points.slice();
-            const orderedPointList = pointListCopy.sort((a, b) => vector2_1.default.distanceSquared(wMousePos, a) - vector2_1.default.distanceSquared(wMousePos, b));
-            const A = orderedPointList[0];
-            const indexA = this.points.indexOf(A);
-            const afterA = indexA < this.points.length ? this.points[indexA + 1] : null;
-            const beforeA = indexA > 0 ? this.points[indexA - 1] : null;
-            const distMouseAfterA = afterA ? vector2_1.default.distanceSquared(wMousePos, afterA) : Infinity;
-            const distMouseBeforeA = beforeA ? vector2_1.default.distanceSquared(wMousePos, beforeA) : Infinity;
-            const B = distMouseAfterA < distMouseBeforeA ? afterA : beforeA;
-            if (!B)
-                throw "B is null";
-            const AB = B.sub(A);
-            const AP = wMousePos.sub(A);
-            const magAB = AB.magnitude() * AB.magnitude();
-            const ABAPProduct = vector2_1.default.dotProduct(AP, AB);
-            const dist = ABAPProduct / magAB;
-            let closestPointOnLineSegment;
-            if (dist < 0)
-                closestPointOnLineSegment = A;
-            else if (dist > 1)
-                closestPointOnLineSegment = B;
-            else
-                closestPointOnLineSegment = A.add(AB.mult(dist)); //closestPointOnLineSegment = A + AB * dist
-            this.highlightedPoint = vector2_1.default.distanceSquared(cam.getCanvasPosFromWorld(closestPointOnLineSegment), cMousePos) < 1000 ? closestPointOnLineSegment : null;
+            const cMousePos = new vector2_1.default(ev.offsetX, ev.offsetY);
+            let closestDistance = Infinity;
+            let closestPoint = vector2_1.default.zero;
+            for (let i = 0; i < this.points.length - 1; i++) {
+                const A = this.points[i];
+                const B = this.points[i + 1];
+                const AB = B.sub(A);
+                const AP = wMousePos.sub(A);
+                const magAB = AB.magnitude() * AB.magnitude();
+                const ABAPProduct = vector2_1.default.dotProduct(AP, AB);
+                const dist = ABAPProduct / magAB;
+                let closestPointOnLineSegment;
+                if (dist < 0)
+                    closestPointOnLineSegment = A;
+                else if (dist > 1)
+                    closestPointOnLineSegment = B;
+                else
+                    closestPointOnLineSegment = A.add(AB.mult(dist)); //closestPointOnLineSegment = A + AB * dist
+                const d = vector2_1.default.distanceSquared(closestPointOnLineSegment, wMousePos);
+                if (d < closestDistance) {
+                    closestDistance = d;
+                    closestPoint = closestPointOnLineSegment;
+                }
+            }
+            this.highlightedPoint = vector2_1.default.distanceSquared(cam.getCanvasPosFromWorld(closestPoint), cMousePos) < 1000 ? closestPoint : null;
+            //console.timeEnd("Highlight point calculation");
         }
     }
     exports.Graph = Graph;

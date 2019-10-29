@@ -20,20 +20,13 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             this.ctx.lineTo(...this.worldToCanvas(pos).toArray());
         }
         worldRect(pos, size, angleRad = 0, resizeOnZoom) {
-            if (angleRad > 0) {
-                this.ctx.save();
-                this.ctx.rotate(angleRad);
-                this.ctx.restore();
-            }
+            size = size.mult(resizeOnZoom ? this.cam.zoom : 1);
+            this.rotateAroundCenterpoint(this.worldToCanvas(pos), size, angleRad);
             //@ts-ignore
-            this.ctx.rect(...this.worldToCanvas(pos).toArray(), ...size.mult(resizeOnZoom ? this.cam.zoom : 1).toArray());
+            this.ctx.rect(...size.div(2).inverse().toArray(), ...size.toArray());
+            this.ctx.resetTransform();
         }
         worldRectWithOffset(pos, size, offset, isWorldOffset, angleRad = 0) {
-            if (angleRad > 0) {
-                this.ctx.save();
-                this.ctx.rotate(angleRad);
-                this.ctx.restore();
-            }
             const wOffset = new vector2_1.default(offset, -offset);
             const cOffset = new vector2_1.default(offset, offset);
             const drawPos = isWorldOffset ?
@@ -42,25 +35,28 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             const drawSize = isWorldOffset ?
                 size.add(cOffset.mult(2)).mult(this.cam.zoom) : //(size + cOffset * 2) * zoom
                 size.mult(this.cam.zoom).add(cOffset.mult(2)); //size * zoom + cOffset * 2
+            this.rotateAroundCenterpoint(drawPos, drawSize, angleRad);
             //@ts-ignore
-            this.ctx.rect(...drawPos.toArray(), ...drawSize.toArray());
+            this.ctx.rect(...drawSize.div(2).inverse().toArray(), ...drawSize.toArray());
+            this.ctx.resetTransform();
         }
         worldArc(pos, radius, startAngle, endAngle, resizeOnZoom, anticlockwise) {
             //@ts-ignore
             this.ctx.arc(...this.worldToCanvas(pos).toArray(), resizeOnZoom ? (radius * this.cam.zoom) : radius, startAngle, endAngle, anticlockwise);
         }
-        worldText(text, pos, angleRad = 0) {
+        worldText(text, pos, stroke, angleRad = 0) {
             if (angleRad > 0) {
-                this.ctx.save();
                 const textMeasurement = this.ctx.measureText(text);
                 this.rotateAroundCenterpoint(this.worldToCanvas(pos), new vector2_1.default(textMeasurement.width, parseInt(this.ctx.font)), angleRad);
-                this.ctx.restore();
             }
+            if (stroke)
+                //@ts-ignore
+                this.ctx.strokeText(text, ...this.worldToCanvas(pos).toArray());
             //@ts-ignore
             this.ctx.fillText(text, ...this.worldToCanvas(pos).toArray());
+            this.ctx.resetTransform();
         }
         worldImage(imgElement, pos, size, angleRad = 0, resizeOnZoom, clipPos, clipSize) {
-            this.ctx.save();
             const drawSize = resizeOnZoom ? size.mult(this.cam.zoom) : size;
             const drawPos = drawSize.div(2).inverse();
             this.rotateAroundCenterpoint(this.worldToCanvas(pos), drawSize, angleRad);
@@ -70,7 +66,7 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             else
                 //@ts-ignore
                 this.ctx.drawImage(imgElement, ...drawPos.toArray(), ...drawSize.toArray());
-            this.ctx.restore();
+            this.ctx.resetTransform();
         }
         drawLine(sPos, fPos, lineStyle = DrawingTools.DEFAULT_LINE_STYLE, isWorldPos = true) {
             this.ctx.beginPath();
@@ -92,7 +88,6 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             this.ctx.closePath();
         }
         drawArrow(from, to, arrowStyle = DrawingTools.DEFAULT_ARROW_STYLE, isWorldPos = true) {
-            this.ctx.save();
             from = isWorldPos ? this.worldToCanvas(from) : from;
             to = isWorldPos ? this.worldToCanvas(to) : to;
             const dx = to.x - from.x;
@@ -119,7 +114,6 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             this.configureLineStyle(arrowStyle);
             this.ctx.stroke();
             this.ctx.closePath();
-            this.ctx.restore();
         }
         drawVector(from, to, vectorStyle = DrawingTools.DEFAULT_VECTOR_STYLE, isWorldPos = true) {
             this.drawArrow(from, to, vectorStyle, isWorldPos);
