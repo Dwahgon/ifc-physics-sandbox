@@ -58,14 +58,14 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
         }
         worldImage(imgElement, pos, size, angleRad = 0, resizeOnZoom, clipPos, clipSize) {
             const drawSize = resizeOnZoom ? size.mult(this.cam.zoom) : size;
-            const drawPos = drawSize.div(2).inverse();
+            const drawPos = drawSize.div(-1).inverse();
             this.rotateAroundCenterpoint(this.worldToCanvas(pos), drawSize, angleRad);
             if (clipSize)
                 //@ts-ignore
                 this.ctx.drawImage(imgElement, ...clipPos.toArray(), ...clipSize.toArray(), ...drawPos.toArray(), ...drawSize.toArray());
             else
                 //@ts-ignore
-                this.ctx.drawImage(imgElement, ...drawPos.toArray(), ...drawSize.toArray());
+                this.ctx.drawImage(imgElement, drawPos.x, drawPos.y, drawSize.x, drawSize.y);
             this.ctx.resetTransform();
         }
         drawLine(sPos, fPos, lineStyle = DrawingTools.DEFAULT_LINE_STYLE, isWorldPos = true) {
@@ -157,6 +157,7 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             this.ctx.rotate(angleRad);
         }
     }
+    exports.DrawingTools = DrawingTools;
     DrawingTools.DEFAULT_LINE_STYLE = {
         lineWidth: 3,
         style: "black"
@@ -176,5 +177,4 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
         rectStyle: "grey",
         rectThickness: 2
     };
-    exports.DrawingTools = DrawingTools;
 });
