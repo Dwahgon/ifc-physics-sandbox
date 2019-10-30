@@ -92,7 +92,7 @@ export class ObjectPosition extends PhysicsProperty<Vector2>{
         object: PhysicsObject
     ) {
         super("position", true, object, initialPosition, Vector2.zero, Vector2Calculator.instance);
-        this.propertyEditorInput = new PropertyEditorInputList(this, "pos<sub>(x, y)</sub>", "Localização", 0, true, false, "Posição", 0);
+        this.propertyEditorInput = new PropertyEditorInputList(this, "<b><i>r</b></i>", "Localização", 0, true, false, "Posição", 0);
         this.propertyEditorInput.addInput(new Vector2InputListRow("position", "m", initialPosition, true, false));
 
         this.updateSpritePosition();
@@ -135,7 +135,7 @@ export class ObjectSize extends PhysicsProperty<Vector2>{
     ) {
         super("size", true, object, initialSize, Vector2.zero, Vector2Calculator.instance);
 
-        this.propertyEditorInput = new PropertyEditorInputList(this, "tam<sub>(x, y)</sub>", "Dimensões", 1, true, false, "Tamanho", 1);
+        this.propertyEditorInput = new PropertyEditorInputList(this, "l, h", "Dimensões", 1, true, false, "Comprimento e altura (Tamanho)", 1);
         this.propertyEditorInput.addInput(new Vector2InputListRow("size", "m", initialSize, true, false));
 
         this.objectPosition = <ObjectPosition>this.object.getProperty("position");
@@ -186,7 +186,7 @@ export class ObjectArea extends PhysicsProperty<number>{
         const sizeVector2 = (objectSize) ? objectSize.initialValue : Vector2.zero;
         this.initialValue = sizeVector2.x * sizeVector2.y;
 
-        this.propertyEditorInput = new PropertyEditorInputList(this, "área", "Dimensões", 2, false, false, "Área", 2);
+        this.propertyEditorInput = new PropertyEditorInputList(this, "A", "Dimensões", 2, false, false, "Área", 2);
         this.propertyEditorInput.addInput(new NumberInputListRow("area", "m", this.initialValue, false, false));
     }
 }
@@ -198,7 +198,7 @@ export class ObjectVelocity extends PhysicsProperty<Vector2>{
     constructor(object: PhysicsObject) {
         super("velocity", true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance, 1);
 
-        this.propertyEditorInput = new PropertyEditorInputList(this, "vel", "Cinemática", 2, true, false, "Vetor velocidade", 3);
+        this.propertyEditorInput = new PropertyEditorInputList(this, "<b><i>v</b></i>", "Cinemática", 2, true, false, "Vetor velocidade", 3);
         this.propertyEditorInput.addInput(new Vector2InputListRow("velocity", "<sup>m</sup>&frasl;<sub>s</sub>", this.initialValue, true, false, "m/s"));
 
         this.objectPosition = <ObjectPosition>this.object.getProperty("position");
@@ -241,7 +241,7 @@ export class ObjectDisplacement extends PhysicsProperty<Vector2>{
     constructor(object: PhysicsObject) {
         super("displacement", false, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
 
-        this.propertyEditorInput = new PropertyEditorInputList(this, "des", "Cinemática", 5, false, false, "Vetor deslocamento", 4);
+        this.propertyEditorInput = new PropertyEditorInputList(this, "<b><i>Δs</i></b>", "Cinemática", 5, false, false, "Vetor deslocamento", 4);
         this.propertyEditorInput.addInput(new Vector2InputListRow("displacement", "m", this.initialValue, false, false, "m"));
 
         this.objectPosition = <ObjectPosition>this.object.getProperty("position")!;
@@ -268,7 +268,7 @@ export class ObjectAcceleration extends PhysicsProperty<Vector2>{
 
     constructor(object: PhysicsObject) {
         super("acceleration", true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance, 2);
-        this.propertyEditorInput = new PropertyEditorInputList(this, "acel", "Cinemática", 3, true, false, "Vetor aceleração", 5);
+        this.propertyEditorInput = new PropertyEditorInputList(this, "<b><i>a</i></b>", "Cinemática", 3, true, false, "Vetor aceleração", 5);
         this.propertyEditorInput.addInput(new Vector2InputListRow("acceleration", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue, true, false, "m/s²"));
 
         this.objectCentripitalAcceleration = <ObjectCentripetalAcceleration>this.object.getProperty("centripetalAcceleration");
@@ -295,7 +295,7 @@ export class ObjectCentripetalAcceleration extends PhysicsProperty<VectorModulus
     constructor(object: PhysicsObject) {
         super("centripetalAcceleration", true, object, { vector: Vector2.zero, modulus: 0 }, { vector: Vector2.zero, modulus: 0 }, VectorModulusCalculator.instance);
 
-        this.propertyEditorInput = new PropertyEditorInputList(this, "acel<sub>c</sub>", "Cinemática", 4, true, false, "Vetor aceleração centrípeta", 6);
+        this.propertyEditorInput = new PropertyEditorInputList(this, "<b><i>a<sub>c</sub></i></b>", "Cinemática", 4, true, false, "Vetor aceleração centrípeta", 6);
         this.propertyEditorInput.addInput(new NumberInputListRow("módulo", "m", 0, true, true));
         this.propertyEditorInput.addInput(new Vector2InputListRow("ponto", "m", Vector2.zero, true, true));
 
@@ -339,10 +339,17 @@ export class ObjectCentripetalAcceleration extends PhysicsProperty<VectorModulus
 export class ObjectMass extends PhysicsProperty<Number>{
     constructor(object: PhysicsObject){
         super("mass", true, object, 0, 0, NumberCalculator.instance);
-        this.propertyEditorInput = new PropertyEditorInputList(this, "massa", "Geral", 3,  true, false, "Massa");
+        this.propertyEditorInput = new PropertyEditorInputList(this, "m", "Geral", 3,  true, false, "Massa");
         this.propertyEditorInput.addInput(new NumberInputListRow("mass", "g", 0, true, false));
     }
 }
+
+// export class ObjectMomentum extends PhysicsProperty<Vector2>{
+//     constructor(object: PhysicsObject){
+//         super("momentum", false, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
+//         this.propertyEditorInput = new PropertyEditorInputList(this, "");
+//     }
+// }
 
 // export class NetForce extends PhysicsProperty<Vector2>{
 //     constructor(object: PhysicsObject){

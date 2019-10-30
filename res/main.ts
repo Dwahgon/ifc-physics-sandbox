@@ -2,7 +2,7 @@ console.log("Loading main");
 
 import Ambient from './ambient';
 import * as Buttons from "./document/buttons";
-import { ObjectSelectionController } from './document/documentUtilities';
+import { ObjectSelectionController, Alert } from './document/documentUtilities';
 import { CanvasRenderer } from './rendering/canvasRenderer';
 import { CartesianPlane } from './rendering/cartesianPlane';
 import Simulator from './simulator';
@@ -45,3 +45,7 @@ canvasRenderer.add(new DebugUI());
 
 canvasRenderer.start();
 
+//If it's firefox, show a alert message warning about svg image scaling
+//@ts-ignore
+if (typeof InstallTrigger !== 'undefined')
+    Alert.throwAlert("Atenção: o dimensionamento da imagens pode não funcionar corretamente", Alert.WARNING);

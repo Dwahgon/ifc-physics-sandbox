@@ -11,16 +11,6 @@
     --graph-panel-width: 30vw;
 }
 
-@font-face {
-    font-family: "CMU Serif";
-    src: url("../vendor/cmunbi.ttf");
-}
-
-@font-face {
-    font-family: "XITS Regular";
-    src: url("../vendor/XITS-Regular.otf");
-}
-
 
 /* Button Classes */
 
@@ -187,7 +177,8 @@
 body {
     margin: 0px;
     overflow: hidden;
-    font: 1.0vw "CMU Serif";
+    font: 1.2em "CMU Serif";
+    font-style: italic;
     color: #ffffff;
 }
 
@@ -430,7 +421,7 @@ main {
 
 #property-list>li {
     width: 100%;
-    font-size: calc(var(--property-li-height) / 3);
+    font-size: .75em;
     border: 1px solid #191919;
     margin-bottom: 3px;
     box-sizing: border-box;
@@ -503,7 +494,7 @@ main {
 }
 
 #property-list>li>label:first-of-type {
-    width: 20%;
+    width: 4em;
     border: solid #474747;
     border-width: 0px 1px 0px 0px;
 }

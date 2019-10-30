@@ -44,4 +44,8 @@ define(["require", "exports", "./ambient", "./document/buttons", "./document/doc
     //     cR.context.closePath();
     // } });
     exports.canvasRenderer.start();
+    //If it's firefox, show a alert message warning about svg image scaling
+    //@ts-ignore
+    if (typeof InstallTrigger !== 'undefined')
+        documentUtilities_1.Alert.throwAlert("Atenção: o dimensionamento da imagens pode não funcionar corretamente", documentUtilities_1.Alert.WARNING);
 });

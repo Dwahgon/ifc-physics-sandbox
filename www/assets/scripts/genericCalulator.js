@@ -2,7 +2,8 @@ define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class Vector2Calculator {
-        constructor() { }
+        constructor() {
+        }
         sum(a, b) {
             return a.add(b);
         }
@@ -16,10 +17,11 @@ define(["require", "exports"], function (require, exports) {
             return a.div(b);
         }
     }
-    Vector2Calculator.instance = new Vector2Calculator();
     exports.Vector2Calculator = Vector2Calculator;
+    Vector2Calculator.instance = new Vector2Calculator();
     class NumberCalculator {
-        constructor() { }
+        constructor() {
+        }
         sum(a, b) {
             return a + b;
         }
@@ -33,10 +35,11 @@ define(["require", "exports"], function (require, exports) {
             return a / b;
         }
     }
-    NumberCalculator.instance = new NumberCalculator();
     exports.NumberCalculator = NumberCalculator;
+    NumberCalculator.instance = new NumberCalculator();
     class VectorModulusCalculator {
-        constructor() { }
+        constructor() {
+        }
         sum(a, b) {
             return {
                 modulus: a.modulus + b.modulus,
@@ -62,6 +65,6 @@ define(["require", "exports"], function (require, exports) {
             };
         }
     }
-    VectorModulusCalculator.instance = new VectorModulusCalculator();
     exports.VectorModulusCalculator = VectorModulusCalculator;
+    VectorModulusCalculator.instance = new VectorModulusCalculator();
 });

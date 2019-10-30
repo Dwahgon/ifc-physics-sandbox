@@ -87,7 +87,7 @@ export class DrawingTools {
 
     worldImage(imgElement: HTMLImageElement, pos: Vector2, size: Vector2, angleRad: number = 0, resizeOnZoom?: boolean, clipPos?: Vector2, clipSize?: Vector2) {
         const drawSize = resizeOnZoom ? size.mult(this.cam.zoom) : size;
-        const drawPos = drawSize.div(2).inverse();
+        const drawPos = drawSize.div(-1).inverse();
 
         this.rotateAroundCenterpoint(this.worldToCanvas(pos), drawSize, angleRad);
 
@@ -96,7 +96,7 @@ export class DrawingTools {
             this.ctx.drawImage(imgElement, ...clipPos.toArray(), ...clipSize.toArray(), ...drawPos.toArray(), ...drawSize.toArray());
         else
             //@ts-ignore
-            this.ctx.drawImage(imgElement, ...drawPos.toArray(), ...drawSize.toArray());
+            this.ctx.drawImage(imgElement, drawPos.x, drawPos.y, drawSize.x, drawSize.y);
 
         this.ctx.resetTransform();
     }

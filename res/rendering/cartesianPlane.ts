@@ -13,8 +13,8 @@ export class CartesianPlane implements Renderable {
         axisLineThickness: 3,
         gridThickness: 1,
 
-        axisMarkerFont: "italic 30px CMU Serif",
-        axisNameFont: "italic 15px CMU Serif",
+        axisMarkerFont: "italic bold 30px CMU Serif",
+        axisNameFont: "italic bold 15px CMU Serif",
         showMeasurements: false
     };
     public static readonly BASIC_STYLE: CartesianPlaneStyle = {
@@ -26,9 +26,9 @@ export class CartesianPlane implements Renderable {
         axisLineThickness: 1,
         gridThickness: 1,
 
-        axisMarkerFont: "italic 30px CMU Serif",
-        axisNameFont: "italic 15px CMU Serif",
-        measurementFont: "italic 12px CMU Serif",
+        axisMarkerFont: "italic bold 30px CMU Serif",
+        axisNameFont: "italic bold 15px CMU Serif",
+        measurementFont: "italic bold 12px CMU Serif",
 
         showMeasurements: true
     };
