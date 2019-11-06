@@ -41,14 +41,13 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
             else {
                 const physicsObj = this.createPhysicsObject(json.kind, ambient);
                 json.properties.forEach(prop => {
-                    physicsObj.getProperty(prop.kind).initialValue = prop.iValue;
+                    physicsObj.getProperty(prop.kind).valueFromJSON(prop.iValue);
                 });
                 return physicsObj;
             }
         }
         draw(cR) {
             const ctx = cR.context;
-            const cam = cR.camera;
             ctx.save();
             this.sprite.draw(cR);
             ctx.restore();
@@ -143,6 +142,7 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
     class Solid extends PhysicsObject {
         constructor(ambient, properties) {
             super(types_1.PhysicsObjectType.Solid, new sprite_1.Sprite("./assets/images/solid.svg", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient, properties ? properties.name : undefined);
+            this.addProperty("mass", new PhysicsProperties.ObjectMass(this));
             this.addProperty("position", new PhysicsProperties.ObjectPosition(properties ? properties.position : vector2_1.default.zero, this));
             this.addProperty("centripetalAcceleration", new PhysicsProperties.ObjectCentripetalAcceleration(this));
             this.addProperty("acceleration", new PhysicsProperties.ObjectAcceleration(this));
@@ -150,6 +150,7 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
             this.addProperty("area", new PhysicsProperties.ObjectArea(this));
             this.addProperty("displacement", new PhysicsProperties.ObjectDisplacement(this));
             this.addProperty("velocity", new PhysicsProperties.ObjectVelocity(this));
+            this.addProperty("momentum", new PhysicsProperties.ObjectMomentum(this));
         }
     }
     Solid.DEFAULT_NAME = "Sólido";

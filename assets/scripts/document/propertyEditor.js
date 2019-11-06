@@ -279,6 +279,26 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
         }
     }
     exports.NumberInputListRow = NumberInputListRow;
+    class ButtonInputListRow {
+        constructor(name, createNameLabel, button) {
+            this.name = name;
+            this._active = true;
+        }
+        get active() {
+            return this._active;
+        }
+        set active(v) {
+            this._active = v;
+            this.button.disabled = !v || !this.changeable;
+        }
+        appendTo(target) {
+            target.appendChild(this.element);
+        }
+        onChanged() { return null; }
+        resetToLastValue() { }
+        updateValue(v) { }
+    }
+    exports.ButtonInputListRow = ButtonInputListRow;
     class ObjectLocatorPropertyEditorOption extends BasicPropertyEditorOption {
         constructor(target, category, layoutOrder, descriptionId) {
             super(category, layoutOrder, true, descriptionId);
@@ -298,13 +318,4 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
         }
     }
     exports.ObjectLocatorPropertyEditorOption = ObjectLocatorPropertyEditorOption;
-    class PropertyEditorWrapperOption extends BasicPropertyEditorOption {
-        constructor(category, layoutOrder, changeable, totalCalc, descriptionId) {
-            super(category, layoutOrder, changeable, descriptionId);
-            this.totalCalc = totalCalc;
-            this.propertyWrapper = document.createElement("div");
-            this.element.append(this.propertyWrapper);
-        }
-    }
-    exports.PropertyEditorWrapperOption = PropertyEditorWrapperOption;
 });
