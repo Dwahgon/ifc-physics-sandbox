@@ -284,7 +284,6 @@ export class InputListRow<T> implements PropertyEditorInputListRow<T> {
         }
         let match = this.input.value.match(this.regExp);
 
-
         if (!match)
             return reset();
 
@@ -361,6 +360,30 @@ export class NumberInputListRow extends InputListRow<number>{
     }
 }
 
+export class ButtonInputListRow implements PropertyEditorInputListRow<null>{
+    private _active: boolean;
+    private element: HTMLElement;
+    private button: HTMLButtonElement;
+
+    constructor(public name: string, createNameLabel: boolean, button: HTMLButtonElement){
+        this._active = true;
+    }
+    get active() {
+        return this._active;
+    }
+
+    set active(v: boolean){
+        this._active = v;
+        this.button.disabled = !v || !this.changeable;
+    }
+    appendTo(target: HTMLElement): void {
+        target.appendChild(this.element)
+    }
+    onChanged(): null {return null}
+    resetToLastValue(): void {}
+    updateValue(v: null): void {}
+}
+
 export class ObjectLocatorPropertyEditorOption extends BasicPropertyEditorOption {
     private locateButton: HTMLElement;
 
@@ -383,18 +406,5 @@ export class ObjectLocatorPropertyEditorOption extends BasicPropertyEditorOption
         nameLabel.innerHTML = target.name;
 
         this.element.append(nameLabel, this.locateButton);
-    }
-}
-
-export class PropertyEditorWrapperOption extends BasicPropertyEditorOption {
-    private propertyWrapper: HTMLDivElement;
-    
-    constructor(category: string, layoutOrder: number, changeable: boolean, public totalCalc?: Function, descriptionId?: number) {
-        super(category, layoutOrder, changeable, descriptionId);
-
-        this.propertyWrapper = document.createElement("div");
-
-        
-        this.element.append(this.propertyWrapper);
     }
 }

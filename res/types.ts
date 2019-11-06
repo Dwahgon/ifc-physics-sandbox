@@ -19,7 +19,7 @@ export enum PhysicsObjectType {
 
 /* Types */
 
-export type PhysicsPropertyName = "position" | "size" | "velocity" | "acceleration" | "displacement" | "area" | "name" | "centripetalAcceleration" | "mass";
+export type PhysicsPropertyName = "position" | "size" | "velocity" | "acceleration" | "displacement" | "area" | "name" | "centripetalAcceleration" | "mass" | "momentum" | "netForce";
 
 /* Interfaces */
 
@@ -141,7 +141,7 @@ export interface PropertyEditorInputListRow<T> {
     updateValue(v: T): void;
 }
 
-export interface VectorModulus {
-    vector: Vector2;
-    modulus: number;
+export interface TrackingVector {
+    target: Vector2;
+    magnitude: number;
 }

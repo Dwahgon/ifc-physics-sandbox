@@ -46,7 +46,7 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
         } else {
             const physicsObj = this.createPhysicsObject(json.kind, ambient);
             json.properties.forEach(prop => {
-                (<PhysicsProperty<any>>physicsObj.getProperty(prop.kind)!).initialValue = prop.iValue;
+                (<PhysicsProperty<any>>physicsObj.getProperty(prop.kind)!).valueFromJSON(prop.iValue);
             });
 
             return physicsObj;
@@ -55,7 +55,6 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
 
     draw(cR: CanvasRenderer): void {
         const ctx = cR.context;
-        const cam = cR.camera;
 
         ctx.save();
         this.sprite.draw(cR);
@@ -183,7 +182,8 @@ class Solid extends PhysicsObject {
             ),
             ambient,
             properties ? properties.name : undefined);
-
+        
+        this.addProperty("mass", new PhysicsProperties.ObjectMass(this));
         this.addProperty("position", new PhysicsProperties.ObjectPosition(properties ? properties.position : Vector2.zero, this));
         this.addProperty("centripetalAcceleration", new PhysicsProperties.ObjectCentripetalAcceleration(this));
         this.addProperty("acceleration", new PhysicsProperties.ObjectAcceleration(this));
@@ -191,5 +191,6 @@ class Solid extends PhysicsObject {
         this.addProperty("area", new PhysicsProperties.ObjectArea(this));
         this.addProperty("displacement", new PhysicsProperties.ObjectDisplacement(this));
         this.addProperty("velocity", new PhysicsProperties.ObjectVelocity(this));
+        this.addProperty("momentum", new PhysicsProperties.ObjectMomentum(this));
     }
 }

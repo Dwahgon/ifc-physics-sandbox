@@ -1,6 +1,10 @@
-define(["require", "exports"], function (require, exports) {
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+define(["require", "exports", "./vector2"], function (require, exports, vector2_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    vector2_1 = __importDefault(vector2_1);
     class Vector2Calculator {
         constructor() {
         }
@@ -15,6 +19,9 @@ define(["require", "exports"], function (require, exports) {
         }
         div(a, b) {
             return a.div(b);
+        }
+        fromJSON(json) {
+            return new vector2_1.default(json.x, json.y);
         }
     }
     exports.Vector2Calculator = Vector2Calculator;
@@ -34,37 +41,43 @@ define(["require", "exports"], function (require, exports) {
         div(a, b) {
             return a / b;
         }
+        fromJSON(json) {
+            return json;
+        }
     }
     exports.NumberCalculator = NumberCalculator;
     NumberCalculator.instance = new NumberCalculator();
-    class VectorModulusCalculator {
+    class TrackingVectorCalculator {
         constructor() {
         }
         sum(a, b) {
             return {
-                modulus: a.modulus + b.modulus,
-                vector: a.vector.add(b.vector)
+                magnitude: a.magnitude + b.magnitude,
+                target: a.target.add(b.target)
             };
         }
         sub(a, b) {
             return {
-                modulus: a.modulus - b.modulus,
-                vector: a.vector.sub(b.vector)
+                magnitude: a.magnitude - b.magnitude,
+                target: a.target.sub(b.target)
             };
         }
         mult(a, b) {
             return {
-                modulus: a.modulus * b.modulus,
-                vector: a.vector.mult(b.vector)
+                magnitude: a.magnitude * b.magnitude,
+                target: a.target.mult(b.target)
             };
         }
         div(a, b) {
             return {
-                modulus: a.modulus / b.modulus,
-                vector: a.vector.div(b.vector)
+                magnitude: a.magnitude / b.magnitude,
+                target: a.target.div(b.target)
             };
         }
+        fromJSON(json) {
+            return { magnitude: json.magnitude, target: Vector2Calculator.instance.fromJSON(json.target) };
+        }
     }
-    exports.VectorModulusCalculator = VectorModulusCalculator;
-    VectorModulusCalculator.instance = new VectorModulusCalculator();
+    exports.TrackingVectorCalculator = TrackingVectorCalculator;
+    TrackingVectorCalculator.instance = new TrackingVectorCalculator();
 });

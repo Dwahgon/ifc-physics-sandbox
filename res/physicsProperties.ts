@@ -2,16 +2,18 @@ console.log("Loading physicsProperties");
 
 import { PropertyEditorInputList, Vector2InputListRow, NumberInputListRow } from './document/propertyEditor';
 import { PhysicsPropertyJSON } from './fileController';
-import GenericCalculator, { NumberCalculator, Vector2Calculator, VectorModulusCalculator } from './genericCalulator';
+import GenericCalculator, { NumberCalculator, Vector2Calculator, TrackingVectorCalculator } from './genericCalulator';
 import { PhysicsObject } from './physicsObjects';
 import { CanvasRenderer } from './rendering/canvasRenderer';
-import { Simulatable, PhysicsPropertyName, VectorModulus, VectorStyle } from './types';
+import { Simulatable, PhysicsPropertyName, TrackingVector, VectorStyle } from './types';
 import Vector2 from './vector2';
 
 export default abstract class PhysicsProperty<T> implements Simulatable {
     public active: boolean;
     public propertyEditorInput: PropertyEditorInputList | null = null;
     public doDrawGizmos: boolean;
+
+    private iValueChangedListeners: Function[];
 
     protected static readonly DEFAULT_VECTOR_STYLE: VectorStyle = {
         style: "lightblue",
@@ -39,6 +41,7 @@ export default abstract class PhysicsProperty<T> implements Simulatable {
     ) {
         this.active = true;
         this.doDrawGizmos = false;
+        this.iValueChangedListeners = [];
     }
 
     get initialValue() {
@@ -48,6 +51,7 @@ export default abstract class PhysicsProperty<T> implements Simulatable {
     set initialValue(value: T) {
         this.iValue = value;
         this.updateInputValue(this.value);
+        this.fireIValueChanged();
     }
 
     get value() {
@@ -80,9 +84,22 @@ export default abstract class PhysicsProperty<T> implements Simulatable {
         });
     }
 
-    protected updateInputValue(value: T) {
+    valueFromJSON(json: any): void {
+        this.initialValue = this.genericCalculator.fromJSON(json);
+    } 
+
+    onIValueChanged(f: Function): Function{
+        this.iValueChangedListeners.push(f);
+        return f;
+    }
+
+    protected updateInputValue(value: T): void {
         if (this.propertyEditorInput)
             this.propertyEditorInput.getInput()!.updateValue(value);
+    }
+
+    private fireIValueChanged(): void{
+        this.iValueChangedListeners.forEach(f => f(this))
     }
 }
 
@@ -149,11 +166,6 @@ export class ObjectSize extends PhysicsProperty<Vector2>{
     set initialValue(value: Vector2) {
         super.initialValue = value;
         this.updateSpriteSize();
-
-        // Change area
-        const objArea = this.object.getProperty("area");
-        if (objArea)
-            (<PhysicsProperty<any>>objArea).initialValue = this.value.x * this.value.y;
     }
 
     get initialValue() {
@@ -182,9 +194,11 @@ export class ObjectArea extends PhysicsProperty<number>{
     constructor(object: PhysicsObject) {
         super("area", false, object, 0, 0, NumberCalculator.instance);
 
-        const objectSize = <PhysicsProperty<any>>object.getProperty("size");
-        const sizeVector2 = (objectSize) ? objectSize.initialValue : Vector2.zero;
-        this.initialValue = sizeVector2.x * sizeVector2.y;
+        const objectSize = <PhysicsProperty<Vector2>>object.getProperty("size");
+        const updateIValue = () => {this.initialValue = objectSize.value.x * objectSize.value.y};
+
+        updateIValue();
+        objectSize.onIValueChanged(updateIValue.bind(this));
 
         this.propertyEditorInput = new PropertyEditorInputList(this, "A", "Dimensões", 2, false, false, "Área", 2);
         this.propertyEditorInput.addInput(new NumberInputListRow("area", "m", this.initialValue, false, false));
@@ -277,7 +291,7 @@ export class ObjectAcceleration extends PhysicsProperty<Vector2>{
 
     simulate(){
         if(this.objectCentripitalAcceleration && this.objectPosition)
-            this.value = this.initialValue.add(this.objectCentripitalAcceleration.getAccelerationVectorOnPoint(this.objectPosition.value));
+            this.value = this.initialValue.add(this.objectCentripitalAcceleration.calculate(this.objectPosition.value));
     }
 
     drawGizmos(canvasRenderer: CanvasRenderer) {
@@ -289,11 +303,11 @@ export class ObjectAcceleration extends PhysicsProperty<Vector2>{
     }
 }
 
-export class ObjectCentripetalAcceleration extends PhysicsProperty<VectorModulus> {
+export class ObjectCentripetalAcceleration extends PhysicsProperty<TrackingVector> {
     private objectPosition: ObjectPosition | null;
 
     constructor(object: PhysicsObject) {
-        super("centripetalAcceleration", true, object, { vector: Vector2.zero, modulus: 0 }, { vector: Vector2.zero, modulus: 0 }, VectorModulusCalculator.instance);
+        super("centripetalAcceleration", true, object, { target: Vector2.zero, magnitude: 0 }, { target: Vector2.zero, magnitude: 0 }, TrackingVectorCalculator.instance);
 
         this.propertyEditorInput = new PropertyEditorInputList(this, "<b><i>a<sub>c</sub></i></b>", "Cinemática", 4, true, false, "Vetor aceleração centrípeta", 6);
         this.propertyEditorInput.addInput(new NumberInputListRow("módulo", "m", 0, true, true));
@@ -302,17 +316,17 @@ export class ObjectCentripetalAcceleration extends PhysicsProperty<VectorModulus
         this.objectPosition = <ObjectPosition>this.object.getProperty("position");
     }
 
-    getAccelerationVectorOnPoint(p: Vector2){
-        const VP = this.value.vector.sub(p);
+    calculate(p: Vector2){
+        const VP = this.value.target.sub(p);
         const dir = Vector2.equals(VP, Vector2.zero) ? Vector2.zero : VP.unit();
         
-        return dir.mult(this.value.modulus);
+        return dir.mult(this.value.magnitude);
     }
 
     onUserInput(formData: any[]): void {
         this.initialValue = {
-            modulus: formData[0],
-            vector: formData[1]
+            magnitude: formData[0],
+            target: formData[1]
         }
     }
 
@@ -323,15 +337,15 @@ export class ObjectCentripetalAcceleration extends PhysicsProperty<VectorModulus
     drawGizmos(canvasRenderer: CanvasRenderer) {
         if (this.doDrawGizmos && this.objectPosition) {
             const from = this.objectPosition.value;
-            const to = from.add(this.getAccelerationVectorOnPoint(from));
+            const to = from.add(this.calculate(from));
             canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
         }
     }
 
-    protected updateInputValue(value: VectorModulus) {
+    protected updateInputValue(value: TrackingVector) {
         if (this.propertyEditorInput) {
-            (<NumberInputListRow>this.propertyEditorInput.getInput("módulo")!).updateValue(value.modulus);
-            (<Vector2InputListRow>this.propertyEditorInput.getInput("ponto")!).updateValue(value.vector);
+            (<NumberInputListRow>this.propertyEditorInput.getInput("módulo")!).updateValue(value.magnitude);
+            (<Vector2InputListRow>this.propertyEditorInput.getInput("ponto")!).updateValue(value.target);
         }
     }
 }
@@ -339,22 +353,58 @@ export class ObjectCentripetalAcceleration extends PhysicsProperty<VectorModulus
 export class ObjectMass extends PhysicsProperty<Number>{
     constructor(object: PhysicsObject){
         super("mass", true, object, 0, 0, NumberCalculator.instance);
-        this.propertyEditorInput = new PropertyEditorInputList(this, "m", "Geral", 3,  true, false, "Massa");
+        this.propertyEditorInput = new PropertyEditorInputList(this, "m", "Geral", 3,  true, false, "Massa", 7);
         this.propertyEditorInput.addInput(new NumberInputListRow("mass", "g", 0, true, false));
     }
 }
 
-// export class ObjectMomentum extends PhysicsProperty<Vector2>{
-//     constructor(object: PhysicsObject){
-//         super("momentum", false, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
-//         this.propertyEditorInput = new PropertyEditorInputList(this, "");
-//     }
-// }
+export class ObjectMomentum extends PhysicsProperty<Vector2>{
+    private mass: PhysicsProperty<number>;
+    private velocity: PhysicsProperty<Vector2>;
+    private position: ObjectPosition | null;
 
-// export class NetForce extends PhysicsProperty<Vector2>{
-//     constructor(object: PhysicsObject){
-//         super("netForce", true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
-//         this.propertyEditorInput = new PropertyEditorInputList(this, "força<sub>t</sub>", "Cinemática", 4, true, false, "Vetor aceleração centrípeta", 6);
-//         this.propertyEditorInput.addInput(new NumberInputListRow("módulo", "m", 0, true, true));
-//     }
-// }
+    constructor(object: PhysicsObject){
+        super("momentum", false, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
+        this.mass = this.object.getProperty("mass")!;
+        this.velocity = this.object.getProperty("velocity")!;
+        this.position = <ObjectPosition>this.object.getProperty("position");
+        
+        const updateValue = () => this.initialValue = this.calculate();
+        
+        this.propertyEditorInput = new PropertyEditorInputList(this, "<b>p<b>", "Dinâmica", 5, false, false, "Vetor momentum", 8);
+        this.propertyEditorInput.addInput(new Vector2InputListRow("momentum", "N·s", this.initialValue, false, false, "N*s"));
+        
+        this.initialValue = updateValue();
+        this.mass.onIValueChanged(updateValue.bind(this));
+        this.velocity.onIValueChanged(updateValue.bind(this));
+    }
+
+    simulate(){
+        this.value = this.calculate();
+    }
+
+    calculate(): Vector2{
+        return this.velocity.value.mult(this.mass.value / 1000);
+    }
+
+    drawGizmos(canvasRenderer: CanvasRenderer) {
+        if (this.doDrawGizmos && this.position) {
+            const from = this.position.value;
+            const to = from.add(this.value);
+            canvasRenderer.drawingTools.drawVector(from, to, PhysicsProperty.DEFAULT_VECTOR_STYLE);
+        }
+    }
+}
+
+export class ObjectNetForce extends PhysicsProperty<Vector2>{
+    private forceList: Map<string, Vector2>;
+
+    constructor(object: PhysicsObject){
+        super("netForce", true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
+
+        this.forceList = new Map<string, Vector2>();
+        
+        this.propertyEditorInput = new PropertyEditorInputList(this, "F<sub>t</sub>", "Dinâmica", 6, false, false, "Vetor força total", 9);
+        this.propertyEditorInput.addInput(new Vector2InputListRow("force", "N", this.initialValue, false, false, "N"));
+    }
+}

@@ -58,7 +58,7 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
         }
         worldImage(imgElement, pos, size, angleRad = 0, resizeOnZoom, clipPos, clipSize) {
             const drawSize = resizeOnZoom ? size.mult(this.cam.zoom) : size;
-            const drawPos = drawSize.div(-1).inverse();
+            const drawPos = drawSize.div(-2);
             this.rotateAroundCenterpoint(this.worldToCanvas(pos), drawSize, angleRad);
             if (clipSize)
                 //@ts-ignore

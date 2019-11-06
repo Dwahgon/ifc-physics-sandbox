@@ -87,7 +87,7 @@ export class DrawingTools {
 
     worldImage(imgElement: HTMLImageElement, pos: Vector2, size: Vector2, angleRad: number = 0, resizeOnZoom?: boolean, clipPos?: Vector2, clipSize?: Vector2) {
         const drawSize = resizeOnZoom ? size.mult(this.cam.zoom) : size;
-        const drawPos = drawSize.div(-1).inverse();
+        const drawPos = drawSize.div(-2);
 
         this.rotateAroundCenterpoint(this.worldToCanvas(pos), drawSize, angleRad);
 

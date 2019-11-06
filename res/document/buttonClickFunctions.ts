@@ -63,8 +63,9 @@ Buttons.getButtonById("load-file-button")!.onClick = function () {
 
                 try {
                     Main.setAmbient(Ambient.fromJSON(result));
-                } catch{
-                    Alert.throwAlert("Não foi possível carregar este arquivo!", Alert.ERROR);
+                } catch(error){
+                    Alert.throwAlert("Não foi possível carregar este arquivo! Erro no console", Alert.ERROR);
+                    console.error(error);
                 }
             };
         }

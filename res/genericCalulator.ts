@@ -1,11 +1,12 @@
 import Vector2 from "./vector2";
-import { VectorModulus } from "./types";
+import { TrackingVector } from "./types";
 
 export default interface GenericCalculator<T> {
     sum(a: T, b: T): T;
     sub(a: T, b: T): T;
     mult(a: T, b: T): T;
     div(a: T, b: T): T;
+    fromJSON(json: any): T;
 }
 
 export class Vector2Calculator implements GenericCalculator<Vector2>{
@@ -24,6 +25,9 @@ export class Vector2Calculator implements GenericCalculator<Vector2>{
     }
     div(a: Vector2, b: Vector2): Vector2 {
         return a.div(b);
+    }
+    fromJSON(json: any): Vector2{
+        return new Vector2(json.x, json.y);
     }
 }
 
@@ -44,35 +48,41 @@ export class NumberCalculator implements GenericCalculator<number>{
     div(a: number, b: number): number {
         return a / b;
     }
+    fromJSON(json: any): number{
+        return json;
+    }
 }
 
-export class VectorModulusCalculator implements GenericCalculator<VectorModulus> {
-    public static readonly instance: GenericCalculator<any> = new VectorModulusCalculator();
+export class TrackingVectorCalculator implements GenericCalculator<TrackingVector> {
+    public static readonly instance: GenericCalculator<any> = new TrackingVectorCalculator();
 
     private constructor() { }
 
-    sum(a: VectorModulus, b: VectorModulus): VectorModulus {
+    sum(a: TrackingVector, b: TrackingVector): TrackingVector {
         return {
-            modulus: a.modulus + b.modulus,
-            vector: a.vector.add(b.vector)
+            magnitude: a.magnitude + b.magnitude,
+            target: a.target.add(b.target)
         };
     }
-    sub(a: VectorModulus, b: VectorModulus): VectorModulus {
+    sub(a: TrackingVector, b: TrackingVector): TrackingVector {
         return {
-            modulus: a.modulus - b.modulus,
-            vector: a.vector.sub(b.vector)
+            magnitude: a.magnitude - b.magnitude,
+            target: a.target.sub(b.target)
         };
     }
-    mult(a: VectorModulus, b: VectorModulus): VectorModulus {
+    mult(a: TrackingVector, b: TrackingVector): TrackingVector {
         return {
-            modulus: a.modulus * b.modulus,
-            vector: a.vector.mult(b.vector)
+            magnitude: a.magnitude * b.magnitude,
+            target: a.target.mult(b.target)
         };
     }
-    div(a: VectorModulus, b: VectorModulus): VectorModulus {
+    div(a: TrackingVector, b: TrackingVector): TrackingVector {
         return {
-            modulus: a.modulus / b.modulus,
-            vector: a.vector.div(b.vector)
+            magnitude: a.magnitude / b.magnitude,
+            target: a.target.div(b.target)
         };
+    }
+    fromJSON(json: any): TrackingVector{
+        return {magnitude: json.magnitude, target: Vector2Calculator.instance.fromJSON(json.target)};
     }
 }

@@ -61,8 +61,9 @@ define(["require", "exports", "../ambient", "../fileController", "../main", "../
                     try {
                         Main.setAmbient(ambient_1.default.fromJSON(result));
                     }
-                    catch (_a) {
-                        documentUtilities_1.Alert.throwAlert("Não foi possível carregar este arquivo!", documentUtilities_1.Alert.ERROR);
+                    catch (error) {
+                        documentUtilities_1.Alert.throwAlert("Não foi possível carregar este arquivo! Erro no console", documentUtilities_1.Alert.ERROR);
+                        console.error(error);
                     }
                 };
             }
