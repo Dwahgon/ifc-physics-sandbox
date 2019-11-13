@@ -151,6 +151,7 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
             this.addProperty("displacement", new PhysicsProperties.ObjectDisplacement(this));
             this.addProperty("velocity", new PhysicsProperties.ObjectVelocity(this));
             this.addProperty("momentum", new PhysicsProperties.ObjectMomentum(this));
+            this.addProperty("netForce", new PhysicsProperties.ObjectNetForce(this));
         }
     }
     Solid.DEFAULT_NAME = "Sólido";

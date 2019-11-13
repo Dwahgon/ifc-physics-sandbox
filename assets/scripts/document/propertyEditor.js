@@ -164,7 +164,12 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
                     this.target.onUserToggle(this.toggled);
             }
             else {
-                const map = this.inputList.map(input => input.onChanged());
+                const map = new Map();
+                this.inputList.forEach(i => {
+                    const result = i.onChanged();
+                    if (result)
+                        map.set(i.name, result);
+                });
                 this.target.onUserInput(map);
             }
         }
@@ -280,16 +285,24 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
     }
     exports.NumberInputListRow = NumberInputListRow;
     class ButtonInputListRow {
-        constructor(name, createNameLabel, button) {
+        constructor(name, button, createNameLabel = true) {
             this.name = name;
+            this.button = button;
             this._active = true;
+            this.element = document.createElement("div");
+            if (createNameLabel) {
+                const nameLabel = document.createElement("label");
+                nameLabel.innerHTML = name;
+                this.element.appendChild(nameLabel);
+            }
+            this.element.appendChild(button.element);
         }
         get active() {
             return this._active;
         }
         set active(v) {
             this._active = v;
-            this.button.disabled = !v || !this.changeable;
+            this.button.enabled = v;
         }
         appendTo(target) {
             target.appendChild(this.element);

@@ -2,6 +2,7 @@ define(["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     console.log("Loaded buttons");
+    const buttons = [];
     /*
         Class Definitions
     */
@@ -25,6 +26,7 @@ define(["require", "exports"], function (require, exports) {
             this.buttonName = element.id;
             element.setAttribute("button-name", this.buttonName);
             element.querySelectorAll("*").forEach((element) => element.setAttribute("button-name", this.buttonName));
+            buttons.push(this);
         }
         get enabled() {
             return this._enabled;
@@ -37,6 +39,7 @@ define(["require", "exports"], function (require, exports) {
         }
         static createButtonElement(buttonConfig) {
             const button = document.createElement("button");
+            buttonConfig.buttonName = buttonConfig.buttonName.replace(" ", "-").toLowerCase();
             button.setAttribute("id", buttonConfig.buttonName);
             button.setAttribute("class", `${buttonConfig.buttonColor} ${buttonConfig.enabled ? "active-button" : "inactive-button"}`);
             button.setAttribute("button-name", buttonConfig.buttonName);
@@ -87,8 +90,7 @@ define(["require", "exports"], function (require, exports) {
     /*
         Query Buttons
     */
-    const buttons = [];
-    document.querySelectorAll("button").forEach(element => buttons.push(new Button(element)));
+    document.querySelectorAll("button").forEach(element => new Button(element));
     /*
         Export functions
     */
