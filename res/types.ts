@@ -128,7 +128,7 @@ export interface PropertyEditorOption {
 
 export interface PropertyEditorFormTarget {
     doDrawGizmos: boolean;
-    onUserInput(formData: any[]): void;
+    onUserInput(formData: Map<string, any>): void;
     onUserToggle?(v: boolean): void;
 }
 

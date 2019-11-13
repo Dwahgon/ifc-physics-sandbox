@@ -67,7 +67,6 @@ export class PropertyEditor {
         const tgt = <HTMLElement>ev.target;
         if (!tgt) return;
 
-
         for (const row of this.rows) {
             if (row.element.contains(tgt))
                 return row;
@@ -215,7 +214,13 @@ export class PropertyEditorInputList extends BasicPropertyEditorOption {
             if(this.target.onUserToggle)
                 this.target.onUserToggle(this.toggled);
         }else{
-            const map = this.inputList.map(input => input.onChanged());
+            const map = new Map<string, any>();
+
+            this.inputList.forEach(i => {
+                const result = i.onChanged();
+                if(result)
+                    map.set(i.name, result);
+            });
 
             this.target.onUserInput(map);
         }
@@ -363,10 +368,18 @@ export class NumberInputListRow extends InputListRow<number>{
 export class ButtonInputListRow implements PropertyEditorInputListRow<null>{
     private _active: boolean;
     private element: HTMLElement;
-    private button: HTMLButtonElement;
 
-    constructor(public name: string, createNameLabel: boolean, button: HTMLButtonElement){
+    constructor(public name: string, private button: Button, createNameLabel: boolean = true){
         this._active = true;
+        this.element = document.createElement("div");
+
+        if(createNameLabel){
+            const nameLabel = document.createElement("label");
+            nameLabel.innerHTML = name;
+            this.element.appendChild(nameLabel);
+        }
+
+        this.element.appendChild(button.element);
     }
     get active() {
         return this._active;
@@ -374,7 +387,7 @@ export class ButtonInputListRow implements PropertyEditorInputListRow<null>{
 
     set active(v: boolean){
         this._active = v;
-        this.button.disabled = !v || !this.changeable;
+        this.button.enabled = v;
     }
     appendTo(target: HTMLElement): void {
         target.appendChild(this.element)

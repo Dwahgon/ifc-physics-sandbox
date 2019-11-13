@@ -2,6 +2,8 @@ console.log("Loaded buttons");
 
 import { ButtonConfig } from "../types";
 
+const buttons: Button[] = [];
+
 /*
     Class Definitions
 */
@@ -34,10 +36,11 @@ export class Button {
         }
         this.altImgSrc = element.getAttribute("alt-img");
 
-
         this.buttonName = element.id;
         element.setAttribute("button-name", this.buttonName);
         element.querySelectorAll("*").forEach((element) => element.setAttribute("button-name", this.buttonName));
+
+        buttons.push(this);
     }
 
     get enabled() {
@@ -55,6 +58,9 @@ export class Button {
 
     static createButtonElement(buttonConfig: ButtonConfig): HTMLButtonElement {
         const button = document.createElement("button");
+
+        buttonConfig.buttonName = buttonConfig.buttonName.replace(" ", "-").toLowerCase();
+
         button.setAttribute("id", buttonConfig.buttonName);
         button.setAttribute("class", `${buttonConfig.buttonColor} ${buttonConfig.enabled ? "active-button" : "inactive-button"}`);
         button.setAttribute("button-name", buttonConfig.buttonName);
@@ -121,8 +127,7 @@ export class Button {
     Query Buttons
 */
 
-const buttons: Button[] = [];
-document.querySelectorAll("button").forEach(element => buttons.push(new Button(element)));
+document.querySelectorAll("button").forEach(element => new Button(element));
 
 /*
     Export functions

@@ -1,12 +1,13 @@
 console.log("Loading physicsProperties");
 
-import { PropertyEditorInputList, Vector2InputListRow, NumberInputListRow } from './document/propertyEditor';
+import { PropertyEditorInputList, Vector2InputListRow, NumberInputListRow, ButtonInputListRow } from './document/propertyEditor';
 import { PhysicsPropertyJSON } from './fileController';
 import GenericCalculator, { NumberCalculator, Vector2Calculator, TrackingVectorCalculator } from './genericCalulator';
 import { PhysicsObject } from './physicsObjects';
 import { CanvasRenderer } from './rendering/canvasRenderer';
-import { Simulatable, PhysicsPropertyName, TrackingVector, VectorStyle } from './types';
+import { Simulatable, PhysicsPropertyName, TrackingVector, VectorStyle, ButtonColor } from './types';
 import Vector2 from './vector2';
+import { Button, pushButtonElement } from './document/buttons';
 
 export default abstract class PhysicsProperty<T> implements Simulatable {
     public active: boolean;
@@ -27,6 +28,20 @@ export default abstract class PhysicsProperty<T> implements Simulatable {
         rectDashOffset: [5, 5],
         rectStyle: "grey",
         rectThickness: 2
+    }
+
+    protected static readonly SUB_VECTOR_STYLE: VectorStyle = {
+        style: "orange",
+        strokeStyle: "black",
+        strokeWidth: 1,
+        
+        lineWidth: 2,
+        headAngle: Math.PI / 6,
+        headLength: 10,
+        
+        rectDashOffset: [5, 5],
+        rectStyle: "lightgrey",
+        rectThickness: 0
     }
 
     constructor(
@@ -63,8 +78,8 @@ export default abstract class PhysicsProperty<T> implements Simulatable {
         this.updateInputValue(this.value);
     }
 
-    onUserInput(formData: any[]) {
-        this.initialValue = formData[0];
+    onUserInput(formData: Map<string, any>) {
+        this.initialValue = formData.values().next().value;
     }
 
     drawGizmos(canvasRenderer: CanvasRenderer) {
@@ -323,10 +338,10 @@ export class ObjectCentripetalAcceleration extends PhysicsProperty<TrackingVecto
         return dir.mult(this.value.magnitude);
     }
 
-    onUserInput(formData: any[]): void {
+    onUserInput(formData: Map<string, any>): void {
         this.initialValue = {
-            magnitude: formData[0],
-            target: formData[1]
+            magnitude: formData.get("módulo"),
+            target: formData.get("ponto")
         }
     }
 
@@ -398,13 +413,71 @@ export class ObjectMomentum extends PhysicsProperty<Vector2>{
 
 export class ObjectNetForce extends PhysicsProperty<Vector2>{
     private forceList: Map<string, Vector2>;
+    private position: PhysicsProperty<Vector2> | null;
 
     constructor(object: PhysicsObject){
         super("netForce", true, object, Vector2.zero, Vector2.zero, Vector2Calculator.instance);
 
         this.forceList = new Map<string, Vector2>();
-        
-        this.propertyEditorInput = new PropertyEditorInputList(this, "F<sub>t</sub>", "Dinâmica", 6, false, false, "Vetor força total", 9);
-        this.propertyEditorInput.addInput(new Vector2InputListRow("force", "N", this.initialValue, false, false, "N"));
+        this.position = <PhysicsProperty<Vector2>>object.getProperty("position");
+
+
+        const button = new Button(Button.createButtonElement({
+            buttonName: `add-force-${object.name}`,
+            buttonColor: ButtonColor.InvisibleBackground,
+            enabled: true,
+            imgSrc: "./assets/images/addicon.svg"
+        }));
+        button.onClick = () => this.addForce(`F${this.forceList.size}`, Vector2.zero);
+
+        this.propertyEditorInput = new PropertyEditorInputList(this, "F", "Dinâmica", 6, true, false, "Vetor força total", 9);
+        this.propertyEditorInput!.addInput(new ButtonInputListRow("Criar Força", button))
+        this.propertyEditorInput!.addInput(new Vector2InputListRow("F<sub>t</sub>", "N", this.calculate(), false, true, "N"));
+    }
+
+    drawGizmos(canvasRenderer: CanvasRenderer){
+        if(this.position && this.doDrawGizmos){
+            const from = this.position.value;
+            const totalTo = from.add(this.calculate());
+
+            canvasRenderer.drawingTools.drawVector(from, totalTo, PhysicsProperty.DEFAULT_VECTOR_STYLE);
+
+            if(this.forceList.size > 1)
+
+            this.forceList.forEach(v => {
+                canvasRenderer.drawingTools.drawVector(from, from.add(v), PhysicsProperty.SUB_VECTOR_STYLE);
+            })
+        }
+    }
+
+    protected updateInputValue(value: Vector2){
+        this.propertyEditorInput!.getInput("F<sub>t</sub>")!.updateValue(value);
+
+        this.forceList.forEach((f, k) => this.propertyEditorInput!.getInput(k)!.updateValue(f));
+    }
+
+    calculate(): Vector2{
+        let total = Vector2.zero;
+        this.forceList.forEach(v => total = total.add(v));
+        return total;
+    }
+
+    addForce(name: string, value: Vector2){
+        this.forceList.set(name, value);
+
+        this.propertyEditorInput!.addInput(new Vector2InputListRow(name, "N", value, true, true, "N"));
+    }
+
+    getForce(name: string){
+        return this.forceList.get(name);
+    }
+
+    removeForce(name: string){
+        this.forceList.delete(name);
+    }
+
+    onUserInput(formData: Map<string, any>): void {
+        Array.from(this.forceList.keys()).forEach(k => this.forceList.set(k, formData.get(k)));
+        this.initialValue = this.calculate();
     }
 }

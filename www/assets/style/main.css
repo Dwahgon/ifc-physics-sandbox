@@ -476,6 +476,12 @@ main {
     text-align: right;
 }
 
+#property-list>li>div>div>button {
+    width: var(--property-li-height); 
+    padding: 5px;
+    margin-left: auto;
+}
+
 #property-list>li.active-row input,
 #property-list>li.active-row label {
     color: #ffffff;

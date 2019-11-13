@@ -192,5 +192,6 @@ class Solid extends PhysicsObject {
         this.addProperty("displacement", new PhysicsProperties.ObjectDisplacement(this));
         this.addProperty("velocity", new PhysicsProperties.ObjectVelocity(this));
         this.addProperty("momentum", new PhysicsProperties.ObjectMomentum(this));
+        this.addProperty("netForce", new PhysicsProperties.ObjectNetForce(this));
     }
 }
