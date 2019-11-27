@@ -1,7 +1,7 @@
 console.log("Loaded buttonClickFunctions");
 
 import Ambient from "../ambient";
-import { downloadJSON } from "../fileController";
+import { downloadJSON, loadJSON } from "../fileController";
 import * as Main from "../main";
 import { PhysicsObject } from "../physicsObjects";
 import Vector2 from "../vector2";
@@ -49,29 +49,16 @@ Buttons.getButtonById("save-file-button")!.onClick = function () {
 }
 
 Buttons.getButtonById("load-file-button")!.onClick = function () {
-    const input = document.createElement("input");
-    input.type = "file";
-
-    input.addEventListener("change", () => {
-        if (input.files) {
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.readAsText(file, "utf-8");
-
-            reader.onload = ev => {
-                const result = <string>(<FileReader>ev.target!).result;
-
-                try {
-                    Main.setAmbient(Ambient.fromJSON(result));
-                } catch(error){
-                    Alert.throwAlert("Não foi possível carregar este arquivo! Erro no console", Alert.ERROR);
-                    console.error(error);
-                }
-            };
+    loadJSON((result) => {
+        try {
+            Main.setAmbient(Ambient.fromJSON(result));
+        } catch(error){
+            Alert.throwAlert("Não foi possível carregar este arquivo! Erro no console", Alert.ERROR);
+            console.error(error);
         }
-    })
-
-    input.click();
+    
+        Alert.throwAlert("Carregado arquivo com sucesso!", Alert.SUCCESS);
+    });  
 };
 
 Buttons.getButtonById("center-camera-button")!.onClick = Main.canvasRenderer.camera.focusOrigin.bind(Main.canvasRenderer.camera);

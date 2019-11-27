@@ -25,4 +25,5 @@
     </platform>
     <engine name="android" spec="^7.1.4" />
     <engine name="windows" spec="^6.0.1" />
+    <preference name="Orientation" value="landscape" />
 </widget>

@@ -1,5 +1,10 @@
 console.log("Loading vector2");
 
+interface Vector2JSON{
+    x: number;
+    y: number;
+}
+
 export default class Vector2 {
     constructor(public x: number, public y: number) { }
 
@@ -57,6 +62,10 @@ export default class Vector2 {
 
     toString() {
         return "(" + this.x + ", " + this.y + ")";
+    }
+
+    static fromJSON(json: Vector2JSON){
+        return new Vector2(json.x, json.y)
     }
 
     static get zero(): Vector2 {

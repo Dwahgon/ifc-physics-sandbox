@@ -164,6 +164,11 @@
     color: rgba(0, 0, 0, 0.9);
 }
 
+.alert-success {
+    background-color: #55efc4;
+    border: 1px solid #00b894;
+    color: rgba(0, 0, 0, 0.9);
+}
 
 /*
     Default element values
@@ -550,6 +555,11 @@ main {
 #property-description-modal article h1 {
     text-align: center;
 }
+
+#property-description-modal article a {
+    color: lightblue;
+}
+
 
 
 /* Graph configuration */

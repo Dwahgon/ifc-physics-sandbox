@@ -23,7 +23,7 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
         }
         static show(propertyKind) {
             this.setElementVisible(true);
-            const description = propertyDescriptions_1.default.get(propertyKind);
+            const description = propertyDescriptions_1.default[propertyKind];
             if (description)
                 this.modal.element.querySelector("article").innerHTML = description;
             else
@@ -144,6 +144,7 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
     exports.Alert = Alert;
     Alert.WARNING = "alert-warning";
     Alert.ERROR = "alert-error";
+    Alert.SUCCESS = "alert-success";
     //Initialize static classes
     GraphPanel.initialize(documentElements_1.default.get("graph-panel"), Buttons.getButtonById("close-graph-panel-button"));
     Alert.initialize(documentElements_1.default.get("alert"));

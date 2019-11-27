@@ -18,4 +18,21 @@ define(["require", "exports"], function (require, exports) {
             }, 0);
         }
     };
+    exports.loadJSON = function (onload) {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.addEventListener("change", () => {
+            if (input.files) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.readAsText(file, "utf-8");
+                reader.onload = ev => {
+                    const result = ev.target.result;
+                    onload(result);
+                    input.remove();
+                };
+            }
+        });
+        input.click();
+    };
 });

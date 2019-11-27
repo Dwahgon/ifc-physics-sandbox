@@ -236,8 +236,8 @@ export class PropertyEditorInputList extends BasicPropertyEditorOption {
 }
 
 export class InputListRow<T> implements PropertyEditorInputListRow<T> {
+    public readonly element: HTMLElement;
     private _active: boolean;
-    private element: HTMLElement;
     protected input: HTMLInputElement;
     private lastValue: T;
 
