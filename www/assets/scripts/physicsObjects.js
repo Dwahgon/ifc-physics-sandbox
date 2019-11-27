@@ -52,7 +52,10 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
             this.sprite.draw(cR);
             ctx.restore();
             ctx.save();
-            this.properties.forEach(property => property.drawGizmos(cR));
+            this.properties.forEach(property => {
+                if (property.doDrawGizmos)
+                    property.drawGizmos(cR);
+            });
             ctx.restore();
             if (documentUtilities_1.ObjectSelectionController.selectedObject == this) {
                 const pos = this.getProperty("position").value;
@@ -137,16 +140,16 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
             });
         }
     }
-    exports.PhysicsObject = PhysicsObject;
     PhysicsObject.DEFAULT_NAME = "";
+    exports.PhysicsObject = PhysicsObject;
     class Solid extends PhysicsObject {
         constructor(ambient, properties) {
             super(types_1.PhysicsObjectType.Solid, new sprite_1.Sprite("./assets/images/solid.svg", new vector2_1.default(0, 0), new vector2_1.default(512, 512), vector2_1.default.zero, vector2_1.default.zero), ambient, properties ? properties.name : undefined);
             this.addProperty("mass", new PhysicsProperties.ObjectMass(this));
-            this.addProperty("position", new PhysicsProperties.ObjectPosition(properties ? properties.position : vector2_1.default.zero, this));
+            this.addProperty("position", new PhysicsProperties.ObjectPosition(this, properties ? properties.position : vector2_1.default.zero));
             this.addProperty("centripetalAcceleration", new PhysicsProperties.ObjectCentripetalAcceleration(this));
             this.addProperty("acceleration", new PhysicsProperties.ObjectAcceleration(this));
-            this.addProperty("size", new PhysicsProperties.ObjectSize(properties ? properties.size : vector2_1.default.zero, this));
+            this.addProperty("size", new PhysicsProperties.ObjectSize(this, properties ? properties.size : vector2_1.default.zero));
             this.addProperty("area", new PhysicsProperties.ObjectArea(this));
             this.addProperty("displacement", new PhysicsProperties.ObjectDisplacement(this));
             this.addProperty("velocity", new PhysicsProperties.ObjectVelocity(this));

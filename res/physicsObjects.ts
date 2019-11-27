@@ -61,7 +61,10 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
         ctx.restore();
 
         ctx.save();
-        this.properties.forEach(property => property.drawGizmos(cR));
+        this.properties.forEach(property => {
+            if(property.doDrawGizmos)
+                property.drawGizmos(cR);
+        });
         ctx.restore();
 
         if(ObjectSelectionController.selectedObject == this){
@@ -184,10 +187,10 @@ class Solid extends PhysicsObject {
             properties ? properties.name : undefined);
         
         this.addProperty("mass", new PhysicsProperties.ObjectMass(this));
-        this.addProperty("position", new PhysicsProperties.ObjectPosition(properties ? properties.position : Vector2.zero, this));
+        this.addProperty("position", new PhysicsProperties.ObjectPosition(this, properties ? properties.position : Vector2.zero));
         this.addProperty("centripetalAcceleration", new PhysicsProperties.ObjectCentripetalAcceleration(this));
         this.addProperty("acceleration", new PhysicsProperties.ObjectAcceleration(this));
-        this.addProperty("size", new PhysicsProperties.ObjectSize(properties ? properties.size : Vector2.zero, this));
+        this.addProperty("size", new PhysicsProperties.ObjectSize(this, properties ? properties.size : Vector2.zero));
         this.addProperty("area", new PhysicsProperties.ObjectArea(this));
         this.addProperty("displacement", new PhysicsProperties.ObjectDisplacement(this));
         this.addProperty("velocity", new PhysicsProperties.ObjectVelocity(this));

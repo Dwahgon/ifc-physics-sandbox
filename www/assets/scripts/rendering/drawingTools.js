@@ -90,6 +90,8 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
         drawArrow(from, to, arrowStyle = DrawingTools.DEFAULT_ARROW_STYLE, isWorldPos = true) {
             from = isWorldPos ? this.worldToCanvas(from) : from;
             to = isWorldPos ? this.worldToCanvas(to) : to;
+            if (vector2_1.default.equals(from, to))
+                return;
             const dx = to.x - from.x;
             const dy = to.y - from.y;
             const angle = Math.atan2(dy, dx);
@@ -116,7 +118,24 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             this.ctx.closePath();
         }
         drawVector(from, to, vectorStyle = DrawingTools.DEFAULT_VECTOR_STYLE, isWorldPos = true) {
+            // Draw Vector Arrow //
             this.drawArrow(from, to, vectorStyle, isWorldPos);
+            // Draw From Dot //
+            this.ctx.beginPath();
+            if (isWorldPos)
+                this.worldArc(from, vectorStyle.circleRadius, 0, 2 * Math.PI, vectorStyle.resizeCircleOnZoom);
+            else
+                //@ts-ignore 
+                this.ctx.arc(...from.toArray(), vectorStyle.circleRadius, 0, 2 * Math.PI);
+            this.ctx.fillStyle = vectorStyle.style;
+            if (vectorStyle.strokeStyle)
+                this.ctx.strokeStyle = vectorStyle.strokeStyle;
+            if (vectorStyle.strokeWidth)
+                this.ctx.lineWidth = vectorStyle.strokeWidth;
+            this.ctx.fill();
+            this.ctx.stroke();
+            this.ctx.closePath();
+            // Draw Vector Rect //
             this.ctx.save();
             const rectPos = new vector2_1.default(Math.min(from.x, to.x), isWorldPos ? Math.max(from.y, to.y) : Math.min(from.y, to.y));
             const rectSize = new vector2_1.default(Math.abs(to.x - from.x), Math.abs(to.y - from.y));
@@ -139,7 +158,7 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
         }
         configureLineStrokeStyle(style) {
             if (style.strokeWidth) {
-                this.ctx.lineWidth = style.strokeWidth + style.lineWidth;
+                this.ctx.lineWidth = style.strokeWidth * 2 + style.lineWidth;
                 this.ctx.lineWidth = style.strokeWidthResizeOnZoom ? this.ctx.lineWidth * this.cam.zoom : this.ctx.lineWidth;
                 this.ctx.strokeStyle = style.strokeStyle || "black";
                 return true;
@@ -157,7 +176,6 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
             this.ctx.rotate(angleRad);
         }
     }
-    exports.DrawingTools = DrawingTools;
     DrawingTools.DEFAULT_LINE_STYLE = {
         lineWidth: 3,
         style: "black"
@@ -175,6 +193,8 @@ define(["require", "exports", "../vector2"], function (require, exports, vector2
         headAngle: Math.PI / 6,
         rectDashOffset: [10, 10],
         rectStyle: "grey",
-        rectThickness: 2
+        rectThickness: 2,
+        circleRadius: 5
     };
+    exports.DrawingTools = DrawingTools;
 });

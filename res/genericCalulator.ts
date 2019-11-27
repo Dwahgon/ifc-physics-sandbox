@@ -2,6 +2,7 @@ import Vector2 from "./vector2";
 import { TrackingVector } from "./types";
 
 export default interface GenericCalculator<T> {
+    zero: T;
     sum(a: T, b: T): T;
     sub(a: T, b: T): T;
     mult(a: T, b: T): T;
@@ -13,6 +14,10 @@ export class Vector2Calculator implements GenericCalculator<Vector2>{
     public static readonly instance: GenericCalculator<any> = new Vector2Calculator();
 
     private constructor() { }
+
+    get zero(): Vector2{
+        return Vector2.zero;
+    }
 
     sum(a: Vector2, b: Vector2): Vector2 {
         return a.add(b);
@@ -36,6 +41,10 @@ export class NumberCalculator implements GenericCalculator<number>{
 
     private constructor() { }
 
+    get zero(): number{
+        return 0;
+    }
+
     sum(a: number, b: number): number {
         return a + b;
     }
@@ -57,6 +66,13 @@ export class TrackingVectorCalculator implements GenericCalculator<TrackingVecto
     public static readonly instance: GenericCalculator<any> = new TrackingVectorCalculator();
 
     private constructor() { }
+
+    get zero(): TrackingVector{
+        return {
+            magnitude: 0, 
+            target: Vector2.zero
+        };
+    }
 
     sum(a: TrackingVector, b: TrackingVector): TrackingVector {
         return {

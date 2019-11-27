@@ -21,7 +21,8 @@ export class DrawingTools {
         headAngle: Math.PI / 6,
         rectDashOffset: [10, 10],
         rectStyle: "grey",
-        rectThickness: 2
+        rectThickness: 2,
+        circleRadius: 5
     }
 
     private worldToCanvas: Function;
@@ -128,6 +129,9 @@ export class DrawingTools {
         from = isWorldPos ? this.worldToCanvas(from) : from;
         to = isWorldPos ? this.worldToCanvas(to) : to;
 
+        if(Vector2.equals(from, to))
+            return;
+
         const dx = to.x - from.x;
         const dy = to.y - from.y;
         const angle = Math.atan2(dy, dx);
@@ -162,8 +166,28 @@ export class DrawingTools {
     }
 
     drawVector(from: Vector2, to: Vector2, vectorStyle: VectorStyle = DrawingTools.DEFAULT_VECTOR_STYLE, isWorldPos: boolean = true) {
+
+        // Draw Vector Arrow //
         this.drawArrow(from, to, vectorStyle, isWorldPos);
 
+        // Draw From Dot //
+        this.ctx.beginPath();
+
+        if(isWorldPos)
+            this.worldArc(from, vectorStyle.circleRadius, 0, 2*Math.PI, vectorStyle.resizeCircleOnZoom);
+        else
+            //@ts-ignore 
+            this.ctx.arc(...from.toArray(), vectorStyle.circleRadius, 0, 2*Math.PI);      
+
+        this.ctx.fillStyle = vectorStyle.style;
+        if(vectorStyle.strokeStyle) this.ctx.strokeStyle = vectorStyle.strokeStyle;
+        if(vectorStyle.strokeWidth) this.ctx.lineWidth = vectorStyle.strokeWidth;
+
+        this.ctx.fill();
+        this.ctx.stroke();
+        this.ctx.closePath();
+
+        // Draw Vector Rect //
         this.ctx.save();
 
         const rectPos = new Vector2(Math.min(from.x, to.x), isWorldPos ? Math.max(from.y, to.y) : Math.min(from.y, to.y));
@@ -190,7 +214,7 @@ export class DrawingTools {
 
     private configureLineStrokeStyle(style: LineStyle) {
         if (style.strokeWidth) {
-            this.ctx.lineWidth = style.strokeWidth + style.lineWidth;
+            this.ctx.lineWidth = style.strokeWidth * 2 + style.lineWidth;
             this.ctx.lineWidth = style.strokeWidthResizeOnZoom ? this.ctx.lineWidth * this.cam.zoom : this.ctx.lineWidth;
             this.ctx.strokeStyle = style.strokeStyle || "black";
 

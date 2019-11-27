@@ -107,11 +107,14 @@ export interface ArrowStyle extends LineStyle {
 }
 
 export interface VectorStyle extends ArrowStyle{
-    rectDashOffset: number[],
-    rectStyle: string,
-    rectThickness: number,
+    rectDashOffset: number[];
+    rectStyle: string;
+    rectThickness: number;
     
-    rectThicknessResizeOnZoom?: boolean
+    rectThicknessResizeOnZoom?: boolean;
+
+    circleRadius: number;
+    resizeCircleOnZoom?: boolean;
 }
 
 export interface PropertyEditorOption {
@@ -144,4 +147,9 @@ export interface PropertyEditorInputListRow<T> {
 export interface TrackingVector {
     target: Vector2;
     magnitude: number;
+}
+
+export interface Property<T> {
+    value: T,
+
 }
