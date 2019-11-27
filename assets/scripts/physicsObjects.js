@@ -148,13 +148,13 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
             this.addProperty("mass", new PhysicsProperties.ObjectMass(this));
             this.addProperty("position", new PhysicsProperties.ObjectPosition(this, properties ? properties.position : vector2_1.default.zero));
             this.addProperty("centripetalAcceleration", new PhysicsProperties.ObjectCentripetalAcceleration(this));
+            this.addProperty("netForce", new PhysicsProperties.ObjectNetForce(this));
             this.addProperty("acceleration", new PhysicsProperties.ObjectAcceleration(this));
             this.addProperty("size", new PhysicsProperties.ObjectSize(this, properties ? properties.size : vector2_1.default.zero));
             this.addProperty("area", new PhysicsProperties.ObjectArea(this));
             this.addProperty("displacement", new PhysicsProperties.ObjectDisplacement(this));
             this.addProperty("velocity", new PhysicsProperties.ObjectVelocity(this));
             this.addProperty("momentum", new PhysicsProperties.ObjectMomentum(this));
-            this.addProperty("netForce", new PhysicsProperties.ObjectNetForce(this));
         }
     }
     Solid.DEFAULT_NAME = "Sólido";

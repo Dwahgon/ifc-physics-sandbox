@@ -49,26 +49,16 @@ define(["require", "exports", "../ambient", "../fileController", "../main", "../
         fileController_1.downloadJSON(JSON.stringify(Main.ambient.toJSON()), "meuAmbiente.pha", "pha");
     };
     Buttons.getButtonById("load-file-button").onClick = function () {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.addEventListener("change", () => {
-            if (input.files) {
-                const file = input.files[0];
-                const reader = new FileReader();
-                reader.readAsText(file, "utf-8");
-                reader.onload = ev => {
-                    const result = ev.target.result;
-                    try {
-                        Main.setAmbient(ambient_1.default.fromJSON(result));
-                    }
-                    catch (error) {
-                        documentUtilities_1.Alert.throwAlert("Não foi possível carregar este arquivo! Erro no console", documentUtilities_1.Alert.ERROR);
-                        console.error(error);
-                    }
-                };
+        fileController_1.loadJSON((result) => {
+            try {
+                Main.setAmbient(ambient_1.default.fromJSON(result));
             }
+            catch (error) {
+                documentUtilities_1.Alert.throwAlert("Não foi possível carregar este arquivo! Erro no console", documentUtilities_1.Alert.ERROR);
+                console.error(error);
+            }
+            documentUtilities_1.Alert.throwAlert("Carregado arquivo com sucesso!", documentUtilities_1.Alert.SUCCESS);
         });
-        input.click();
     };
     Buttons.getButtonById("center-camera-button").onClick = Main.canvasRenderer.camera.focusOrigin.bind(Main.canvasRenderer.camera);
     /*
