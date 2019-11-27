@@ -224,10 +224,14 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
             this.propertyEditorInput.addInput(new propertyEditor_1.Vector2InputListRow("acceleration", "<sup>m</sup>&frasl;<sub>s<sup>2</sup></sub>", this.initialValue, true, false, "m/s²"));
             this.objectCentripitalAcceleration = this.object.getProperty("centripetalAcceleration");
             this.objectPosition = this.object.getProperty("position");
+            this.netForce = this.object.getProperty("netForce");
+            this.mass = this.object.getProperty("mass");
         }
         simulate() {
             if (this.objectCentripitalAcceleration && this.objectPosition)
                 this.value = this.initialValue.add(this.objectCentripitalAcceleration.calculate(this.objectPosition.value));
+            if (this.netForce && this.mass && this.objectPosition && this.mass.value > 0)
+                this.value = this.value.add(this.netForce.calculate().div(this.mass.value / 1000));
         }
         drawGizmos(canvasRenderer) {
             if (this.doDrawGizmos && this.objectPosition) {
@@ -313,7 +317,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
     exports.ObjectMomentum = ObjectMomentum;
     class ObjectNetForce extends PhysicsProperty {
         constructor(object) {
-            super("netForce", true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance);
+            super("netForce", true, object, vector2_1.default.zero, vector2_1.default.zero, genericCalulator_1.Vector2Calculator.instance, 3);
             this.forceList = new Map();
             this.position = object.getProperty("position");
             const button = new buttons_1.Button(buttons_1.Button.createButtonElement({
@@ -349,7 +353,15 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         }
         addForce(name, value) {
             this.forceList.set(name, value);
-            this.propertyEditorInput.addInput(new propertyEditor_1.Vector2InputListRow(name, "N", value, true, true, "N"));
+            // const newInput = new Vector2InputListRow(name, "N", value, true, true, "N");
+            // const deleteButton = new Button(Button.createButtonElement({
+            //     buttonName: `delete-force-${name}`,
+            //     buttonColor: ButtonColor.InvisibleBackground,
+            //     enabled: true,
+            //     imgSrc: "./assets/images/addicon.svg"
+            // }));
+            // deleteButton.onClick = () => this.removeForce();
+            // this.propertyEditorInput!.addInput();
         }
         getForce(name) {
             return this.forceList.get(name);
@@ -360,6 +372,17 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         onUserInput(formData) {
             Array.from(this.forceList.keys()).forEach(k => this.forceList.set(k, formData.get(k)));
             this.initialValue = this.calculate();
+        }
+        toJSON() {
+            let values = [];
+            this.forceList.forEach((v, k) => values.push({ key: k, force: v }));
+            return Object.assign({}, {
+                kind: this.kind,
+                iValue: values
+            });
+        }
+        valueFromJSON(json) {
+            json.forEach(value => this.addForce(value.key, vector2_1.default.fromJSON(value.force)));
         }
     }
     exports.ObjectNetForce = ObjectNetForce;
