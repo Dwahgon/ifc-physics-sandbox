@@ -48,6 +48,9 @@ define(["require", "exports"], function (require, exports) {
         toString() {
             return "(" + this.x + ", " + this.y + ")";
         }
+        static fromJSON(json) {
+            return new Vector2(json.x, json.y);
+        }
         static get zero() {
             return new Vector2(0, 0);
         }

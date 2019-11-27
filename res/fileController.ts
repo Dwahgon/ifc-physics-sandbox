@@ -32,3 +32,26 @@ export const downloadJSON = function (data: string, filename: string, type: stri
         }, 0);
     }
 }
+
+export const loadJSON = function (onload: (json: string) => void){
+    const input = document.createElement("input");
+    input.type = "file";
+
+    input.addEventListener("change", () => {
+        if (input.files) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.readAsText(file, "utf-8");
+
+            reader.onload = ev => {
+                const result = <string>(<FileReader>ev.target!).result;
+
+                onload(result);
+
+                input.remove();
+            };
+        }
+    })
+
+    input.click();
+}

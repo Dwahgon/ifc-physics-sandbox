@@ -297,7 +297,8 @@ export class ObjectDisplacement extends PhysicsProperty<Vector2>{
 export class ObjectAcceleration extends PhysicsProperty<Vector2>{
     private objectPosition: ObjectPosition | null;
     private objectCentripitalAcceleration: ObjectCentripetalAcceleration | null;
-    private objectNetForce: ObjectNetForce | null;
+    private netForce: ObjectNetForce | null;
+    private mass: ObjectMass | null;
 
     constructor(object: PhysicsObject) {
         super("acceleration", true, object, Vector2Calculator.instance, 2);
@@ -306,19 +307,19 @@ export class ObjectAcceleration extends PhysicsProperty<Vector2>{
 
         this.objectCentripitalAcceleration = <ObjectCentripetalAcceleration>this.object.getProperty("centripetalAcceleration");
         this.objectPosition = <ObjectPosition>this.object.getProperty("position");
-        this.objectNetForce = <ObjectNetForce>this.object.getProperty("netForce");
+        this.netForce = <ObjectNetForce>this.object.getProperty("netForce");
+        this.mass = <ObjectMass>this.object.getProperty("mass");
     }
 
     simulate(){
         let value = this.initialValue;
 
         if(this.objectCentripitalAcceleration && this.objectPosition)
-            value = value.add(this.objectCentripitalAcceleration.calculate(this.objectPosition.value));
+            this.value = this.initialValue.add(this.objectCentripitalAcceleration.calculate(this.objectPosition.value));
 
-        if(this.objectNetForce)
-            value = value.add(this.objectNetForce.calculate());
+        if(this.netForce && this.mass && this.objectPosition && this.mass.value > 0)
+            this.value = this.value.add(this.netForce.calculate().div(this.mass.value / 1000));
 
-        this.value = value;
     }
 
     drawGizmos(canvasRenderer: CanvasRenderer) {
@@ -377,7 +378,7 @@ export class ObjectCentripetalAcceleration extends PhysicsProperty<TrackingVecto
     }
 }
 
-export class ObjectMass extends PhysicsProperty<Number>{
+export class ObjectMass extends PhysicsProperty<number>{
     constructor(object: PhysicsObject){
         super("mass", true, object, NumberCalculator.instance);
         this.propertyEditorInput = new PropertyEditorInputList(this, "m", "Geral", 3,  true, false, "Massa", 7);
@@ -433,7 +434,6 @@ export class ObjectNetForce extends PhysicsProperty<Vector2>{
         this.forceList = new Map<string, Vector2>();
         this.position = <PhysicsProperty<Vector2>>object.getProperty("position");
 
-
         const button = new Button(Button.createButtonElement({
             buttonName: `add-force-${object.name}`,
             buttonColor: ButtonColor.InvisibleBackground,
@@ -477,7 +477,16 @@ export class ObjectNetForce extends PhysicsProperty<Vector2>{
     addForce(name: string, value: Vector2){
         this.forceList.set(name, value);
 
-        this.propertyEditorInput!.addInput(new Vector2InputListRow(name, "N", value, true, true, "N"));
+        // const newInput = new Vector2InputListRow(name, "N", value, true, true, "N");
+        // const deleteButton = new Button(Button.createButtonElement({
+        //     buttonName: `delete-force-${name}`,
+        //     buttonColor: ButtonColor.InvisibleBackground,
+        //     enabled: true,
+        //     imgSrc: "./assets/images/addicon.svg"
+        // }));
+        // deleteButton.onClick = () => this.removeForce();
+
+        // this.propertyEditorInput!.addInput();
     }
 
     getForce(name: string){
@@ -492,4 +501,19 @@ export class ObjectNetForce extends PhysicsProperty<Vector2>{
         Array.from(this.forceList.keys()).forEach(k => this.forceList.set(k, formData.get(k)));
         this.initialValue = this.calculate();
     }
+
+    toJSON(): PhysicsPropertyJSON<any> {
+        let values: any = [];
+
+        this.forceList.forEach((v, k) => values.push({key: k, force: v}));
+
+        return Object.assign({}, {
+            kind: this.kind,
+            iValue: values
+        });
+    }
+
+    valueFromJSON(json: any[]): void {
+        json.forEach(value => this.addForce(value.key, Vector2.fromJSON(value.force)));
+    } 
 }

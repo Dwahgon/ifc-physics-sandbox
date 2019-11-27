@@ -22,7 +22,7 @@ export abstract class PropertyDescriptionUI {
     static show(propertyKind: PhysicsObjectType): void {
         this.setElementVisible(true);
 
-        const description = propertyDescriptions.get(propertyKind);
+        const description = propertyDescriptions[propertyKind];
 
         if (description)
             this.modal.element.querySelector("article")!.innerHTML = description;
@@ -165,6 +165,7 @@ export abstract class ObjectSelectionController {
 export abstract class Alert {
     public static readonly WARNING: string = "alert-warning";
     public static readonly ERROR: string = "alert-error";
+    public static readonly SUCCESS: string = "alert-success";
 
     private static element: HTMLDivElement;
 

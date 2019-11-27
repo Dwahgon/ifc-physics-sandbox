@@ -1,14 +1,16 @@
-var __importDefault = (this && this.__importDefault) || function (mod) {
+var __importDefault = (this && this.__importDefault) || function(mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var __importStar = (this && this.__importStar) || function (mod) {
+var __importStar = (this && this.__importStar) || function(mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    if (mod != null)
+        for (var k in mod)
+            if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
     result["default"] = mod;
     return result;
 };
-define(["require", "exports", "../main", "../propertyDescriptions", "../rendering/canvasRenderer", "../rendering/cartesianPlane", "../vector2", "./buttons", "./documentElements", "./modals", "./propertyEditor"], function (require, exports, main_1, propertyDescriptions_1, canvasRenderer_1, cartesianPlane_1, vector2_1, Buttons, documentElements_1, Modals, propertyEditor_1) {
+define(["require", "exports", "../main", "../propertyDescriptions", "../rendering/canvasRenderer", "../rendering/cartesianPlane", "../vector2", "./buttons", "./documentElements", "./modals", "./propertyEditor"], function(require, exports, main_1, propertyDescriptions_1, canvasRenderer_1, cartesianPlane_1, vector2_1, Buttons, documentElements_1, Modals, propertyEditor_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     propertyDescriptions_1 = __importDefault(propertyDescriptions_1);
@@ -23,7 +25,7 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
         }
         static show(propertyKind) {
             this.setElementVisible(true);
-            const description = propertyDescriptions_1.default.get(propertyKind);
+            const description = propertyDescriptions_1.default[propertyKind];
             if (description)
                 this.modal.element.querySelector("article").innerHTML = description;
             else
@@ -99,18 +101,18 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
      */
     class ObjectSelectionController {
         static initialize(propertyEditor) {
-            this.propertyEditor = propertyEditor;
-        }
-        /**
-         * @returns the currently selected object
-         */
+                this.propertyEditor = propertyEditor;
+            }
+            /**
+             * @returns the currently selected object
+             */
         static get selectedObject() {
-            return this._selectedObject;
-        }
-        /**
-         * Selects an object, displaying it's properties in the properties list
-         * @param object the object to be selected
-         */
+                return this._selectedObject;
+            }
+            /**
+             * Selects an object, displaying it's properties in the properties list
+             * @param object the object to be selected
+             */
         static selectObject(object) {
             if (object == this.selectedObject)
                 return;
@@ -143,7 +145,7 @@ define(["require", "exports", "../main", "../propertyDescriptions", "../renderin
     }
     Alert.WARNING = "alert-warning";
     Alert.ERROR = "alert-error";
-    exports.Alert = Alert;
+    Alert.SUCCESS = "alert-success";
     //Initialize static classes
     GraphPanel.initialize(documentElements_1.default.get("graph-panel"), Buttons.getButtonById("close-graph-panel-button"));
     Alert.initialize(documentElements_1.default.get("alert"));
