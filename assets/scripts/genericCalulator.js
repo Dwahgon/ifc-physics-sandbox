@@ -6,7 +6,9 @@ define(["require", "exports", "./vector2"], function (require, exports, vector2_
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_1 = __importDefault(vector2_1);
     class Vector2Calculator {
-        constructor() {
+        constructor() { }
+        get zero() {
+            return vector2_1.default.zero;
         }
         sum(a, b) {
             return a.add(b);
@@ -24,10 +26,12 @@ define(["require", "exports", "./vector2"], function (require, exports, vector2_
             return new vector2_1.default(json.x, json.y);
         }
     }
-    exports.Vector2Calculator = Vector2Calculator;
     Vector2Calculator.instance = new Vector2Calculator();
+    exports.Vector2Calculator = Vector2Calculator;
     class NumberCalculator {
-        constructor() {
+        constructor() { }
+        get zero() {
+            return 0;
         }
         sum(a, b) {
             return a + b;
@@ -45,10 +49,15 @@ define(["require", "exports", "./vector2"], function (require, exports, vector2_
             return json;
         }
     }
-    exports.NumberCalculator = NumberCalculator;
     NumberCalculator.instance = new NumberCalculator();
+    exports.NumberCalculator = NumberCalculator;
     class TrackingVectorCalculator {
-        constructor() {
+        constructor() { }
+        get zero() {
+            return {
+                magnitude: 0,
+                target: vector2_1.default.zero
+            };
         }
         sum(a, b) {
             return {
@@ -78,6 +87,6 @@ define(["require", "exports", "./vector2"], function (require, exports, vector2_
             return { magnitude: json.magnitude, target: Vector2Calculator.instance.fromJSON(json.target) };
         }
     }
-    exports.TrackingVectorCalculator = TrackingVectorCalculator;
     TrackingVectorCalculator.instance = new TrackingVectorCalculator();
+    exports.TrackingVectorCalculator = TrackingVectorCalculator;
 });
