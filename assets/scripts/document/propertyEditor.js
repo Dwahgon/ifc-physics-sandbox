@@ -151,6 +151,13 @@ define(["require", "exports", "../types", "../vector2", "./buttons"], function (
             this.inputList.push(input);
             input.appendTo(this.inputWrapper);
         }
+        removeInput(name) {
+            let inputToRemove = this.inputList.find(i => i.name === name);
+            if (!inputToRemove)
+                return;
+            this.inputList.splice(this.inputList.indexOf(inputToRemove), 1);
+            inputToRemove.element.remove();
+        }
         getInput(name) {
             if (name)
                 return this.inputList.find(el => el.name == name);
