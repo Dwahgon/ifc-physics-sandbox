@@ -138,6 +138,7 @@ export interface PropertyEditorFormTarget {
 export interface PropertyEditorInputListRow<T> {
     name: string;
     active: boolean;
+    readonly element: HTMLElement;
     appendTo(target: HTMLElement): void;
     onChanged(): T;
     resetToLastValue(): void;

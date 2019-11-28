@@ -158,6 +158,7 @@ export class PhysicsObject implements Selectable, Simulatable, Renderable, Follo
     destroy(): void {
         const index = this.ambient.objects.indexOf(this);
         this.ambient.objects.splice(index, 1);
+        
     }
 
     toJSON(): PhysicsObjectJSON {

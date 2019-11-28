@@ -200,6 +200,15 @@ export class PropertyEditorInputList extends BasicPropertyEditorOption {
         input.appendTo(this.inputWrapper);
     }
 
+    removeInput(name: string){
+        let inputToRemove = this.inputList.find(i => i.name === name);
+        if(!inputToRemove)
+            return;
+
+        this.inputList.splice(this.inputList.indexOf(inputToRemove), 1);
+        inputToRemove.element.remove();
+    }
+
     getInput(name?: string): PropertyEditorInputListRow<any> | undefined {
         if(name)        
             return this.inputList.find(el => el.name == name);
@@ -367,7 +376,7 @@ export class NumberInputListRow extends InputListRow<number>{
 
 export class ButtonInputListRow implements PropertyEditorInputListRow<null>{
     private _active: boolean;
-    private element: HTMLElement;
+    public readonly element: HTMLElement;
 
     constructor(public name: string, private button: Button, createNameLabel: boolean = true){
         this._active = true;
