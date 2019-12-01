@@ -152,6 +152,14 @@ export const removeButtonElement = (element: HTMLButtonElement) => {
         buttons.splice(buttons.indexOf(btn));
 }
 
+export const removeAllButtonsFrom = (element: HTMLElement) => {
+    element.querySelectorAll("button").forEach(b => {
+        let btn = getButtonByHTMLElement(b);
+        if (btn)
+            buttons.splice(buttons.indexOf(btn));
+    })
+}
+
 /*
     Predefined onClick functions
 */

@@ -130,6 +130,7 @@ define(["require", "exports", "./physicsProperties", "./rendering/sprite", "./ty
         destroy() {
             const index = this.ambient.objects.indexOf(this);
             this.ambient.objects.splice(index, 1);
+            this.properties.forEach(p => p.destroy());
         }
         toJSON() {
             const properties = [];

@@ -23,6 +23,7 @@ import("./rendering/graph");
 export const setAmbient = function (a: Ambient) {
     canvasRenderer.remove(ambient);
     simulator.remove(ambient);
+    ambient.objects.forEach(o => o.destroy());
     ambient = a;
     canvasRenderer.add(ambient);
     simulator.add(ambient);

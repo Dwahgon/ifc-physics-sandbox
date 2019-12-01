@@ -7,7 +7,7 @@ import { PhysicsObject } from './physicsObjects';
 import { CanvasRenderer } from './rendering/canvasRenderer';
 import { Simulatable, PhysicsPropertyName, TrackingVector, VectorStyle, ButtonColor, Renderable } from './types';
 import Vector2 from './vector2';
-import { Button } from './document/buttons';
+import * as Buttons from './document/buttons';
 
 export default abstract class PhysicsProperty<T> implements Simulatable {
     public active: boolean;
@@ -93,6 +93,17 @@ export default abstract class PhysicsProperty<T> implements Simulatable {
 
     reset(): void {
         this.value = this.initialValue;
+    }
+
+    destroy(): void{
+        delete this.iValue;
+        delete this.oValue;
+        delete this.iValueChangedListeners;
+
+        if(this.propertyEditorInput){
+            Buttons.removeAllButtonsFrom(this.propertyEditorInput.element);
+            delete this.propertyEditorInput
+        }
     }
 
     toJSON(): PhysicsPropertyJSON<any> {
@@ -434,7 +445,7 @@ export class ObjectNetForce extends PhysicsProperty<Vector2>{
         this.forceList = new Map<string, Vector2>();
         this.position = <PhysicsProperty<Vector2>>object.getProperty("position");
 
-        const button = new Button(Button.createButtonElement({
+        const button = new Buttons.Button(Buttons.Button.createButtonElement({
             buttonName: `add-force-${object.name}`,
             buttonColor: ButtonColor.InvisibleBackground,
             enabled: true,
@@ -451,7 +462,7 @@ export class ObjectNetForce extends PhysicsProperty<Vector2>{
         this.forceList.set(name, value);
 
         const newInput = new Vector2InputListRow(name, "N", value, true, true, "N");
-        const deleteButton = new Button(Button.createButtonElement({
+        const deleteButton = new Buttons.Button(Buttons.Button.createButtonElement({
             buttonName: `delete-force-${name}`,
             buttonColor: ButtonColor.InvisibleBackground,
             enabled: true,

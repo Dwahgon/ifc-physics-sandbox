@@ -27,6 +27,7 @@ define(["require", "exports", "./ambient", "./document/buttons", "./document/doc
     exports.setAmbient = function (a) {
         exports.canvasRenderer.remove(exports.ambient);
         exports.simulator.remove(exports.ambient);
+        exports.ambient.objects.forEach(o => o.destroy());
         exports.ambient = a;
         exports.canvasRenderer.add(exports.ambient);
         exports.simulator.add(exports.ambient);

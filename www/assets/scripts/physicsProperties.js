@@ -1,10 +1,18 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-define(["require", "exports", "./document/propertyEditor", "./genericCalulator", "./types", "./vector2", "./document/buttons"], function (require, exports, propertyEditor_1, genericCalulator_1, types_1, vector2_1, buttons_1) {
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+define(["require", "exports", "./document/propertyEditor", "./genericCalulator", "./types", "./vector2", "./document/buttons"], function (require, exports, propertyEditor_1, genericCalulator_1, types_1, vector2_1, Buttons) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     vector2_1 = __importDefault(vector2_1);
+    Buttons = __importStar(Buttons);
     console.log("Loading physicsProperties");
     class PhysicsProperty {
         constructor(kind, changeable, object, genericCalculator, simulationPriority = 0) {
@@ -42,6 +50,15 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         simulate(step) { }
         reset() {
             this.value = this.initialValue;
+        }
+        destroy() {
+            delete this.iValue;
+            delete this.oValue;
+            delete this.iValueChangedListeners;
+            if (this.propertyEditorInput) {
+                Buttons.removeAllButtonsFrom(this.propertyEditorInput.element);
+                delete this.propertyEditorInput;
+            }
         }
         toJSON() {
             return Object.assign({}, {
@@ -320,7 +337,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
             super("netForce", true, object, genericCalulator_1.Vector2Calculator.instance);
             this.forceList = new Map();
             this.position = object.getProperty("position");
-            const button = new buttons_1.Button(buttons_1.Button.createButtonElement({
+            const button = new Buttons.Button(Buttons.Button.createButtonElement({
                 buttonName: `add-force-${object.name}`,
                 buttonColor: types_1.ButtonColor.InvisibleBackground,
                 enabled: true,
@@ -334,7 +351,7 @@ define(["require", "exports", "./document/propertyEditor", "./genericCalulator",
         addForce(name, value) {
             this.forceList.set(name, value);
             const newInput = new propertyEditor_1.Vector2InputListRow(name, "N", value, true, true, "N");
-            const deleteButton = new buttons_1.Button(buttons_1.Button.createButtonElement({
+            const deleteButton = new Buttons.Button(Buttons.Button.createButtonElement({
                 buttonName: `delete-force-${name}`,
                 buttonColor: types_1.ButtonColor.InvisibleBackground,
                 enabled: true,

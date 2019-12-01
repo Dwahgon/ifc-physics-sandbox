@@ -9,6 +9,9 @@
   "installed_plugins": {
     "cordova-plugin-whitelist": {
       "PACKAGE_NAME": "com.ifc.ia17pi"
+    },
+    "cordova-plugin-file": {
+      "PACKAGE_NAME": "com.ifc.ia17pi"
     }
   },
   "dependent_plugins": {}
