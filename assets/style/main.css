@@ -170,6 +170,7 @@
     color: rgba(0, 0, 0, 0.9);
 }
 
+
 /*
     Default element values
 */
@@ -380,6 +381,7 @@ main {
 #property-side-panel {
     width: var(--property-panel-width);
     max-width: var(--property-panel-max-width);
+    min-width: 250px;
     right: 5px;
     box-sizing: border-box;
 }
@@ -482,7 +484,7 @@ main {
 }
 
 #property-list>li>div>div>button {
-    width: var(--property-li-height); 
+    width: var(--property-li-height);
     padding: 5px;
     margin-left: auto;
 }
@@ -559,7 +561,6 @@ main {
 #property-description-modal article a {
     color: lightblue;
 }
-
 
 
 /* Graph configuration */

@@ -109,6 +109,13 @@ define(["require", "exports"], function (require, exports) {
         if (btn)
             buttons.splice(buttons.indexOf(btn));
     };
+    exports.removeAllButtonsFrom = (element) => {
+        element.querySelectorAll("button").forEach(b => {
+            let btn = exports.getButtonByHTMLElement(b);
+            if (btn)
+                buttons.splice(buttons.indexOf(btn));
+        });
+    };
     /*
         Predefined onClick functions
     */
