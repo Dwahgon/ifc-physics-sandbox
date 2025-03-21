@@ -296,16 +296,14 @@ export class InputListRow<T> implements PropertyEditorInputListRow<T> {
             this.resetToLastValue();
             return lastValue;
         }
-        let match = this.input.value.match(this.regExp);
+        const match = this.input.value.match(this.regExp)?.filter(el => el != "" );
 
         if (!match)
             return reset();
 
-        match = match.filter(el => { return el != "" });
-
         const matchResult = this.processMatch(match);
 
-        if (matchResult == undefined) 
+        if (matchResult == undefined)
             return reset();
 
         return matchResult;
@@ -320,7 +318,7 @@ export class InputListRow<T> implements PropertyEditorInputListRow<T> {
         return "NaN";
     }
 
-    protected processMatch(match: RegExpMatchArray): T | undefined {
+    protected processMatch(match: string[]): T | undefined {
         return undefined;
     }
 }
@@ -340,7 +338,7 @@ export class Vector2InputListRow extends InputListRow<Vector2>{
         return `(${value.x.toFixed(2)}, ${value.y.toFixed(2)})`;
     }
 
-    protected processMatch(match: RegExpMatchArray): Vector2 | undefined {
+    protected processMatch(match: string[]): Vector2 | undefined {
         if (!match[0] || !match[1]) {
             this.resetToLastValue();
             return undefined;
@@ -364,7 +362,7 @@ export class NumberInputListRow extends InputListRow<number>{
         return value.toFixed(2);
     }
 
-    protected processMatch(match: RegExpMatchArray): number | undefined {
+    protected processMatch(match: string[]): number | undefined {
         if (!match[0]) {
             this.resetToLastValue();
             return;

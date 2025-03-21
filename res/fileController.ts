@@ -30,18 +30,16 @@ export const downloadJSON = function (data: string, filename: string, type: stri
                         fileWriter.onwriteend = function() {
                             Alert.throwAlert("Ambiente salvo com sucesso! Você pode encontrá la em "+fileEntry.fullPath, Alert.SUCCESS);
                         };
-                
+
                         fileWriter.onerror = function (e) {
                             Alert.throwAlert("Erro ao salvar ambiente: "+ e.toString(), Alert.ERROR);
                         };
-                
+
                         fileWriter.write(file);
                     });
-            
+
                 }, () => Alert.throwAlert("Não foi possível criar arquivo", Alert.ERROR));
             }, () => Alert.throwAlert("Não foi possível criar diretório", Alert.ERROR))
-            
-        
         }, () => Alert.throwAlert("Não foi possível carregar sistema de arquvos", Alert.ERROR));
     }
     else {

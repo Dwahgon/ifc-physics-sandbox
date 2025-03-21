@@ -96,13 +96,13 @@ export default abstract class PhysicsProperty<T> implements Simulatable {
     }
 
     destroy(): void{
-        delete this.iValue;
-        delete this.oValue;
-        delete this.iValueChangedListeners;
+        // delete this.iValue;
+        // delete this.oValue;
+        // delete this.iValueChangedListeners;
 
         if(this.propertyEditorInput){
             Buttons.removeAllButtonsFrom(this.propertyEditorInput.element);
-            delete this.propertyEditorInput
+            // delete this.propertyEditorInput
         }
     }
 
