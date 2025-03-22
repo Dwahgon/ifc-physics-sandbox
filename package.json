@@ -4,7 +4,9 @@
   "description": "An educational physics sandbox application",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "cordova run browser",
+    "dev:browser": "nodemon --exec \"npm run build && npm run start\" --ext ts"
   },
   "repository": {
     "type": "git",
@@ -19,12 +21,15 @@
   "devDependencies": {
     "@types/cordova": "^11.0.3",
     "cordova": "^12.0.0",
+    "cordova-android": "^13.0.0",
     "cordova-browser": "^7.0.0",
+    "nodemon": "^3.1.9",
     "typescript": "^5.8.2"
   },
   "cordova": {
     "platforms": [
-      "browser"
+      "browser",
+      "android"
     ]
   }
 }

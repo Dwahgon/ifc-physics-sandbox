@@ -18,19 +18,26 @@ export interface PhysicsPropertyJSON<T> {
 export const downloadJSON = function (data: string, filename: string, type: string) {
     const file = new Blob([data], { type: type });
 
+    //@ts-ignore
     if (window.navigator.msSaveOrOpenBlob) // IE10+
+        //@ts-ignore
         window.navigator.msSaveOrOpenBlob(file, filename);
     //@ts-ignore
     else if(typeof cordova !== 'undefined' && cordova.platformId === "android"){
+        //@ts-ignore
         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
+            //@ts-ignore
             fs.root.getDirectory('PIFisica', { create: true }, function (dirEntry) {
+                //@ts-ignore
                 dirEntry.getFile(filename, { create: true, exclusive: false }, function (fileEntry) {
+                    //@ts-ignore
                     fileEntry.createWriter(function (fileWriter) {
 
                         fileWriter.onwriteend = function() {
                             Alert.throwAlert("Ambiente salvo com sucesso! Você pode encontrá la em "+fileEntry.fullPath, Alert.SUCCESS);
                         };
 
+                        //@ts-ignore
                         fileWriter.onerror = function (e) {
                             Alert.throwAlert("Erro ao salvar ambiente: "+ e.toString(), Alert.ERROR);
                         };
@@ -59,6 +66,7 @@ export const downloadJSON = function (data: string, filename: string, type: stri
 export const loadJSON = function (onload: (json: string) => void){
     const input = document.createElement("input");
     input.type = "file";
+    console.log('a')
 
     input.addEventListener("change", () => {
         if (input.files) {
